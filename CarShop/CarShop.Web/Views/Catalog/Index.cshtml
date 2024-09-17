@@ -1,6 +1,17 @@
 ﻿
 @{
-    
+    IEnumerable<Car> cars = (IEnumerable<Car>) ViewData["Cars"]!;
 }
 
-@* Поиск и сортировка *@
+@* Блок поиска и сортировки *@
+
+@foreach (Car car in cars)
+{
+    @* Список товаров *@
+}
+
+@if(cars.Count() == 0)
+{
+    @* То, что отображается, если товаров нет *@
+}
+
