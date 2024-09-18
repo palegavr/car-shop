@@ -33,3 +33,7 @@
     font-family: arial;
     bottom: 10%;
 }
+
+.small-image-in-list {
+    height: 100px;
+}

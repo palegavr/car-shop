@@ -1,29 +1,35 @@
-﻿
-@{
-    IEnumerable<Car> cars = (IEnumerable<Car>) ViewData["Cars"]!;
-    bool searching = (bool?) ViewData["Searching"] ?? false;
+﻿@{
+	IEnumerable<Car> cars = (IEnumerable<Car>)ViewData["Cars"]!;
+	bool searching = (bool?)ViewData["Searching"] ?? false;
 }
 
 @* Блок поиска и сортировки *@
+<div class="container text-center">
+	<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 my-2 g-4">
+		@foreach (Car car in cars)
+		{
+			<div class="col">
+				<div class="card mb-3">
+					<img src="@car.ImageUrl" style="height: 300px;" class="img-fluid rounded" alt="...">
+					<div class="card-body">
+						<h5 class="card-title">@car.Brand @car.Model</h5>
+						<p class="card-text">Цена: @car.PriceForStandardConfiguration грн.</p>
+						<a href="/catalog/@car.Id" class="btn btn-primary">Подробнее</a>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+</div>
 
-@foreach (Car car in cars)
+@if (cars.Count() == 0)
 {
-    <div class="div1">
-        <img src="@(car.ImageUrl)" class="img1" >
-        <p class="p1">Марка: @(car.Brand)</p>
-        <p class="p2">Модель: @(car.Model)</p>
-        <p class="p3">Ціна @(car.PriceForStandardConfiguration) грн</p>
-    </div> 
-}
-
-@if(cars.Count() == 0)
-{
-    @if (searching)
-    {
-        @* То, что отображается, если поиск не дал результатов *@
-    } 
-    else
-    {
-        @* То, что отображается, если товаров нет *@
-    }
+	@if (searching)
+	{
+		@* То, что отображается, если поиск не дал результатов *@
+	}
+	else
+	{
+		@* То, что отображается, если товаров нет *@
+	}
 }

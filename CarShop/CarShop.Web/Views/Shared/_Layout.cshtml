@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="~/@(nameof(CarShop)).@(nameof(CarShop.Web)).styles.css" />
+    <link rel="stylesheet" href="~/bootstrap/dist/css/bootstrap.min.css" />
     <title>@ViewData["Title"]</title>
 </head>
 <body>
@@ -12,5 +13,6 @@
     @RenderBody()
 
     @await RenderSectionAsync("Scripts", required: false)
+    <script src="~/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
