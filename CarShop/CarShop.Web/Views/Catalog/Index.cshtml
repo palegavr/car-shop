@@ -7,7 +7,12 @@
 
 @foreach (Car car in cars)
 {
-    @* Список товаров *@
+    <div class="div1">
+        <img src="@(car.ImageUrl)" class="img1" >
+        <p class="p1">Марка: @(car.Brand)</p>
+        <p class="p2">Модель: @(car.Model)</p>
+        <p class="p3">Ціна @(car.PriceForStandardConfiguration) грн</p>
+    </div> 
 }
 
 @if(cars.Count() == 0)
