@@ -1,6 +1,7 @@
 ﻿
 @{
     IEnumerable<Car> cars = (IEnumerable<Car>) ViewData["Cars"]!;
+    bool searching = (bool?) ViewData["Searching"] ?? false;
 }
 
 @* Блок поиска и сортировки *@
@@ -17,9 +18,12 @@
 
 @if(cars.Count() == 0)
 {
-    @* То, что отображается, если товаров нет *@
-}
-
-@section Styles {
-    <link rel="stylesheet" href="~/@(nameof(CarShop)).@(nameof(CarShop.Web)).styles.css" />
+    @if (searching)
+    {
+        @* То, что отображается, если поиск не дал результатов *@
+    } 
+    else
+    {
+        @* То, что отображается, если товаров нет *@
+    }
 }
