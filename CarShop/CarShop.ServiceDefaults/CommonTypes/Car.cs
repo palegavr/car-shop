@@ -19,7 +19,7 @@ namespace CarShop.ServiceDefaults.CommonTypes
         public FuelType FuelType { get; set; }
         public int Count { get; set; }
         public string ImageUrl { get; set; }
-
+        public string[] BigImageURLs { get; set; }
         public double PriceForStandardConfigurationWithTax => PriceForStandardConfiguration + TaxForPriceForStandardConfiguration;
         public double TaxForPriceForStandardConfiguration => PriceForStandardConfiguration * (SALE_TAX / 100);
     }
