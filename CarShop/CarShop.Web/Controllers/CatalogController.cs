@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CarShop.Web.Controllers
 {
+    [Route("{controller}/{id?}")]
     public class CatalogController : Controller
     {
         private List<Car> _cars = new List<Car>()
@@ -46,7 +47,7 @@ namespace CarShop.Web.Controllers
             [FromForm(Name = "brand")] string? brand,
             [FromForm(Name = "engine_capacity")] double engineCapacity,
             [FromForm(Name = "fuel_type")] FuelType fuelType,
-            [FromForm(Name = "corpus_type")] string? corpusType,
+            [FromForm(Name = "corpus_type")] CorpusType corpusType,
             [FromForm(Name = "minimal_price")] double minimalPrice,
             [FromForm(Name = "maximum_price")] double maximumPrice
             )
