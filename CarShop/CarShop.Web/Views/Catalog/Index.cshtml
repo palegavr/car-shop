@@ -13,7 +13,7 @@
 					<img src="@car.ImageUrl" style="height: 300px;" class="img-fluid rounded" alt="...">
 					<div class="card-body">
 						<h5 class="card-title">@car.Brand @car.Model</h5>
-						<p class="card-text">Цена: @car.PriceForStandardConfiguration грн.</p>
+						<p class="card-text">Цена: <b class="text-success">@car.PriceForStandardConfiguration</b> <span class="text-secondary">+ @car.TaxForPriceForStandardConfiguration</span> грн.</p>
 						<a asp-controller="Catalog" asp-action="Index" asp-route-id="@car.Id" class="btn btn-primary">Подробнее</a>
 					</div>
 				</div>

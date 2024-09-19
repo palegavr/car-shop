@@ -8,6 +8,7 @@ namespace CarShop.ServiceDefaults.CommonTypes
 {
     public class Car
     {
+        public const double SALE_TAX = 20.0;
         public long Id { get; set; }
         public string Brand { get; set; }
         public string Model { get; set; }
@@ -18,5 +19,8 @@ namespace CarShop.ServiceDefaults.CommonTypes
         public FuelType FuelType { get; set; }
         public int Count { get; set; }
         public string ImageUrl { get; set; }
+
+        public double PriceForStandardConfigurationWithTax => PriceForStandardConfiguration + TaxForPriceForStandardConfiguration;
+        public double TaxForPriceForStandardConfiguration => PriceForStandardConfiguration * (SALE_TAX / 100);
     }
 }
