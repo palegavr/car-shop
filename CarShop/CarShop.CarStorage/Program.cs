@@ -1,5 +1,6 @@
 
 using CarShop.CarStorage.Database;
+using CarShop.CarStorage.Repositories;
 
 namespace CarShop.CarStorage;
 
@@ -18,6 +19,7 @@ public class Program
         builder.Services.AddSwaggerGen();
 
         builder.Services.AddDbContext<CarStorageDatabase>();
+        builder.Services.AddScoped<CarsRepository>();
 
         var app = builder.Build();
 

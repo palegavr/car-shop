@@ -1,6 +1,0 @@
-@CarShop.CarStorage_HostAddress = http://localhost:5253
-
-GET {{CarShop.CarStorage_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
