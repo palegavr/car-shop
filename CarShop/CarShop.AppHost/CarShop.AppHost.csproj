@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\CarShop.CarStorage\CarShop.CarStorage.csproj" />
     <ProjectReference Include="..\CarShop.Web\CarShop.Web.csproj" />
   </ItemGroup>
 
