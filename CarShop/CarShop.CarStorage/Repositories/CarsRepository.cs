@@ -21,9 +21,8 @@ namespace CarShop.CarStorage.Repositories
 
         public async Task DeleteCarAsync(long carId)
         {
-            Car car = new Car { Id = carId, IsDeleted = true };
-            _db.Entry(car).Property(e => e.IsDeleted).IsModified = true;
-            car.IsDeleted = true;
+            Car notDeletedCar = new Car { Id = carId };
+            _db.Cars.Remove(notDeletedCar);
             await _db.SaveChangesAsync();
         }
 
@@ -58,7 +57,8 @@ namespace CarShop.CarStorage.Repositories
 
         public async Task<Car?> GetCarByIdAsync(long id)
         {
-            return await _db.Cars.SingleOrDefaultAsync(car => car.Id == id);
+            return await _db.Cars
+                .SingleOrDefaultAsync(car => car.Id == id);
         }
     }
 

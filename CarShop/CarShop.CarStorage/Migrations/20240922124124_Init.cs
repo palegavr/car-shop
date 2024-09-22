@@ -26,8 +26,7 @@ namespace CarShop.CarStorage.Migrations
                     FuelType = table.Column<int>(type: "integer", nullable: false),
                     Count = table.Column<int>(type: "integer", nullable: false),
                     ImageUrl = table.Column<string>(type: "text", nullable: false),
-                    BigImageURLs = table.Column<string[]>(type: "text[]", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: "false")
+                    BigImageURLs = table.Column<string[]>(type: "text[]", nullable: false)
                 },
                 constraints: table =>
                 {

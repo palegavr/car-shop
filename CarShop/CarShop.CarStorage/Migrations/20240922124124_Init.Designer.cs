@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace CarShop.CarStorage.Migrations
 {
     [DbContext(typeof(CarStorageDatabase))]
-    [Migration("20240921154927_Init")]
+    [Migration("20240922124124_Init")]
     partial class Init
     {
         /// <inheritdoc />
@@ -59,9 +59,6 @@ namespace CarShop.CarStorage.Migrations
                     b.Property<string>("ImageUrl")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
 
                     b.Property<string>("Model")
                         .IsRequired()

@@ -17,8 +17,28 @@ namespace CarShop.CarStorage.Controllers
         public async Task<IActionResult> AddCarAsync(
             [FromBody] Car carForAdding)
         {
+            carForAdding.Id = 0;
             await _carsRepository.AddCarAsync(carForAdding);
-            return Ok();
+            Car carAfterAdd = (await _carsRepository.GetCarByIdAsync(carForAdding.Id))!;
+            return Ok(carAfterAdd);
+        }
+
+        [HttpPost]
+        [Route("{id}/update")]
+        public async Task<IActionResult> UpdateCarAsync(Car carWithNewData, [FromRoute(Name = "id")] long id)
+        {
+            carWithNewData.Id = id;
+            await _carsRepository.UpdateCarAsync(carWithNewData);
+            Car carAfterUpdate = (await _carsRepository.GetCarByIdAsync(carWithNewData.Id))!;
+            return Ok(carAfterUpdate);
+        }
+
+        [HttpPost]
+        [Route("{id}/delete")]
+        public async Task<IActionResult> DeleteCarAsync([FromRoute(Name = "id")] long id)
+        {
+            await _carsRepository.DeleteCarAsync(id);
+            return Ok(new {Id = id});
         }
     }
 }

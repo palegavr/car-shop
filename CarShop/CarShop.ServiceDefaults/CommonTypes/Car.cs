@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CarShop.ServiceDefaults.CommonTypes
@@ -19,10 +20,9 @@ namespace CarShop.ServiceDefaults.CommonTypes
         public FuelType FuelType { get; set; }
         public int Count { get; set; }
         public string ImageUrl { get; set; }
-        public string[] BigImageURLs { get; set; }
-        public bool IsDeleted { get; set; } = false;
+        public string[] BigImageURLs { get; set; } = [];
 
-        public double PriceForStandardConfigurationWithTax => PriceForStandardConfiguration + TaxForPriceForStandardConfiguration;
-        public double TaxForPriceForStandardConfiguration => PriceForStandardConfiguration * (SALE_TAX / 100);
+        [JsonIgnore] public double PriceForStandardConfigurationWithTax => PriceForStandardConfiguration + TaxForPriceForStandardConfiguration;
+        [JsonIgnore] public double TaxForPriceForStandardConfiguration => PriceForStandardConfiguration * (SALE_TAX / 100);
     }
 }
