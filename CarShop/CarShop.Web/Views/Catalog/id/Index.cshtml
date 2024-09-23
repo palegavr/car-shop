@@ -1,0 +1,13 @@
+﻿@{
+	Car? car = (Car?)ViewData["Car"];
+}
+
+
+@if (car is not null)
+{
+	<div>@car.Id</div>
+}
+else
+{
+	<div>Товар не найден</div>
+}

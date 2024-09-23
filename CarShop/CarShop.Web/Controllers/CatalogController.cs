@@ -1,10 +1,11 @@
 ﻿using CarShop.ServiceDefaults.CommonTypes;
+using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarShop.Web.Controllers
 {
-    [Route("{controller}/{id?}")]
-    public class CatalogController : Controller
+    [Route("[controller]/{id?}")]
+    public class CatalogController(CarStorageClient _carStorageClient) : Controller
     {
         private List<Car> _cars = new List<Car>()
         {
@@ -36,9 +37,11 @@ namespace CarShop.Web.Controllers
         };
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index([FromRoute] long? id)
         {
-            ViewData["Cars"] = _cars;
+            if (id is not null) { return await IdIndexAsync(id.Value); }
+
+			ViewData["Cars"] = _cars;
             return View();
         }
 
@@ -55,6 +58,12 @@ namespace CarShop.Web.Controllers
             
             throw new NotImplementedException();
             return View();
+        }
+
+        public async Task<IActionResult> IdIndexAsync(long id)
+        {
+            ViewData["Car"] = await _carStorageClient.GetCarAsync(id);
+            return View("~/Views/Catalog/id/Index.cshtml");
         }
     }
 }
