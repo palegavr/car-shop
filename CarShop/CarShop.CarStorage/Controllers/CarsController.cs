@@ -24,8 +24,8 @@ namespace CarShop.CarStorage.Controllers
             return Ok(carAfterAdd);
         }
 
-        [HttpPost]
-        [Route("{id}/update")]
+        [HttpPatch]
+        [Route("{id}")]
         public async Task<IActionResult> UpdateCarAsync(
             [FromRoute(Name = "id")] long id,
             [FromBody] UpdateCarRequest updateCarRequest)
@@ -35,12 +35,20 @@ namespace CarShop.CarStorage.Controllers
             return Ok(carAfterUpdate);
         }
 
-        [HttpPost]
-        [Route("{id}/delete")]
+        [HttpDelete]
+        [Route("{id}")]
         public async Task<IActionResult> DeleteCarAsync([FromRoute(Name = "id")] long id)
         {
             await _carsRepository.DeleteCarAsync(id);
             return Ok(new {Id = id});
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetCarAsync([FromRoute(Name = "id")] long id)
+        {
+            Car? car = await _carsRepository.GetCarByIdAsync(id);
+            return car is null ? NotFound() : Ok(car);
         }
     }
 }
