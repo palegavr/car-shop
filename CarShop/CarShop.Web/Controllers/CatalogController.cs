@@ -41,7 +41,7 @@ namespace CarShop.Web.Controllers
         {
             if (id is not null) { return await IdIndexAsync(id.Value); }
 
-			ViewData["Cars"] = _cars;
+            ViewData["Cars"] = (await _carStorageClient.GetCarsAsync()).Cars;
             return View();
         }
 

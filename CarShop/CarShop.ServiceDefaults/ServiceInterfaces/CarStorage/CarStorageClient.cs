@@ -31,6 +31,12 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
             }
         }
 
+        public async Task<GetCarsResult> GetCarsAsync(GetCarsOptions? getCarsOptions = null, CancellationToken cancellationToken = default)
+        {
+            GetCarsResult result = (await _httpClient.GetFromJsonAsync<GetCarsResult>("/api/cars", cancellationToken))!;
+            return result;
+        }
+
         public static void ConfigureClient(HttpClient httpClient)
         {
             httpClient.BaseAddress = new Uri("http://localhost:5253");
