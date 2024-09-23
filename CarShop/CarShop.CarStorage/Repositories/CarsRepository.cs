@@ -1,5 +1,6 @@
 ﻿using CarShop.CarStorage.Database;
 using CarShop.ServiceDefaults.CommonTypes;
+using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -11,12 +12,35 @@ namespace CarShop.CarStorage.Repositories
         {
             _db.Cars.Add(carForAdding);
             await _db.SaveChangesAsync();
+            _db.Entry(carForAdding).State = EntityState.Detached;
         }
 
         public async Task UpdateCarAsync(Car carWithNewData)
         {
             _db.Cars.Update(carWithNewData);
             await _db.SaveChangesAsync();
+            _db.Entry(carWithNewData).State = EntityState.Detached;
+        }
+
+        public async Task UpdateCarAsync(long id, UpdateCarRequest updateCarRequest)
+        {
+            Car car = new Car { Id = id };
+            updateCarRequest.GetType().GetProperties()
+                .Where(prop => prop.GetValue(updateCarRequest) is not null)
+                .ToList().ForEach(updateCarRequestPropery =>
+                {
+                    var carProperty = car.GetType()
+                    .GetProperties()
+                    .Where(p => p.Name == updateCarRequestPropery.Name)
+                    .Single();
+
+                    carProperty.SetValue(car, updateCarRequestPropery.GetValue(updateCarRequest));
+
+                    _db.Entry(car).Property(carProperty.Name).IsModified = true;
+                });
+
+            await _db.SaveChangesAsync();
+            _db.Entry(car).State = EntityState.Detached;
         }
 
         public async Task DeleteCarAsync(long carId)
@@ -24,6 +48,7 @@ namespace CarShop.CarStorage.Repositories
             Car notDeletedCar = new Car { Id = carId };
             _db.Cars.Remove(notDeletedCar);
             await _db.SaveChangesAsync();
+            _db.Entry(notDeletedCar).State = EntityState.Detached;
         }
 
         public async Task<GetCarsResult> GetCarsAsync<TKey>(
@@ -48,17 +73,29 @@ namespace CarShop.CarStorage.Repositories
             if (fromTo is not null)
                 query = query?.Take(fromTo.Value) ?? _db.Cars.Take(fromTo.Value);
 
-            return new GetCarsResult
+            var result = new GetCarsResult
             {
                 Cars = await (query?.ToArrayAsync() ?? _db.Cars.ToArrayAsync()),
                 TotalResultsCount = totalResultsCount
             };
+
+            foreach (var car in result.Cars)
+            {
+                _db.Entry(car).State = EntityState.Detached;
+            }
+
+            return result;
         }
 
         public async Task<Car?> GetCarByIdAsync(long id)
         {
-            return await _db.Cars
+            Car? car = await _db.Cars
                 .SingleOrDefaultAsync(car => car.Id == id);
+
+            if (car is not null)
+                _db.Entry(car).State = EntityState.Detached;
+
+            return car;
         }
     }
 

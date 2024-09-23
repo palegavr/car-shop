@@ -1,5 +1,6 @@
 ﻿using CarShop.CarStorage.Repositories;
 using CarShop.ServiceDefaults.CommonTypes;
+using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,11 +26,12 @@ namespace CarShop.CarStorage.Controllers
 
         [HttpPost]
         [Route("{id}/update")]
-        public async Task<IActionResult> UpdateCarAsync(Car carWithNewData, [FromRoute(Name = "id")] long id)
+        public async Task<IActionResult> UpdateCarAsync(
+            [FromRoute(Name = "id")] long id,
+            [FromBody] UpdateCarRequest updateCarRequest)
         {
-            carWithNewData.Id = id;
-            await _carsRepository.UpdateCarAsync(carWithNewData);
-            Car carAfterUpdate = (await _carsRepository.GetCarByIdAsync(carWithNewData.Id))!;
+            await _carsRepository.UpdateCarAsync(id, updateCarRequest);
+            Car carAfterUpdate = (await _carsRepository.GetCarByIdAsync(id))!;
             return Ok(carAfterUpdate);
         }
 
