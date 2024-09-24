@@ -1,86 +1,79 @@
-﻿@{
-	Car? car = (Car?)ViewData["Car"];
+﻿@model Car
+@{
+	Car car = Model;
 }
 
-
-@if (car is not null)
+@if (car.BigImageURLs.Length > 0)
 {
-	@if (car.BigImageURLs.Length > 0)
-	{
-		<div id="carouselExampleIndicators" class="carousel slide" style="background-color: darkgrey;">
-			<div class="carousel-indicators">
-				@for (int i = 0; i < car.BigImageURLs.Length; i++)
+	<div id="carouselExampleIndicators" class="carousel slide" style="background-color: darkgrey;">
+		<div class="carousel-indicators">
+			@for (int i = 0; i < car.BigImageURLs.Length; i++)
+			{
+				@if (i == 0)
 				{
-					@if (i == 0)
-					{
-						<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="@i" class="active" aria-current="true" aria-label="Slide @(i + 1)"></button>
-					}
-					else
-					{
-						<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="@i" aria-label="Slide @(i + 1)"></button>
-					}
+					<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="@i" class="active" aria-current="true" aria-label="Slide @(i + 1)"></button>
 				}
+				else
+				{
+					<button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="@i" aria-label="Slide @(i + 1)"></button>
+				}
+			}
 
-			</div>
-			<div class="carousel-inner">
-				@foreach (string imgUrl in car.BigImageURLs)
-				{
-					<div class="carousel-item @(imgUrl == car.BigImageURLs[0] ? "active" : "")">
-						<img src="@imgUrl" style="height: 400px; max-width: 1000px;" class="d-block  mx-auto">
-					</div>
-				}
-			</div>
-			<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-				<span class="carousel-control-prev-icon" aria-hidden="true"></span>
-				<span class="visually-hidden">Previous</span>
-			</button>
-			<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-				<span class="carousel-control-next-icon" aria-hidden="true"></span>
-				<span class="visually-hidden">Next</span>
-			</button>
 		</div>
-	}
-	
-	<table class="table table-striped" style="font-size: 6mm;">
-		<tbody>
-			<tr>
-				<td>Марка</td>
-				<td>@car.Brand</td>
-			</tr>
-			<tr>
-				<td>Модель</td>
-				<td>@car.Model</td>
-			</tr>
+		<div class="carousel-inner">
+			@foreach (string imgUrl in car.BigImageURLs)
+			{
+				<div class="carousel-item @(imgUrl == car.BigImageURLs[0] ? "active" : "")">
+					<img src="@imgUrl" style="height: 400px; max-width: 1000px;" class="d-block  mx-auto">
+				</div>
+			}
+		</div>
+		<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+			<span class="carousel-control-prev-icon" aria-hidden="true"></span>
+			<span class="visually-hidden">Previous</span>
+		</button>
+		<button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+			<span class="carousel-control-next-icon" aria-hidden="true"></span>
+			<span class="visually-hidden">Next</span>
+		</button>
+	</div>
+}
 
-			<tr>
-				<td>Цвет</td>
-				<td>@car.Color</td>
-			</tr>
-			<tr>
-				<td>Объём двигателя</td>
-				<td>@car.EngineCapacity л</td>
-			</tr>
-			<tr>
-				<td>Вид корпуса</td>
-				<td>@car.CorpusType</td>
-			</tr>
-			<tr>
-				<td>Вид топлива</td>
-				<td>@car.FuelType</td>
-			</tr>
-			<tr>
-				<td>Количество единиц товара на складе</td>
-				<td>@car.Count</td>
-			</tr>
-			<tr>
-				<td>Цена за стандартную комплектацию</td>
-				<td style="background-color: rgb(141, 248, 141);">@car.PriceForStandardConfiguration грн</td>
-			</tr>
-		</tbody>
-	</table>
-	<button type="button" style="height: 50px; font-size: 6mm;" class="btn btn-outline-primary w-100 mb-2">Купить</button>
-}
-else
-{
-	<div>Товар не найден</div>
-}
+<table class="table table-striped" style="font-size: 6mm;">
+	<tbody>
+		<tr>
+			<td>Марка</td>
+			<td>@car.Brand</td>
+		</tr>
+		<tr>
+			<td>Модель</td>
+			<td>@car.Model</td>
+		</tr>
+
+		<tr>
+			<td>Цвет</td>
+			<td>@car.Color</td>
+		</tr>
+		<tr>
+			<td>Объём двигателя</td>
+			<td>@car.EngineCapacity л</td>
+		</tr>
+		<tr>
+			<td>Вид корпуса</td>
+			<td>@car.CorpusType</td>
+		</tr>
+		<tr>
+			<td>Вид топлива</td>
+			<td>@car.FuelType</td>
+		</tr>
+		<tr>
+			<td>Количество единиц товара на складе</td>
+			<td>@car.Count</td>
+		</tr>
+		<tr>
+			<td>Цена за стандартную комплектацию</td>
+			<td style="background-color: rgb(141, 248, 141);">@car.PriceForStandardConfiguration грн</td>
+		</tr>
+	</tbody>
+</table>
+<button type="button" style="height: 50px; font-size: 6mm;" class="btn btn-outline-primary w-100 mb-2">Купить</button>
