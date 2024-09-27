@@ -1,4 +1,5 @@
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
+using CarShop.Web.ModelBuilders;
 
 namespace CarShop.Web;
 
@@ -10,7 +11,10 @@ public class Program
         builder.AddServiceDefaults();
 
         // Add services to the container.
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews(options =>
+        {
+			options.ModelBinderProviders.Insert(0, new DoubleModelBinderProvider());
+		});
 
         builder.Services.AddHttpClient<CarStorageClient>(CarStorageClient.ConfigureClient);
 

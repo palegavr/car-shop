@@ -13,7 +13,7 @@ namespace CarShop.ServiceDefaults.CommonTypes
         public long Id { get; set; }
         public string Brand { get; set; }
         public string Model { get; set; }
-        public double PriceForStandardConfiguration { get; set; }
+        public double PriceForStandartConfiguration { get; set; }
         public string Color { get; set; }
         public double EngineCapacity { get; set; }
         public CorpusType CorpusType { get; set; }
@@ -22,7 +22,7 @@ namespace CarShop.ServiceDefaults.CommonTypes
         public string ImageUrl { get; set; }
         public string[] BigImageURLs { get; set; } = [];
 
-        [JsonIgnore] public double PriceForStandardConfigurationWithTax => PriceForStandardConfiguration + TaxForPriceForStandardConfiguration;
-        [JsonIgnore] public double TaxForPriceForStandardConfiguration => PriceForStandardConfiguration * (SALE_TAX / 100);
+        [JsonIgnore] public double PriceForStandardConfigurationWithTax => PriceForStandartConfiguration + TaxForPriceForStandardConfiguration;
+        [JsonIgnore] public double TaxForPriceForStandardConfiguration => PriceForStandartConfiguration * (SALE_TAX / 100);
     }
 }

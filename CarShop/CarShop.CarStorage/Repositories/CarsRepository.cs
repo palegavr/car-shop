@@ -3,6 +3,8 @@ using CarShop.ServiceDefaults.CommonTypes;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
+using System.Linq.Dynamic.Core;
+using System.Linq;
 
 namespace CarShop.CarStorage.Repositories
 {
@@ -46,7 +48,7 @@ namespace CarShop.CarStorage.Repositories
         }
         public async Task<GetCarsResult> GetCarsAsync(GetCarsOptions? getCarsOptions = null)
         {
-            IQueryable<Car>? query = null;
+            IQueryable<Car>? query = getCarsOptions is not null ? MakeGetCarsQuery(getCarsOptions) : null;
             long totalResultsCount = query?.Count() ?? _db.Cars.Count();
             var result = new GetCarsResult
             {
@@ -65,28 +67,28 @@ namespace CarShop.CarStorage.Repositories
             if (getCarsOptions.Brand is not null)
             {
                 Expression<Func<Car, bool>> brandCondition =
-                    car => car.Brand.Contains(getCarsOptions.Brand);
+                    car => car.Brand.ToLower().Contains(getCarsOptions.Brand.ToLower());
                 query = query?.Where(brandCondition)
                     ?? _db.Cars.Where(brandCondition);
             }
-            if (getCarsOptions.EngineCapacityFrom is not null)
+            if (getCarsOptions.MinimumEngineCapacity is not null)
             {
                 Expression<Func<Car, bool>> engineCapacityFromCondition =
-                    car => car.EngineCapacity >= getCarsOptions.EngineCapacityFrom;
+                    car => car.EngineCapacity >= getCarsOptions.MinimumEngineCapacity;
                 query = query?.Where(engineCapacityFromCondition)
                     ?? _db.Cars.Where(engineCapacityFromCondition);
             }
-            if (getCarsOptions.EngineCapacityTo is not null)
+            if (getCarsOptions.MaximumEngineCapacity is not null)
             {
                 Expression<Func<Car, bool>> engineCapacityToCondition =
-                    car => car.EngineCapacity <= getCarsOptions.EngineCapacityTo;
+                    car => car.EngineCapacity <= getCarsOptions.MaximumEngineCapacity;
                 query = query?.Where(engineCapacityToCondition)
                     ?? _db.Cars.Where(engineCapacityToCondition);
             }
             if (getCarsOptions.FuelType is not null)
             {
                 Expression<Func<Car, bool>> fuelTypeCondition =
-                    car => car.FuelType == getCarsOptions.FuelType;
+                    car => car.FuelType.HasFlag(getCarsOptions.FuelType);
                 query = query?.Where(fuelTypeCondition)
                     ?? _db.Cars.Where(fuelTypeCondition);
             }
@@ -97,22 +99,42 @@ namespace CarShop.CarStorage.Repositories
                 query = query?.Where(corpusTypeCondition)
                     ?? _db.Cars.Where(corpusTypeCondition);
             }
-            if (getCarsOptions.PriceFrom is not null)
+            if (getCarsOptions.MinimumPrice is not null)
             {
                 Expression<Func<Car, bool>> priceFromCondition =
-                    car => car.PriceForStandardConfiguration >= getCarsOptions.PriceFrom;
+                    car => car.PriceForStandartConfiguration >= getCarsOptions.MinimumPrice;
                 query = query?.Where(priceFromCondition)
                     ?? _db.Cars.Where(priceFromCondition);
             }
-            if (getCarsOptions.PriceTo is not null)
+            if (getCarsOptions.MaximumPrice is not null)
             {
                 Expression<Func<Car, bool>> priceToCondition =
-                    car => car.PriceForStandardConfiguration <= getCarsOptions.PriceTo;
+                    car => car.PriceForStandartConfiguration <= getCarsOptions.MaximumPrice;
                 query = query?.Where(priceToCondition)
                     ?? _db.Cars.Where(priceToCondition);
             }
+			if (getCarsOptions.SortBy is not null)
+			{
+                bool desc = getCarsOptions.SortType.HasValue && getCarsOptions.SortType == SortType.Descending;
+                string orderExpression = $"{getCarsOptions.SortBy.ToString()}";
+                if (desc) orderExpression += " descending";
 
-            return query;
+				query = query?.OrderBy(orderExpression) 
+                    ?? _db.Cars.OrderBy(orderExpression);
+			}
+            if (getCarsOptions.StartIndex is not null)
+            {
+                query = query?.Skip(getCarsOptions.StartIndex.Value)
+                    ?? _db.Cars.Skip(getCarsOptions.StartIndex.Value);
+            }
+			if (getCarsOptions.EndIndex is not null)
+			{
+                int takeCount = getCarsOptions.EndIndex.Value - (getCarsOptions.StartIndex ?? 0);
+				query = query?.Take(takeCount)
+					?? _db.Cars.Take(takeCount);
+			}
+
+			return query;
         }
         public async Task<Car?> GetCarByIdAsync(long id)
         {
