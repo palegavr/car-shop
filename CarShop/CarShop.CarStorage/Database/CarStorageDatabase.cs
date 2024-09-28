@@ -9,7 +9,12 @@ namespace CarShop.CarStorage.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=testdb;Username=postgres;Password=123");
+            string host = "db";
+            int port = 5432;
+            string database = "testdb";
+            string username = "postgres";
+            string password = "123";
+			optionsBuilder.UseNpgsql($"Host={host};Port={port};Database={database};Username={username};Password={password}");
         }
     }
 }

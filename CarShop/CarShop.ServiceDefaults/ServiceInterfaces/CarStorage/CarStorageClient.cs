@@ -13,7 +13,7 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
 {
     public class CarStorageClient(HttpClient _httpClient)
     {
-        public const string BASE_ADDRESS = "http://localhost:5253";
+        public const string BASE_ADDRESS = "http://carshop.carstorage:8080";
 
 		public async Task<Car?> GetCarAsync(long id, CancellationToken cancellationToken = default)
         {

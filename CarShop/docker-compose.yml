@@ -1,0 +1,17 @@
+version: '3.4'
+
+services:
+  carshop.web:
+    image: ${DOCKER_REGISTRY-}carshopweb
+    build:
+      context: .
+      dockerfile: CarShop.Web/Dockerfile
+
+  carshop.carstorage:
+    image: ${DOCKER_REGISTRY-}carshopcarstorage
+    build:
+      context: .
+      dockerfile: CarShop.CarStorage/Dockerfile
+  db:
+    image: postgres:17
+

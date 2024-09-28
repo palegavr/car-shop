@@ -61,7 +61,7 @@ namespace CarShop.CarStorage.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<double>("PriceForStandardConfiguration")
+                    b.Property<double>("PriceForStandartConfiguration")
                         .HasColumnType("double precision");
 
                     b.HasKey("Id");

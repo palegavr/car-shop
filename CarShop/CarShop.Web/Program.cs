@@ -32,7 +32,7 @@ public class Program
 			app.UseHsts();
         }*/
 
-        app.UseHttpsRedirection();
+        //app.UseHttpsRedirection();
 		app.UseStatusCodePagesWithReExecute("/Error/{0}");
 		app.UseStaticFiles();
 
