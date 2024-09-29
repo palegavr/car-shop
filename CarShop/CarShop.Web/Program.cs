@@ -1,4 +1,5 @@
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
+using CarShop.Web.ModelBuilders;
 
 namespace CarShop.Web;
 
@@ -10,7 +11,10 @@ public class Program
         builder.AddServiceDefaults();
 
         // Add services to the container.
-        builder.Services.AddControllersWithViews();
+        builder.Services.AddControllersWithViews(options =>
+        {
+			options.ModelBinderProviders.Insert(0, new DoubleModelBinderProvider());
+		});
 
         builder.Services.AddHttpClient<CarStorageClient>(CarStorageClient.ConfigureClient);
 
@@ -19,15 +23,18 @@ public class Program
         app.MapDefaultEndpoints();
 
         // Configure the HTTP request pipeline.
-        if (!app.Environment.IsDevelopment())
+        /*if (!app.Environment.IsDevelopment() || true)
         {
-            app.UseExceptionHandler("/Home/Error");
-            // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-            app.UseHsts();
-        }
+            app.UseExceptionHandler("/Error/NotFound404");
+			app.UseStatusCodePagesWithReExecute("/Error/{0}");
 
-        app.UseHttpsRedirection();
-        app.UseStaticFiles();
+			// The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+			app.UseHsts();
+        }*/
+
+        //app.UseHttpsRedirection();
+		app.UseStatusCodePagesWithReExecute("/Error/{0}");
+		app.UseStaticFiles();
 
         app.UseRouting();
 
@@ -37,6 +44,7 @@ public class Program
             name: "default",
             pattern: "{controller=Home}/{action=Index}");
 
-        app.Run();
+
+		app.Run();
     }
 }

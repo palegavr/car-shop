@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  carshop.web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      #- ASPNETCORE_HTTPS_PORTS=8081
+    ports:
+      - "80:8080"
+      #- "443:8081"
+  carshop.carstorage:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      #- ASPNETCORE_HTTPS_PORTS=8081
+  db:
+    environment:
+      - POSTGRES_PASSWORD=123
+      - PGDATA=/var/lib/postgresql/data
+      - PGPORT=5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+

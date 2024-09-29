@@ -50,5 +50,12 @@ namespace CarShop.CarStorage.Controllers
             Car? car = await _carsRepository.GetCarByIdAsync(id);
             return car is null ? NotFound() : Ok(car);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCarsAsync([FromQuery] GetCarsOptions getCarsOptions)
+        {
+            GetCarsResult result = await _carsRepository.GetCarsAsync(getCarsOptions);
+            return Ok(result);
+        }
     }
 }
