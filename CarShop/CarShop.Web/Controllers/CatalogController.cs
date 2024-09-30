@@ -2,22 +2,38 @@
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.Web.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Globalization;
 
 namespace CarShop.Web.Controllers
 {
-    [Route("[controller]/{id?}")]
+    [Route("[controller]/{id:long?}")]
     public class CatalogController(CarStorageClient _carStorageClient) : Controller
     {
+        private const int CARS_COUNT_ON_ONE_PAGE = 30;
+
         [HttpGet]
-        public async Task<IActionResult> Index([FromRoute] long? id)
+        public async Task<IActionResult> Index([FromRoute] long? id, [FromQuery(Name = "page")] int page = 1)
         {
             if (id is not null) { return await IdIndexAsync(id.Value); }
 
-            CatalogViewModel viewModel = new CatalogViewModel 
+            GetCarsResult getCarsResult = await _carStorageClient.GetCarsAsync();
+
+            IEnumerable<Car> cars = getCarsResult.Cars
+                .Skip(CARS_COUNT_ON_ONE_PAGE * (page - 1))
+                .Take(CARS_COUNT_ON_ONE_PAGE);
+
+            int pagesCount = getCarsResult.TotalResultsCount / CARS_COUNT_ON_ONE_PAGE;
+
+            if (getCarsResult.TotalResultsCount % CARS_COUNT_ON_ONE_PAGE > 0)
+                pagesCount++;
+
+			CatalogViewModel viewModel = new CatalogViewModel 
             { 
-                Cars = (await _carStorageClient.GetCarsAsync()).Cars 
-            };
+                Cars = cars,
+                CurrentPage = page,
+                PagesCount = pagesCount
+			};
             return View(viewModel);
         }
 
@@ -33,7 +49,8 @@ namespace CarShop.Web.Controllers
             [FromForm(Name = "minimum_price")] double? minimumPrice,
             [FromForm(Name = "maximum_price")] double? maximumPrice,
             [FromForm(Name = "sort_by")] SortBy? sortBy,
-            [FromForm(Name = "sort_type")] SortType? sortType
+            [FromForm(Name = "sort_type")] SortType? sortType,
+			[FromForm(Name = "page")] int page = 1
 			)
         {
 			GetCarsOptions getCarsOptions = new GetCarsOptions
@@ -51,10 +68,23 @@ namespace CarShop.Web.Controllers
                 SortType = sortType
             };
 
+			GetCarsResult getCarsResult = await _carStorageClient.GetCarsAsync(getCarsOptions);
+
+			IEnumerable<Car> cars = getCarsResult.Cars
+				.Skip(CARS_COUNT_ON_ONE_PAGE * (page - 1))
+				.Take(CARS_COUNT_ON_ONE_PAGE);
+
+			int pagesCount = getCarsResult.TotalResultsCount / CARS_COUNT_ON_ONE_PAGE;
+
+			if (getCarsResult.TotalResultsCount % CARS_COUNT_ON_ONE_PAGE > 0)
+				pagesCount++;
+
 			CatalogViewModel viewModel = new CatalogViewModel
 			{
-				Cars = (await _carStorageClient.GetCarsAsync(getCarsOptions)).Cars,
-                IsSearchResultsPage = true
+				Cars = cars,
+				CurrentPage = page,
+				PagesCount = pagesCount,
+				IsSearchResultsPage = true
 			};
 
 			return View(viewModel);

@@ -49,7 +49,7 @@ namespace CarShop.CarStorage.Repositories
         public async Task<GetCarsResult> GetCarsAsync(GetCarsOptions? getCarsOptions = null)
         {
             IQueryable<Car>? query = getCarsOptions is not null ? MakeGetCarsQuery(getCarsOptions) : null;
-            long totalResultsCount = query?.Count() ?? _db.Cars.Count();
+            int totalResultsCount = query?.Count() ?? _db.Cars.Count();
             var result = new GetCarsResult
             {
                 Cars = await (query?.ToArrayAsync() ?? _db.Cars.ToArrayAsync()),
