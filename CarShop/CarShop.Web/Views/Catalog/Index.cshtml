@@ -34,11 +34,21 @@
 	}
 }
 
-
-
-<div class="btn-toolbar mx-auto" role="toolbar" aria-label="Toolbar with button groups">
-  <div class="btn-group mx-auto pb-3" role="group" aria-label="First group">
-    <a  class="btn btn-primary page-item active" style="font-size: 8mm;" >1</a>
-    <a href="http://127.0.0.1:5500/Untitled-2.html" class="btn btn-primary" style="font-size: 8mm;" >2</a>
-  </div>
-</div>
+@if (Model.PagesCount > 1)
+{
+	<div class="btn-toolbar mx-auto" role="toolbar" aria-label="Toolbar with button groups">
+		<div class="btn-group mx-auto pb-3" role="group" aria-label="First group">
+			@for(int i = 1; i <= Model.PagesCount; i++)
+			{
+				@if (i == Model.CurrentPage)
+				{
+					<a asp-controller="Catalog" asp-action="Index" asp-route-page="@i" class="btn btn-primary page-item active" style="font-size: 8mm;">@i</a>
+				}
+				else
+				{
+					<a asp-controller="Catalog" asp-action="Index" asp-route-page="@i" class="btn btn-primary" style="font-size: 8mm;">@i</a>
+				}
+			}
+		</div>
+	</div>
+}
