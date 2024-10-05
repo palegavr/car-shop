@@ -11,7 +11,7 @@ namespace CarShop.Web.Controllers
     public class CatalogController(CarStorageClient _carStorageClient) : Controller
     {
         private const int CARS_COUNT_ON_ONE_PAGE = 30;
-
+        
         [HttpGet]
         public async Task<IActionResult> Index(
             [FromRoute] long? id,
@@ -22,13 +22,17 @@ namespace CarShop.Web.Controllers
 			[FromQuery(Name = "corpus_type")] CorpusType? corpusType,
 			[FromQuery(Name = "minimum_price")] double? minimumPrice,
 			[FromQuery(Name = "maximum_price")] double? maximumPrice,
-			[FromQuery(Name = "page")] int? page)
+			[FromQuery(Name = "page")] int page = 1,
+            [FromQuery(Name = "sort_by")] SortBy sortBy = SortBy.Brand,
+            [FromQuery(Name = "sort_type")] SortType sortType = SortType.Ascending)
         {
             if (id is not null) { return await IdIndexAsync(id.Value); }
-            
-            page ??= 1;
-            if (page <= 0) 
-                page = 1;
+
+            if (page <= 0) { page = 1; }
+            if (!Enum.IsDefined(sortBy))
+                sortBy = SortBy.Brand;
+            if (!Enum.IsDefined(sortType))
+                sortType = SortType.Ascending;
 
 			GetCarsOptions getCarsOptions = new GetCarsOptions
 			{
@@ -38,13 +42,15 @@ namespace CarShop.Web.Controllers
 				FuelType = fuelType,
 				CorpusType = corpusType,
 				MinimumPrice = minimumPrice,
-				MaximumPrice = maximumPrice
+				MaximumPrice = maximumPrice,
+                SortBy = sortBy,
+                SortType = sortType,
 			};
 
 			GetCarsResult getCarsResult = await _carStorageClient.GetCarsAsync(getCarsOptions);
 
             IEnumerable<Car> cars = getCarsResult.Cars
-                .Skip(CARS_COUNT_ON_ONE_PAGE * (page.Value - 1))
+                .Skip(CARS_COUNT_ON_ONE_PAGE * (page - 1))
                 .Take(CARS_COUNT_ON_ONE_PAGE);
 
             int pagesCount = getCarsResult.TotalResultsCount / CARS_COUNT_ON_ONE_PAGE;
@@ -63,14 +69,14 @@ namespace CarShop.Web.Controllers
             CatalogViewModel viewModel = new CatalogViewModel
             {
                 Cars = cars,
-                CurrentPage = page.Value,
+                CurrentPage = page,
                 PagesCount = pagesCount,
                 IsSearchResultsPage = containsSearchParameters
             };
             return View(viewModel);
         }
 
-        public async Task<IActionResult> IdIndexAsync(long id)
+        private async Task<IActionResult> IdIndexAsync(long id)
         {
             Car? car = await _carStorageClient.GetCarAsync(id);
 
