@@ -5,4 +5,6 @@ builder.AddProject<Projects.CarShop_Web>("webfrontend")
 
 builder.AddProject<Projects.CarShop_CarStorage>("carshop-carstorage");
 
+builder.AddProject<Projects.CarShop_AdminService>("carshop-adminservice");
+
 builder.Build().Run();

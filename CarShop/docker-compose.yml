@@ -12,6 +12,13 @@ services:
     build:
       context: .
       dockerfile: CarShop.CarStorage/Dockerfile
+
+  carshop.adminservice:
+    image: ${DOCKER_REGISTRY-}carshopadminservice
+    build:
+      context: .
+      dockerfile: CarShop.AdminService/Dockerfile
+
   db:
     image: postgres:17
 
