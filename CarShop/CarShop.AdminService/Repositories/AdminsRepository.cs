@@ -6,14 +6,39 @@ namespace CarShop.AdminService.Repositories
 {
     public class AdminsRepository(AdminServiceDatabase _db)
     {
-        public async Task<Admin?> GetByEmailAsync(string email)
+        public async Task<Admin?> GetByIdAsync(long id)
         {
-            return await _db.Admins.Where(admin => admin.Email == email).SingleOrDefaultAsync();
+            Admin? admin = await _db.Admins.SingleOrDefaultAsync(admin => admin.Id == id);
+
+            if (admin is not null)
+            {
+                _db.Entry(admin).State = EntityState.Detached;
+            }
+            
+            return admin;
         }
 
-        public async Task CreateAccount(string email, string password)
+        public async Task<Admin?> GetByEmailAsync(string email)
+        {
+            Admin? admin = await _db.Admins.Where(admin => admin.Email == email).SingleOrDefaultAsync();
+
+            if (admin is not null)
+            {
+                _db.Entry(admin).State = EntityState.Detached;
+            }
+
+            return admin;
+        }
+
+        public async Task CreateAccountAsync(string email, string password)
         {
             _db.Admins.Add(new Admin { Email = email, Password = password });
+            await _db.SaveChangesAsync();
+        }
+        
+        public async Task DeleteAccountAsync(long id)
+        {
+            _db.Admins.Remove(new Admin { Id = id });
             await _db.SaveChangesAsync();
         }
     }

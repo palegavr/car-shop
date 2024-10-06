@@ -21,15 +21,28 @@ namespace CarShop.AdminService.Controllers
             }
 
             Admin? admin = await _adminsRepository.GetByEmailAsync(createAccountRequest.Email);
-            if (admin is not null)
+            if (admin is not null) // Пользователь с такой почтой уже есть
             {
                 return Conflict();
             }
 
-            await _adminsRepository.CreateAccount(
+            await _adminsRepository.CreateAccountAsync(
                 createAccountRequest.Email,
                 Argon2.Hash(createAccountRequest.Password));
 
+            return Ok();
+        }
+
+        [HttpDelete]
+        [Route("{id:long}")]
+        public async Task<IActionResult> DeleteAccountAsync(long id)
+        {
+            if ((await _adminsRepository.GetByIdAsync(id)) is null)
+            {
+                return NotFound();
+            }
+
+            await _adminsRepository.DeleteAccountAsync(id);
             return Ok();
         }
     }
