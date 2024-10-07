@@ -68,7 +68,54 @@ namespace CarShop.AdminService.Controllers
                 return Unauthorized();
             }
 
-            var refreshTokenExpires = DateTime.UtcNow.Add(AuthOptions.REFRESH_TOKEN_LIFETIME);
+            TokensPair tokensPair = GenerateTokensPair(admin.Email, out DateTime refreshTokenExpires);
+
+            await _refreshSessionsRepository.CreateSessionAsync(new RefreshSession
+            {
+                AdminId = admin.Id,
+                RefreshToken = tokensPair.RefreshToken,
+                CreatedAt = DateTime.UtcNow,
+                ExpiresIn = refreshTokenExpires,
+            });
+
+            return Ok(new
+            {
+                refresh_token = tokensPair.RefreshToken,
+                access_token = tokensPair.AccessToken,
+            });
+        }
+
+        [HttpPost]
+        [Route("updatetokens")]
+        public async Task<IActionResult> UpdateTokensAsync([FromBody] UpdateTokensRequest updateTokensRequest)
+        {
+            RefreshSession? refreshSession = await _refreshSessionsRepository.GetByRefreshTokenAsync(updateTokensRequest.RefreshToken);
+
+            if (refreshSession is null ||
+                refreshSession.IsExpired ||
+                TokenValidator.ValidateToken(updateTokensRequest.RefreshToken) is null)
+            {
+                return Unauthorized();
+            }
+
+            Admin admin = (await _adminsRepository.GetByIdAsync(refreshSession.AdminId))!;
+            TokensPair tokensPair = GenerateTokensPair(admin.Email, out DateTime refreshTokenExpires);
+
+            refreshSession.RefreshToken = tokensPair.RefreshToken;
+            refreshSession.ExpiresIn = refreshTokenExpires;
+            await _refreshSessionsRepository.UpdateSessionAsync(refreshSession);
+
+            return Ok(new
+            {
+                refresh_token = tokensPair.RefreshToken,
+                access_token = tokensPair.AccessToken,
+            });
+        }
+
+        [NonAction]
+        private TokensPair GenerateTokensPair(string email, out DateTime refreshTokenExpires)
+        {
+            refreshTokenExpires = DateTime.UtcNow.Add(AuthOptions.REFRESH_TOKEN_LIFETIME);
             JwtSecurityToken refreshJwt = new JwtSecurityToken(
                 issuer: AuthOptions.ISSUER,
                 audience: AuthOptions.AUDIENCE,
@@ -79,24 +126,14 @@ namespace CarShop.AdminService.Controllers
             JwtSecurityToken accessJwt = new JwtSecurityToken(
                 issuer: AuthOptions.ISSUER,
                 audience: AuthOptions.AUDIENCE,
-                claims: [new ("email", admin.Email)],
+                claims: [new("email", email)],
                 expires: DateTime.UtcNow.Add(AuthOptions.ACCESS_TOKEN_LIFETIME),
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             string accessToken = new JwtSecurityTokenHandler().WriteToken(accessJwt);
 
-            await _refreshSessionsRepository.CreateSessionAsync(new RefreshSession
-            {
-                AdminId = admin.Id,
-                RefreshToken = refreshToken,
-                CreatedAt = DateTime.UtcNow,
-                ExpiresIn = refreshTokenExpires,
-            });
-
-            return Ok(new
-            {
-                refresh_token = refreshToken,
-                access_token = accessToken,
-            });
+            return new TokensPair(refreshToken, accessToken);
         }
+
+        private record TokensPair(string RefreshToken, string AccessToken);
     }
 }

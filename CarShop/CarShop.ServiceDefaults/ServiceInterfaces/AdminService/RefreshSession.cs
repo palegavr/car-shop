@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,5 +16,7 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.AdminService
         public string RefreshToken { get; set; }
         public DateTime ExpiresIn { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        [NotMapped] public bool IsExpired => DateTime.UtcNow > ExpiresIn;
     }
 }
