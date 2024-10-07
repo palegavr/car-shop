@@ -20,6 +20,7 @@ public class Program
 
         builder.Services.AddDbContext<AdminServiceDatabase>();
         builder.Services.AddScoped<AdminsRepository>();
+        builder.Services.AddScoped<RefreshSessionsRepository>();
 
         var app = builder.Build();
 

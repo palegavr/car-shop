@@ -8,10 +8,9 @@ using System.Threading.Tasks;
 
 namespace CarShop.ServiceDefaults.ServiceInterfaces.AdminService
 {
-    public class CreateAccountRequest
+    public class LoginRequest
     {
         [Required]
-        [EmailAddress]
         [ModelBinder(Name = "email")]
         public string Email { get; set; }
 
