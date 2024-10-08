@@ -112,6 +112,49 @@ namespace CarShop.AdminService.Controllers
             });
         }
 
+        [HttpPost]
+        [Route("ban/{id:long}")]
+        public async Task<IActionResult> BanAsync([FromRoute(Name = "id")] long id)
+        {
+            Admin? admin = await _adminsRepository.GetByIdAsync(id);
+            if (admin is null)
+            {
+                return NotFound();
+            }
+
+            if (admin.Banned)
+            {
+                return Conflict();
+            }
+
+            admin.Banned = true;
+            await _adminsRepository.UpdateAccountAsync(admin);
+            await _refreshSessionsRepository.RemoveAllSessionsOfAdminAsync(admin.Id);
+
+            return Ok();
+        }
+
+        [HttpPost]
+        [Route("unban/{id:long}")]
+        public async Task<IActionResult> UnbanAsync([FromRoute(Name = "id")] long id)
+        {
+            Admin? admin = await _adminsRepository.GetByIdAsync(id);
+            if (admin is null)
+            {
+                return NotFound();
+            }
+
+            if (!admin.Banned)
+            {
+                return Conflict();
+            }
+
+            admin.Banned = false;
+            await _adminsRepository.UpdateAccountAsync(admin);
+
+            return Ok();
+        }
+
         [NonAction]
         private TokensPair GenerateTokensPair(string email, out DateTime refreshTokenExpires)
         {

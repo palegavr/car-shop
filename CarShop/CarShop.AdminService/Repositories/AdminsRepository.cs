@@ -41,5 +41,12 @@ namespace CarShop.AdminService.Repositories
             _db.Admins.Remove(new Admin { Id = id });
             await _db.SaveChangesAsync();
         }
+
+        public async Task UpdateAccountAsync(Admin admin)
+        {
+            _db.Admins.Update(admin);
+            await _db.SaveChangesAsync();
+            _db.Entry(admin).State = EntityState.Detached;
+        }
     }
 }

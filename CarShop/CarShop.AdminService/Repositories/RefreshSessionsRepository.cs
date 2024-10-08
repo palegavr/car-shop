@@ -29,5 +29,17 @@ namespace CarShop.AdminService.Repositories
             await _db.SaveChangesAsync();
             _db.Entry(refreshSession).State = EntityState.Detached;
         }
+
+        public async Task RemoveAllSessionsOfAdminAsync(long id)
+        {
+            RefreshSession[] refreshSessions = await _db.RefreshSessions
+                .Where(session => session.AdminId == id).ToArrayAsync();
+
+            if (refreshSessions.Length > 0)
+            {
+                _db.RefreshSessions.RemoveRange(refreshSessions);
+                await _db.SaveChangesAsync();
+            }
+        }
     }
 }
