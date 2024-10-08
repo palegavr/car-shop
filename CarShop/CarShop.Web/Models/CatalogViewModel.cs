@@ -1,4 +1,5 @@
 ﻿using CarShop.ServiceDefaults.CommonTypes;
+using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 
 namespace CarShop.Web.Models
 {
@@ -8,5 +9,6 @@ namespace CarShop.Web.Models
         public bool IsSearchResultsPage { get; set; } = false;
 		public int CurrentPage { get; set; } = 1;
 		public int PagesCount { get; set; } = 1;
+        public GetCarsOptions GetCarsOptions { get; set; }
     }
 }

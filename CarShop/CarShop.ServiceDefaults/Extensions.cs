@@ -1,3 +1,4 @@
+using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +15,28 @@ namespace Microsoft.Extensions.Hosting;
 // To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
 public static class Extensions
 {
-    public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
+    public static string ToDisplayString(this SortBy sortBy)
+    {
+        return sortBy switch
+        {
+            SortBy.Brand => "Марка",
+            SortBy.EngineCapacity => "Объём двигателя",
+            SortBy.FuelType => "Вид топлива",
+            SortBy.CorpusType => "Вид корпуса",
+            SortBy.PriceForStandartConfiguration => "Цена"
+        };
+    }
+
+	public static string ToDisplayString(this SortType sortType)
+	{
+		return sortType switch
+		{
+			SortType.Ascending => "По возрастанию",
+            SortType.Descending => "По убыванию"
+		};
+	}
+
+	public static IHostApplicationBuilder AddServiceDefaults(this IHostApplicationBuilder builder)
     {
         builder.ConfigureOpenTelemetry();
 

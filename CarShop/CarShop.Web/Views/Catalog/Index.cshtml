@@ -1,6 +1,32 @@
 ﻿@model CatalogViewModel
+<div class="text-end pt-2">
+	<div class="btn-group">
+		@* Критерий сортировки *@
+		<div class="dropdown me-2">
+			<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+				@Model.GetCarsOptions.SortBy!.Value.ToDisplayString()
+			</button>
+			<ul class="dropdown-menu">
+				<li><a class="dropdown-item" href="#" onclick="setSortBy(0, event)">Марка</a></li>
+				<li><a class="dropdown-item" href="#" onclick="setSortBy(1, event)">Объём двигателя</a></li>
+				<li><a class="dropdown-item" href="#" onclick="setSortBy(2, event)">Вид топлива</a></li>
+				<li><a class="dropdown-item" href="#" onclick="setSortBy(3, event)">Вид корпуса</a></li>
+				<li><a class="dropdown-item" href="#" onclick="setSortBy(4, event)">Цена</a></li>
+			</ul>
+		</div>
+		@* Тип сортировки *@
+		<div class="dropdown">
+			<button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+				@Model.GetCarsOptions.SortType!.Value.ToDisplayString()
+			</button>
+			<ul class="dropdown-menu">
+				<li><a class="dropdown-item" href="#" onclick="setSortType(0, event)">По возрастанию</a></li>
+				<li><a class="dropdown-item" href="#" onclick="setSortType(1, event)">По убыванию</a></li>
+			</ul>
+		</div>
+	</div>
+</div>
 
-@* Блок поиска и сортировки *@
 
 <div class="container text-center">
 	<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 my-2 g-4">
@@ -51,4 +77,23 @@
 			}
 		</div>
 	</div>
+}
+
+@section Scripts
+{
+	<script>
+		function setSortBy(sortByIndex, event) {
+			event.preventDefault();
+			const currentUrl = new URL(window.location.href);
+			currentUrl.searchParams.set('sort_by', sortByIndex.toString());
+			window.location.href = currentUrl.toString();
+		}
+
+		function setSortType(sortTypeIndex, event) {
+			event.preventDefault();
+			const currentUrl = new URL(window.location.href);
+			currentUrl.searchParams.set('sort_type', sortTypeIndex.toString());
+			window.location.href = currentUrl.toString();
+		}
+	</script>
 }

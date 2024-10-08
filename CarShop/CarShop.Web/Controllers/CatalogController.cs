@@ -71,7 +71,8 @@ namespace CarShop.Web.Controllers
                 Cars = cars,
                 CurrentPage = page,
                 PagesCount = pagesCount,
-                IsSearchResultsPage = containsSearchParameters
+                IsSearchResultsPage = containsSearchParameters,
+                GetCarsOptions = getCarsOptions,
             };
             return View(viewModel);
         }
