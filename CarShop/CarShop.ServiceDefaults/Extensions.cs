@@ -19,11 +19,11 @@ public static class Extensions
     {
         return sortBy switch
         {
-            SortBy.Brand => "Марка",
-            SortBy.EngineCapacity => "Объём двигателя",
-            SortBy.FuelType => "Вид топлива",
-            SortBy.CorpusType => "Вид корпуса",
-            SortBy.PriceForStandartConfiguration => "Цена"
+            SortBy.Brand => "РњР°СЂРєР°",
+            SortBy.EngineCapacity => "РћР±СЉС‘Рј РґРІРёРіР°С‚РµР»СЏ",
+            SortBy.FuelType => "Р’РёРґ С‚РѕРїР»РёРІР°",
+            SortBy.CorpusType => "Р’РёРґ РєРѕСЂРїСѓСЃР°",
+            SortBy.PriceForStandartConfiguration => "Р¦РµРЅР°"
         };
     }
 
@@ -31,8 +31,8 @@ public static class Extensions
 	{
 		return sortType switch
 		{
-			SortType.Ascending => "По возрастанию",
-            SortType.Descending => "По убыванию"
+			SortType.Ascending => "РџРѕ РІРѕР·СЂР°СЃС‚Р°РЅРёСЋ",
+            SortType.Descending => "РџРѕ СѓР±С‹РІР°РЅРёСЋ"
 		};
 	}
 

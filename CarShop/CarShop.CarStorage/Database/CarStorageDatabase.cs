@@ -11,7 +11,7 @@ namespace CarShop.CarStorage.Database
         {
             string host = "db";
             int port = 5432;
-            string database = "testdb";
+            string database = "carstoragedb";
             string username = "postgres";
             string password = "123";
 			optionsBuilder.UseNpgsql($"Host={host};Port={port};Database={database};Username={username};Password={password}");

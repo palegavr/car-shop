@@ -1,6 +1,7 @@
 
 using CarShop.AdminService.Database;
 using CarShop.AdminService.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarShop.AdminService;
 
@@ -37,9 +38,29 @@ public class Program
 
         app.UseAuthorization();
 
+		WaitUntilMigrationDone().Wait();
 
-        app.MapControllers();
+		app.MapControllers();
 
         app.Run();
     }
+
+	private static async Task WaitUntilMigrationDone()
+	{
+		while (true)
+		{
+			try
+			{
+				using (var db = new AdminServiceDatabase())
+				{
+					db.Database.Migrate();
+				}
+				break;
+			}
+			catch { }
+
+			await Task.Delay(2000);
+		}
+
+	}
 }
