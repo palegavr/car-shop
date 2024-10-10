@@ -20,8 +20,7 @@ namespace CarShop.CarStorage.Controllers
         {
             carForAdding.Id = 0;
             await _carsRepository.AddCarAsync(carForAdding);
-            Car carAfterAdd = (await _carsRepository.GetCarByIdAsync(carForAdding.Id))!;
-            return Ok(carAfterAdd);
+            return Ok(carForAdding);
         }
 
         [HttpPatch]
@@ -31,8 +30,7 @@ namespace CarShop.CarStorage.Controllers
             [FromBody] UpdateCarRequest updateCarRequest)
         {
             await _carsRepository.UpdateCarAsync(id, updateCarRequest);
-            Car carAfterUpdate = (await _carsRepository.GetCarByIdAsync(id))!;
-            return Ok(carAfterUpdate);
+            return Ok();
         }
 
         [HttpDelete]
