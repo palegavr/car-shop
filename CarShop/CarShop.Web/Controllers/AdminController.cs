@@ -14,6 +14,13 @@ namespace CarShop.Web.Controllers
 	{
 		public static readonly string[] ALLOWED_IMAGES_EXTENTIONS = ["jpg", "jpeg", "png"];
 
+		[HttpGet]
+		[Route("addcar")]
+		public async Task<IActionResult> AddCarAsync()
+		{
+			return View();
+		}
+
 		[HttpPost]
 		[Route("addcar")]
 		public async Task<IActionResult> AddCarAsync([FromForm] AddCarFormModel addCarFormModel)
@@ -61,6 +68,7 @@ namespace CarShop.Web.Controllers
 			return Redirect($"/catalog/{carInDatabase.Id}");
 		}
 
+		[NonAction]
 		private bool HaveAllowedImageExtention(AddCarFormModel addCarFormModel)
 		{
 			if (addCarFormModel.Image is not null &&
@@ -79,6 +87,7 @@ namespace CarShop.Web.Controllers
 			return true;
 		}
 
+		[NonAction]
 		private bool HaveAllowedImageExtention(IFormFile formFile)
 		{
 			var extention = Path.GetExtension(formFile.FileName);
