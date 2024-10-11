@@ -3,6 +3,8 @@
 
 <form method="post" enctype="multipart/form-data" oninput="updateFuelTypeHidden()" onsubmit="return validateForm()">
 	<div class="container p-3 my-3 border border-1 rounded rounded-3 shadow" style="max-width: 700px">
+		<h1 class="text-center">Добавление товара</h1>
+		<hr />
 		@* Марка *@
 		<div class="mb-3">
 			<label for="brand_input" class="form-label">Марка</label>
@@ -52,7 +54,7 @@
 		<div class="mb-3">
 			<label for="corpus_type_select" class="form-label">Вид корпуса</label>
 			<select name="corpus_type" id="corpus_type_select" class="form-select"
-					onselect="unsetIsInvalidState(this)">
+					oninput="unsetIsInvalidState(this)">
 				<option disabled selected value="">Выберите вид корпуса</option>
 				<option value="0">Седан</option>
 				<option value="1">Хэтчбек</option>
@@ -172,10 +174,11 @@
 			}
 		}
 
-		function inputIsMoreThanValidation(input, min, onlyInts) {
+		function inputIsMoreThanValidation(input, min, onlyInts, inclusive) {
 			input.value = input.value.trim();
 			const value = parseFloat(input.value.replace(',', '.'));
-			if (isNaN(value) || value <= min ||
+			if (isNaN(value) ||
+				(inclusive ? value < min : value <= min) ||
 				(onlyInts ? !Number.isInteger(value) : false)) {
 				input.classList.add('is-invalid')
 			} else {
@@ -236,7 +239,7 @@
 
 		function validateCount() {
 			const countInput = document.getElementById("count_input");
-			inputIsMoreThanValidation(countInput, 0, true);
+			inputIsMoreThanValidation(countInput, 0, true, true);
 		}
 	</script>
 }
