@@ -91,7 +91,7 @@ namespace CarShop.Web.Controllers
 		private bool HaveAllowedImageExtention(IFormFile formFile)
 		{
 			var extention = Path.GetExtension(formFile.FileName);
-			return extention != "" && ALLOWED_IMAGES_EXTENTIONS.Contains(extention.Substring(1));
+			return extention != "" && ALLOWED_IMAGES_EXTENTIONS.Contains(extention.Substring(1).ToLower());
 		}
 
 		[NonAction]

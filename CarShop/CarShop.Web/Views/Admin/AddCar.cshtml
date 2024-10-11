@@ -102,13 +102,21 @@
 		</div>
 		@* Картинка для /catalog *@
 		<div class="mb-3">
-			<label for="image_input" class="form-label">Картинка для /catalog</label>
-			<input class="form-control" name="image" accept=".jpg, .jpeg, .png" type="file" id="image_input">
+			<label for="image_input" class="form-label">Картинка для <span class="fw-bold">/catalog</span></label>
+			<input class="form-control" name="image" accept=".jpg, .jpeg, .png" type="file" id="image_input"
+			       onchange="validateFileInput(this)">
+			<div class="invalid-feedback">
+				Допустимые форматы: .jpg, .jpeg, .png
+			</div>
 		</div>
 		@* Картинки для /catalog/{id} *@
 		<div class="mb-3">
-			<label for="big_images_input" class="form-label">Картинки для /catalog/{id}</label>
-			<input class="form-control" name="big_images" accept=".jpg, .jpeg, .png" type="file" id="big_images_input" multiple>
+			<label for="big_images_input" class="form-label">Картинки для <span class="fw-bold">/catalog/{id}</span></label>
+			<input class="form-control" name="big_images" accept=".jpg, .jpeg, .png" type="file" id="big_images_input"
+			       onchange="validateFileInput(this)" multiple>
+			<div class="invalid-feedback">
+				Допустимые форматы: .jpg, .jpeg, .png
+			</div>
 		</div>
 
 		<input type="submit" class="btn btn-success w-100" value="Добавить" />
@@ -162,6 +170,8 @@
 			validateCorpusType();
 			validateFuelType();
 			validateCount();
+			validateFileInput(imageInput);
+			validateFileInput(bigImagesInput);
 
 			return document.querySelectorAll('.is-invalid').length === 0;
 		}
@@ -240,6 +250,20 @@
 		function validateCount() {
 			const countInput = document.getElementById("count_input");
 			inputIsMoreThanValidation(countInput, 0, true, true);
+		}
+		
+		function validateFileInput(input) {
+			const allowedExtensions = ['jpg', 'jpeg', 'png'];
+			for (const file of input.files) {
+				const fileExtension = file.name.split('.').pop().toLowerCase();
+				if (!allowedExtensions.includes(fileExtension)) {
+					input.classList.add('is-invalid');
+					input.value = ''; // очищение списка выбранных файлов
+					return;
+				}
+			}
+
+			input.classList.remove('is-invalid');
 		}
 	</script>
 }
