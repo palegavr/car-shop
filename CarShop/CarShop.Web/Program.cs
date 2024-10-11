@@ -1,3 +1,4 @@
+using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.Web.ModelBuilders;
 
@@ -17,6 +18,7 @@ public class Program
 		});
 
         builder.Services.AddHttpClient<CarStorageClient>(CarStorageClient.ConfigureClient);
+        builder.Services.AddHttpClient<AdminServiceClient>(AdminServiceClient.ConfigureClient);
 
         var app = builder.Build();
 

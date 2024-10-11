@@ -78,10 +78,10 @@ namespace CarShop.AdminService.Controllers
                 ExpiresIn = refreshTokenExpires,
             });
 
-            return Ok(new
+            return Ok(new TokensPairResponce
             {
-                refresh_token = tokensPair.RefreshToken,
-                access_token = tokensPair.AccessToken,
+                AccessToken = tokensPair.AccessToken,
+                RefreshToken = tokensPair.RefreshToken,
             });
         }
 
@@ -105,10 +105,10 @@ namespace CarShop.AdminService.Controllers
             refreshSession.ExpiresIn = refreshTokenExpires;
             await _refreshSessionsRepository.UpdateSessionAsync(refreshSession);
 
-            return Ok(new
+            return Ok(new TokensPairResponce
             {
-                refresh_token = tokensPair.RefreshToken,
-                access_token = tokensPair.AccessToken,
+                AccessToken = tokensPair.AccessToken,
+                RefreshToken = tokensPair.RefreshToken,
             });
         }
 

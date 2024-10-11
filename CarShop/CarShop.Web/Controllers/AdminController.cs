@@ -5,12 +5,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Net;
+using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
+using CarShop.Web.Models;
+using CarShop.Web.Models.Admin;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace CarShop.Web.Controllers
 {
 	[Route("[controller]")]
-	public class AdminController(CarStorageClient _carStorageClient) : Controller
+	public class AdminController(CarStorageClient _carStorageClient, AdminServiceClient _adminServiceClient) : Controller
 	{
 		public static readonly string[] ALLOWED_IMAGES_EXTENTIONS = ["jpg", "jpeg", "png"];
 
@@ -68,12 +72,61 @@ namespace CarShop.Web.Controllers
 			return Redirect($"/catalog/{carInDatabase.Id}");
 		}
 
+		[HttpGet]
+		[Route("login")]
+		public async Task<IActionResult> LoginAsync()
+		{
+			return View(new LoginViewModel());
+		}
+		
+		[HttpPost]
+		[Route("login")]
+		public async Task<IActionResult> LoginAsync(
+			[FromForm(Name = "email")] string login, 
+			[FromForm(Name = "password")] string password)
+		{
+			var responce = await _adminServiceClient.LoginAsync(login, password);
+			if (responce.StatusCode == HttpStatusCode.OK)
+			{
+				TokensPairResponce tokensPairResponce 
+					= (await responce.Content.ReadFromJsonAsync<TokensPairResponce>())!;
+				
+				var cookieOptionsRefresh = new CookieOptions
+				{
+					HttpOnly = true,
+					SameSite = SameSiteMode.Strict,
+					MaxAge = TimeSpan.FromDays(30)
+				};
+				
+				var cookieOptionsAccess = new CookieOptions
+				{
+					HttpOnly = true,
+					SameSite = SameSiteMode.Strict,
+					MaxAge = TimeSpan.FromMinutes(3)
+				};
+				
+				Response.Cookies.Append("refresh_token", tokensPairResponce.RefreshToken, cookieOptionsRefresh);
+				Response.Cookies.Append("access_token", tokensPairResponce.AccessToken, cookieOptionsAccess);
+				return Redirect("/admin");
+			}
+			else
+			{
+				var viewModel = new LoginViewModel
+				{
+					ErrorMessage = "Не удалось войти в аккаунт.",
+					Login = login,
+					Password = password
+				};
+				return View(viewModel);
+			}
+		}
+
 		[NonAction]
 		private bool HaveAllowedImageExtention(AddCarFormModel addCarFormModel)
 		{
 			if (addCarFormModel.Image is not null &&
 				!HaveAllowedImageExtention(addCarFormModel.Image))
-					return false;
+				return false;
 
 			if (addCarFormModel.BigImages is not null)
 			{
