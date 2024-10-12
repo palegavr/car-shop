@@ -41,5 +41,11 @@ namespace CarShop.AdminService.Repositories
                 await _db.SaveChangesAsync();
             }
         }
+
+        public async Task DeleteSessionAsync(long id)
+        {
+            _db.RefreshSessions.Remove(new RefreshSession { Id = id });
+            await _db.SaveChangesAsync();
+        }
     }
 }

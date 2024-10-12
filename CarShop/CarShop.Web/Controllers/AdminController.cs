@@ -9,6 +9,7 @@ using System.Net;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.Web.Models;
 using CarShop.Web.Models.Admin;
+using Microsoft.AspNetCore.Authorization;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace CarShop.Web.Controllers
@@ -18,6 +19,7 @@ namespace CarShop.Web.Controllers
 	{
 		public static readonly string[] ALLOWED_IMAGES_EXTENTIONS = ["jpg", "jpeg", "png"];
 
+		[Authorize]
 		[HttpGet]
 		[Route("addcar")]
 		public async Task<IActionResult> AddCarAsync()
@@ -25,6 +27,7 @@ namespace CarShop.Web.Controllers
 			return View();
 		}
 
+		[Authorize]
 		[HttpPost]
 		[Route("addcar")]
 		public async Task<IActionResult> AddCarAsync([FromForm] AddCarFormModel addCarFormModel)
@@ -91,22 +94,8 @@ namespace CarShop.Web.Controllers
 				TokensPairResponce tokensPairResponce 
 					= (await responce.Content.ReadFromJsonAsync<TokensPairResponce>())!;
 				
-				var cookieOptionsRefresh = new CookieOptions
-				{
-					HttpOnly = true,
-					SameSite = SameSiteMode.Strict,
-					MaxAge = TimeSpan.FromDays(30)
-				};
-				
-				var cookieOptionsAccess = new CookieOptions
-				{
-					HttpOnly = true,
-					SameSite = SameSiteMode.Strict,
-					MaxAge = TimeSpan.FromMinutes(3)
-				};
-				
-				Response.Cookies.Append("refresh_token", tokensPairResponce.RefreshToken, cookieOptionsRefresh);
-				Response.Cookies.Append("access_token", tokensPairResponce.AccessToken, cookieOptionsAccess);
+				Response.Cookies.SetAccessTokenCookie(tokensPairResponce.AccessToken);
+				Response.Cookies.SetRefreshTokenCookie(tokensPairResponce.RefreshToken);
 				return Redirect("/admin");
 			}
 			else

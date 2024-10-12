@@ -14,6 +14,15 @@ public class AdminServiceClient(HttpClient _httpClient)
             Password = password
         }, cancellationToken);
     }
+
+    public async Task<HttpResponseMessage> UpdateTokensAsync(string refreshToken,
+        CancellationToken cancellationToken = default)
+    {
+        return await _httpClient.PostAsJsonAsync("api/admin/updateTokens", new UpdateTokensRequest
+            {
+                RefreshToken = refreshToken
+            }, cancellationToken);
+    }
     
     public static void ConfigureClient(HttpClient httpClient)
     {

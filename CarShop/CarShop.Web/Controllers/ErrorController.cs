@@ -9,6 +9,8 @@ namespace CarShop.Web.Controllers
 		{
 			if (code == StatusCodes.Status404NotFound)
 				return NotFound404();
+			else if (code == StatusCodes.Status401Unauthorized)
+				return Redirect("/admin/login");
 
 			return View();
 		}

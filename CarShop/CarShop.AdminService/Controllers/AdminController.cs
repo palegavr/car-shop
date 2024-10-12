@@ -92,9 +92,12 @@ namespace CarShop.AdminService.Controllers
             RefreshSession? refreshSession = await _refreshSessionsRepository.GetByRefreshTokenAsync(updateTokensRequest.RefreshToken);
 
             if (refreshSession is null ||
-                refreshSession.IsExpired ||
-                TokenValidator.ValidateToken(updateTokensRequest.RefreshToken) is null)
+                refreshSession.IsExpired)
             {
+                if (refreshSession?.IsExpired ?? false)
+                {
+                    await _refreshSessionsRepository.DeleteSessionAsync(refreshSession.Id);
+                }
                 return Unauthorized();
             }
 

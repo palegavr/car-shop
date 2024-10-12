@@ -14,7 +14,7 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.AdminService
 
     public class TokenValidator
     {
-        private static readonly TokenValidationParameters _validationParameters = new TokenValidationParameters
+        public static readonly TokenValidationParameters ValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidIssuer = AuthOptions.ISSUER,
@@ -23,7 +23,8 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.AdminService
             ValidAudience = AuthOptions.AUDIENCE,
 
             ValidateLifetime = true,
-
+            ClockSkew = TimeSpan.Zero,
+            
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
         };
@@ -32,7 +33,7 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.AdminService
         {            
             ClaimsPrincipal claimsPrincipal = 
                 new JwtSecurityTokenHandler()
-                .ValidateToken(token, _validationParameters, out SecurityToken validatedToken);
+                .ValidateToken(token, ValidationParameters, out SecurityToken validatedToken);
 
             if (validatedToken is JwtSecurityToken jwtToken &&
                 jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
