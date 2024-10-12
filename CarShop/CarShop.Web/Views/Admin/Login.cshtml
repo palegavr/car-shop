@@ -1,7 +1,11 @@
 ﻿@model CarShop.Web.Models.Admin.LoginViewModel
 
 @* Форма входа *@
-
-<div>Error: @Model.ErrorMessage</div>
-<div>Login: @Model.Login</div>
-<div>Password: @Model.Password</div>
+<form method="post">
+    <span>Email: </span><input type="text" name="email" value="@Model.Login">
+    <br/>
+    <span>Password: </span><input type="password" name="password" value="@Model.Password">
+    <br/>
+    <input type="submit" value="Login">
+    <div>Error: @Model.ErrorMessage</div>
+</form>

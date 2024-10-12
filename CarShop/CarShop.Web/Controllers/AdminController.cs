@@ -19,6 +19,11 @@ namespace CarShop.Web.Controllers
 	{
 		public static readonly string[] ALLOWED_IMAGES_EXTENTIONS = ["jpg", "jpeg", "png"];
 
+		public IActionResult Index()
+		{
+			return RedirectToAction("AddCar");
+		}
+
 		[Authorize]
 		[HttpGet]
 		[Route("addcar")]
