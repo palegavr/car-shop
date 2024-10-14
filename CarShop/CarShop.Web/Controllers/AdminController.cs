@@ -1,5 +1,4 @@
-﻿using CarShop.ServiceDefaults.CommonTypes;
-using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
+﻿using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;

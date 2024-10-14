@@ -1,5 +1,4 @@
 ﻿using CarShop.CarStorage.Database;
-using CarShop.ServiceDefaults.CommonTypes;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -136,10 +135,21 @@ namespace CarShop.CarStorage.Repositories
 
 			return query;
         }
-        public async Task<Car?> GetCarByIdAsync(long id)
+        public async Task<Car?> GetCarByIdAsync(long id, bool withAvaliableOptions = false)
         {
-            Car? car = await _db.Cars
-                .SingleOrDefaultAsync(car => car.Id == id);
+            Car? car = null;
+            if (withAvaliableOptions)
+            {
+                car = await _db.Cars
+                    .Include(c => c.AdditionalCarOptions)
+                    .SingleOrDefaultAsync(c => c.Id == id);
+            }
+            else
+            {
+                car = await _db.Cars
+                    .SingleOrDefaultAsync(c => c.Id == id);
+            }
+
             if (car is not null)
                 _db.Entry(car).State = EntityState.Detached;
             return car;

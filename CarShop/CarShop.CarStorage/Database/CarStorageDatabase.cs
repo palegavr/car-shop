@@ -1,4 +1,4 @@
-﻿using CarShop.ServiceDefaults.CommonTypes;
+﻿using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarShop.CarStorage.Database

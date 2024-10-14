@@ -1,5 +1,4 @@
-﻿using CarShop.ServiceDefaults.CommonTypes;
-using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
+﻿using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 
 namespace CarShop.Web.Models
 {

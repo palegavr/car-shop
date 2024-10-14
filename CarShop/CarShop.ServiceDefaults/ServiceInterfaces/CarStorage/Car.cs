@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
-namespace CarShop.ServiceDefaults.CommonTypes
+namespace CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
 {
     public class Car
     {
@@ -21,6 +16,7 @@ namespace CarShop.ServiceDefaults.CommonTypes
         public int Count { get; set; }
         public string ImageUrl { get; set; }
         public string[] BigImageURLs { get; set; } = [];
+        public List<AdditionalCarOption> AdditionalCarOptions { get; set; } = new();
 
         [JsonIgnore] public double PriceForStandardConfigurationWithTax => PriceForStandartConfiguration + TaxForPriceForStandardConfiguration;
         [JsonIgnore] public double TaxForPriceForStandardConfiguration => PriceForStandartConfiguration * (SALE_TAX / 100);

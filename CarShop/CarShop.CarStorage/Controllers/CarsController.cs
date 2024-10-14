@@ -1,5 +1,4 @@
 ﻿using CarShop.CarStorage.Repositories;
-using CarShop.ServiceDefaults.CommonTypes;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -45,7 +44,7 @@ namespace CarShop.CarStorage.Controllers
         [Route("{id}")]
         public async Task<IActionResult> GetCarAsync([FromRoute(Name = "id")] long id)
         {
-            Car? car = await _carsRepository.GetCarByIdAsync(id);
+            Car? car = await _carsRepository.GetCarByIdAsync(id, withAvaliableOptions: true);
             return car is null ? NotFound() : Ok(car);
         }
 
