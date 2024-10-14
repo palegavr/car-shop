@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Text.Json;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.Web.Models;
 using CarShop.Web.Models.Admin;
@@ -36,12 +37,18 @@ namespace CarShop.Web.Controllers
 		[Route("addcar")]
 		public async Task<IActionResult> AddCarAsync([FromForm] AddCarFormModel addCarFormModel)
 		{
+			var additionalCarOptions = addCarFormModel.AdditionalCarOptions;
 			if (!(Request.ContentType?.StartsWith("multipart/form-data", StringComparison.InvariantCultureIgnoreCase) ?? false) ||
 				!ModelState.IsValid ||
-				!HaveAllowedImageExtention(addCarFormModel))
+				!HaveAllowedImageExtention(addCarFormModel)||
+				(additionalCarOptions.Length > 0 && additionalCarOptions[0].Id < 0) ||
+				additionalCarOptions // Есть элементы с одинаковым типом
+					.GroupBy(option => option.Type)
+					.Where(group => group.Count() > 1)
+					.Select(group => group.Key).Any())
 			{
 				return BadRequest();
-			};
+			}
 
 			string imageUrl = string.Empty;
 			if (addCarFormModel.Image is not null && addCarFormModel.Image.Length > 0)
@@ -74,6 +81,7 @@ namespace CarShop.Web.Controllers
 				Count = addCarFormModel.Count,
 				ImageUrl = imageUrl,
 				BigImageURLs = bigImageUrls.ToArray(),
+				AdditionalCarOptions = additionalCarOptions.ToList()
 			});
 
 			return Redirect($"/catalog/{carInDatabase.Id}");
@@ -209,5 +217,34 @@ namespace CarShop.Web.Controllers
 
 		[ModelBinder(Name = "big_images")]
 		public IFormFileCollection? BigImages { get; set; }
+		
+		[ModelBinder(Name = "additional_car_options")]
+		public string? AdditionalCarOptionsJson { get; set; }
+		[BindNever]
+		public AdditionalCarOption[] AdditionalCarOptions {
+			get
+			{
+				if (AdditionalCarOptionsJson is null)
+				{
+					return [];
+				}
+
+				try
+				{
+					return JsonSerializer.Deserialize<AdditionalCarOption[]>(AdditionalCarOptionsJson) ?? 
+					       [new()
+					       {
+						       Id = -1
+					       }];
+				}
+				catch (JsonException)
+				{
+					return [new()
+					{
+						Id = -1
+					}];
+				}
+			}
+		}
 	}
 }
