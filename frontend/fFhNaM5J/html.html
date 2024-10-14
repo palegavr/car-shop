@@ -1,0 +1,14 @@
+<form method="post" style="font-size: 8mm;">
+      <div class="container p-3 my-3 border border-1 rounded rounded-3 shadow position-absolute top-50 start-50 translate-middle" style="max-width: 700px;">
+      <div class="mb-3">
+        <label for="exampleFormControl1" class="form-label">Email</label>
+        <input type="email" class="form-control"  name="email" id="exampleFormControl1" value="@Model.Login" placeholder="Email">
+      </div>
+      <div class="mb-3">
+        <label for="exampleFormControl2" class="form-label">Password</label>
+        <input type="password" class="form-control"  name="password" id="exampleFormControl2" value="@Model.Password" placeholder="Password">
+      </div>
+      <input class="btn btn-primary w-100" type="submit" value="Login" style="font-size: 6mm;">
+      <div>Error: @Model.ErrorMessage</div>
+    </div>
+  </form>

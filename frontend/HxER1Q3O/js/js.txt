@@ -1,0 +1,62 @@
+ /* для вибору вида топлива*/
+      function onSearchFormSubmit(){
+        const a =window.document.getElementById("flexCheckDefault1");
+
+        const s =window.document.getElementById("flexCheckDefault2");
+
+        const d =window.document.getElementById("flexCheckDefault3");
+
+        const f =window.document.getElementById("flexCheckDefault4");
+        let fuel_type=0;
+        if(a.checked){
+          fuel_type|=a.value;
+        }
+        if(s.checked){
+          fuel_type|=s.value;
+        }
+        if(d.checked){
+          fuel_type|=d.value;
+        }
+        if(f.checked){
+          fuel_type|=f.value;
+        }
+        if(fuel_type>0){
+          window.document.getElementById("fuel_type_id").value=fuel_type;
+        }
+      }
+
+      /* Провірка на заповнення */
+      function check(){
+        const marka = window.document.getElementById("e1xampleFormControlInput1").value;
+        const obuammin = window.document.getElementById("e1xampleFormControlInput2").value;
+        const obuammax = window.document.getElementById("e1xampleFormControlInput3").value;
+        const benz = window.document.getElementById("flexCheckDefault1").checked;
+        const diez = window.document.getElementById("flexCheckDefault2").checked;
+        const elect = window.document.getElementById("flexCheckDefault3").checked;
+        const gas = window.document.getElementById("flexCheckDefault4").checked;
+        const sedan = window.document.getElementById("flexRadioDefault1").checked;
+        const hatchback = window.document.getElementById("flexRadioDefault2").checked;
+        const pricemin = window.document.getElementById("e1xampleFormControlInput4").value;
+        const pricemax = window.document.getElementById("e1xampleFormControlInput5").value;
+        
+        if(marka==""&& obuammax==""&& obuammin==""&&!benz&&!diez&&!elect&&!gas&&!sedan&&!hatchback&& pricemin==""&& pricemax==""){
+          window.document.getElementById("powyk").classList.add('disabled');
+
+        }
+        else{
+          
+          window.document.getElementById("powyk").classList.remove('disabled');
+        }
+      }
+
+      /* виключає радіо кнопку*/
+      var check1,check2;
+    function radiocheck(с) {
+        if (check1 != с) {
+            check2 = 0;
+            check1 = с
+        }
+        check2 ^= 1;
+        с.checked = check2
+        check();
+    }
