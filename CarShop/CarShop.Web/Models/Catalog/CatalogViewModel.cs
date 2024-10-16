@@ -1,6 +1,6 @@
 ﻿using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 
-namespace CarShop.Web.Models
+namespace CarShop.Web.Models.Catalog
 {
 	public class CatalogViewModel
 	{

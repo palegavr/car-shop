@@ -19,11 +19,3 @@ public class AdditionalCarOption
     [JsonRequired]
     public bool IsRequired { get; set; } = false;
 }
-
-public enum AdditionalCarOptionType
-{
-    AirConditioner,
-    HeatedDriversSeat,
-    SeatHeightAdjustment,
-    DifferentCarColor
-}

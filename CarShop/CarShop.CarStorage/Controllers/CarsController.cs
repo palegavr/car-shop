@@ -54,5 +54,14 @@ namespace CarShop.CarStorage.Controllers
             GetCarsResult result = await _carsRepository.GetCarsAsync(getCarsOptions);
             return Ok(result);
         }
+
+        [HttpPost]
+        [Route("addcarconfiguration")]
+        public async Task<IActionResult> AddConfiguration([FromBody] CarConfiguration carConfiguration)
+        {
+            carConfiguration.Id = Guid.Empty;
+            await _carsRepository.AddCarConfiguration(carConfiguration);
+            return Ok(carConfiguration);
+        }
     }
 }

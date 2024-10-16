@@ -1,0 +1,7 @@
+@model CarShop.Web.Models.Catalog.ConfigureViewModel
+
+<div>Car ID: @Model.Car.Id</div>
+@if (Model.AddedCarConfiguration is not null)
+{
+    <div>/configuration/@Model.AddedCarConfiguration.Id</div>
+}

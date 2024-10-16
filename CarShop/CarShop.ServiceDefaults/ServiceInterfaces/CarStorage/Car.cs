@@ -17,7 +17,7 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
         public string ImageUrl { get; set; }
         public string[] BigImageURLs { get; set; } = [];
         public List<AdditionalCarOption> AdditionalCarOptions { get; set; } = new();
-
+        public List<CarConfiguration> CarConfigurations { get; set; } = new();
         [JsonIgnore] public double PriceForStandardConfigurationWithTax => PriceForStandartConfiguration + TaxForPriceForStandardConfiguration;
         [JsonIgnore] public double TaxForPriceForStandardConfiguration => PriceForStandartConfiguration * (SALE_TAX / 100);
     }

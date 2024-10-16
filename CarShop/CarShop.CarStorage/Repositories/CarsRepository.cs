@@ -21,6 +21,13 @@ namespace CarShop.CarStorage.Repositories
             await _db.SaveChangesAsync();
             _db.Entry(carWithNewData).State = EntityState.Detached;
         }
+
+        public async Task AddCarConfiguration(CarConfiguration carConfiguration)
+        {
+            _db.CarConfigurations.Add(carConfiguration);
+            await _db.SaveChangesAsync();
+            _db.Entry(carConfiguration).State = EntityState.Detached;
+        }
         public async Task UpdateCarAsync(long id, UpdateCarRequest updateCarRequest)
         {
             Car car = new Car { Id = id };

@@ -6,6 +6,7 @@ namespace CarShop.CarStorage.Database
     public class CarStorageDatabase : DbContext
     {
         public DbSet<Car> Cars { get; set; }
+        public DbSet<CarConfiguration> CarConfigurations { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
