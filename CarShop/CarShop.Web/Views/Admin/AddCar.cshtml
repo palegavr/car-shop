@@ -1,7 +1,7 @@
 ﻿@{
 }
 
-<form method="post" enctype="multipart/form-data" oninput="updateFuelTypeHidden()" onsubmit="validateForm(event)">
+<form method="post" enctype="multipart/form-data" oninput="onFormInput()" onsubmit="validateForm(event)">
     <div class="container p-3 my-3 border border-1 rounded rounded-3 shadow" style="max-width: 700px">
         <h1 class="text-center">Добавление товара</h1>
         <hr/>
@@ -41,15 +41,6 @@
                 Заполните это поле.
             </div>
         </div>
-        @* Объём двигателя *@
-        <div class="mb-3">
-            <label for="engine_capacity_input" class="form-label">Объём двигателя <span class="form-text">(литры)</span></label>
-            <input type="text" name="engine_capacity" class="form-control" id="engine_capacity_input"
-                   placeholder="Введите объём двигателя" oninput="unsetIsInvalidState(this)">
-            <div class="invalid-feedback">
-                Введите положительное число.
-            </div>
-        </div>
         @* Вид корпуса *@
         <div class="mb-3">
             <label for="corpus_type_select" class="form-label">Вид корпуса</label>
@@ -65,32 +56,42 @@
         </div>
         @* Вид топлива *@
         <div class="mb-3">
-            <input type="hidden" id="fuel_type_value" name="fuel_type" value="0"/>
-            <label class="form-label">Вид топлива</label>
-            <div class="form-check form-switch">
-                <input class="form-check-input" value="1" type="checkbox" role="button" id="fuel_type_petrol"
-                       onchange="unsetIsInvalidState(this.parentElement)">
-                <label class="form-check-label" for="fuel_type_petrol">Бензин</label>
-            </div>
-            <div class="form-check form-switch">
-                <input class="form-check-input" value="2" type="checkbox" role="button" id="fuel_type_diesel"
-                       onchange="unsetIsInvalidState(document.querySelector('.form-check.form-switch'))">
-                <label class="form-check-label" for="fuel_type_diesel">Дизель</label>
-            </div>
-            <div class="form-check form-switch">
-                <input class="form-check-input" value="4" type="checkbox" role="button" id="fuel_type_gas"
-                       onchange="unsetIsInvalidState(document.querySelector('.form-check.form-switch'))">
-                <label class="form-check-label" for="fuel_type_gas">Газ</label>
-            </div>
-            <div class="form-check form-switch">
-                <input class="form-check-input" value="8" type="checkbox" role="button" id="fuel_type_electric"
-                       onchange="unsetIsInvalidState(document.querySelector('.form-check.form-switch'))">
-                <label class="form-check-label" for="fuel_type_electric">Электрика</label>
-            </div>
-            <div class="invalid-feedback">
-                Выберите хотябы один элемент.
-            </div>
+	        <input type="hidden" id="fuel_type_value" name="fuel_type" value="0"/>
+	        <label class="form-label">Вид топлива</label>
+	        <div class="form-check form-switch">
+		        <input class="form-check-input" value="1" type="checkbox" role="button" id="fuel_type_petrol"
+		               onchange="onFuelTypeCheckboxChecked()">
+		        <label class="form-check-label" for="fuel_type_petrol">Бензин</label>
+	        </div>
+	        <div class="form-check form-switch">
+		        <input class="form-check-input" value="2" type="checkbox" role="button" id="fuel_type_diesel"
+		               onchange="onFuelTypeCheckboxChecked()">
+		        <label class="form-check-label" for="fuel_type_diesel">Дизель</label>
+	        </div>
+	        <div class="form-check form-switch">
+		        <input class="form-check-input" value="4" type="checkbox" role="button" id="fuel_type_gas"
+		               onchange="onFuelTypeCheckboxChecked()">
+		        <label class="form-check-label" for="fuel_type_gas">Газ</label>
+	        </div>
+	        <div class="form-check form-switch">
+		        <input class="form-check-input" value="8" type="checkbox" role="button" id="fuel_type_electric"
+		               onchange="onFuelTypeCheckboxChecked()">
+		        <label class="form-check-label" for="fuel_type_electric">Электрика</label>
+	        </div>
+	        <div class="invalid-feedback">
+		        Выберите хотябы один элемент.
+	        </div>
         </div>
+	    @* Объём двигателя *@
+	    <div class="mb-3 invisible position-absolute">
+		    <label for="engine_capacity_input" class="form-label">Объём двигателя <span class="form-text">(литры)</span></label>
+		    <input type="text" name="engine_capacity" class="form-control" id="engine_capacity_input"
+		           placeholder="Введите объём двигателя" oninput="unsetIsInvalidState(this)">
+		    <div class="form-text invisible position-absolute">Значение этого поля не будет учитываться, так как у электромобилей нет этого параметра.</div>
+		    <div class="invalid-feedback">
+			    Введите положительное число.
+		    </div>
+	    </div>
         @* Количество единиц товара на складе *@
         <div class="mb-3">
             <label for="count_input" class="form-label">Количество единиц товара на складе</label>
@@ -168,6 +169,7 @@
 @section Scripts
 {
 	<script type="text/javascript">
+		
 		function unsetIsInvalidState(element) {
 			element.classList.remove('is-invalid');
 		}
@@ -175,6 +177,28 @@
 		function onAdditionalOptionCheckboxChange(element) {
 			const settingsDiv = document.getElementById(`${element.id.replace('_checkbox', '_settings')}`);
 			setDisplayNone(settingsDiv, element.checked);
+		}
+		
+		function onFormInput() {
+			updateFuelTypeHidden();
+		}
+		
+		function onFuelTypeCheckboxChecked() {
+			unsetIsInvalidState(document.querySelector('.form-check.form-switch'));
+			
+			const fuelTypeHidden = document.getElementById("fuel_type_value");
+			const engineCapacityInput = document.getElementById("engine_capacity_input");
+			const parent = engineCapacityInput.parentElement;
+			
+			if (fuelTypeHidden.value != 8 && fuelTypeHidden.value != 0) {
+				parent.classList.remove("invisible");
+				parent.classList.remove("position-absolute");
+			} else {
+				parent.classList.add("invisible");
+				parent.classList.add("position-absolute");
+				engineCapacityInput.value = '';
+				engineCapacityInput.classList.remove('is-invalid');
+			}
 		}
 		
 		function validateAdditionalOptionsGroup() {
@@ -257,6 +281,11 @@
 			validateAdditionalOptionsGroup();
 			updateFuelTypeHidden();
 			updateAdditionalOptionsHidden();
+
+			if (engineCapacityInput.parentElement.classList.contains('invisible')) {
+				engineCapacityInput.value = '0';
+				engineCapacityInput.classList.remove('is-invalid');
+			}
 			
 			if (document.querySelectorAll('.is-invalid').length !== 0) {
 				event.preventDefault();
@@ -367,5 +396,6 @@
 				airConditionerOption.insertAdjacentHTML('afterend', newOption);
 			}
 		})
+	
 	</script>
 }

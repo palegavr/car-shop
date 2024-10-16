@@ -40,6 +40,7 @@ namespace CarShop.Web.Controllers
 			var additionalCarOptions = addCarFormModel.AdditionalCarOptions;
 			if (!(Request.ContentType?.StartsWith("multipart/form-data", StringComparison.InvariantCultureIgnoreCase) ?? false) ||
 				!ModelState.IsValid ||
+				(addCarFormModel.FuelType != FuelType.Electric && addCarFormModel.EngineCapacity == 0) ||
 				!HaveAllowedImageExtention(addCarFormModel)||
 				(additionalCarOptions.Length > 0 && additionalCarOptions[0].Id < 0) ||
 				additionalCarOptions // Есть элементы с одинаковым типом
@@ -196,7 +197,7 @@ namespace CarShop.Web.Controllers
 
 		[ModelBinder(Name = "engine_capacity")]
 		[Required]
-		[Range(0.0, double.MaxValue, MinimumIsExclusive = true)]
+		[Range(0.0, double.MaxValue)]
 		public double EngineCapacity { get; set; }
 
 		[ModelBinder(Name = "corpus_type")]
