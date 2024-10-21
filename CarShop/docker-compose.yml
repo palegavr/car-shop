@@ -12,6 +12,12 @@ services:
     build:
       context: .
       dockerfile: CarShop.CarStorage/Dockerfile
+      
+  carshop.fileservice:
+    image: ${DOCKER_REGISTRY-}carshop.fileservice
+    build:
+      context: .
+      dockerfile: CarShop.FileService/Dockerfile
 
   carshop.adminservice:
     image: ${DOCKER_REGISTRY-}carshopadminservice
@@ -19,6 +25,21 @@ services:
       context: .
       dockerfile: CarShop.AdminService/Dockerfile
 
+  carshop.apigateway:
+    image: ${DOCKER_REGISTRY-}carshop.apigateway
+    build:
+      context: .
+      dockerfile: CarShop.ApiGateway/Dockerfile
+
   db:
     image: postgres:17
 
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "80:80"
+    depends_on:
+      - carshop.web
+      - carshop.apigateway

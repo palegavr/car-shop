@@ -6,8 +6,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       #- ASPNETCORE_HTTPS_PORTS=8081
-    ports:
-      - "80:8080"
+    #ports:
+      #- "80:8080"
       #- "443:8081"
     volumes:
       - ./CarShop.Web/wwwroot:/app/wwwroot
@@ -16,12 +16,26 @@ services:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
       #- ASPNETCORE_HTTPS_PORTS=8081
+  carshop.fileservice:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      #- ASPNETCORE_HTTPS_PORTS=8081
+    volumes:
+      - ./CarShop.Web/wwwroot:/app/wwwroot
   carshop.adminservice:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_HTTP_PORTS=8080
-    ports:
-      - "1234:8080"
+    #ports:
+    #  - "1234:8080"
+  carshop.apigateway:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=8080
+      #- ASPNETCORE_HTTPS_PORTS=8081
+    #ports:
+    #  - "1235:8080"
   db:
     environment:
       - POSTGRES_PASSWORD=123

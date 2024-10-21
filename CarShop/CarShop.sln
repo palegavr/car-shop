@@ -14,6 +14,10 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarShop.AdminService", "CarShop.AdminService\CarShop.AdminService.csproj", "{2491B4E0-9DBE-4B4F-B841-858A3B829658}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarShop.FileService", "CarShop.FileService\CarShop.FileService.csproj", "{4E033EF6-11AB-4733-8CFF-DE560F750FAC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CarShop.ApiGateway", "CarShop.ApiGateway\CarShop.ApiGateway.csproj", "{29C3F653-5475-4E36-B906-13A870FEF82C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +48,14 @@ Global
 		{2491B4E0-9DBE-4B4F-B841-858A3B829658}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2491B4E0-9DBE-4B4F-B841-858A3B829658}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2491B4E0-9DBE-4B4F-B841-858A3B829658}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4E033EF6-11AB-4733-8CFF-DE560F750FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E033EF6-11AB-4733-8CFF-DE560F750FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E033EF6-11AB-4733-8CFF-DE560F750FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E033EF6-11AB-4733-8CFF-DE560F750FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29C3F653-5475-4E36-B906-13A870FEF82C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29C3F653-5475-4E36-B906-13A870FEF82C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29C3F653-5475-4E36-B906-13A870FEF82C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29C3F653-5475-4E36-B906-13A870FEF82C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
