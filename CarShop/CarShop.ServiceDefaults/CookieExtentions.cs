@@ -1,8 +1,9 @@
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
+using Microsoft.AspNetCore.Http;
 
-namespace CarShop.Web;
+namespace CarShop.ServiceDefaults;
 
-public static class Extentions
+public static class CookieExtentions
 {
 
     public static void SetRefreshTokenCookie(this IResponseCookies cookies, string refreshToken)

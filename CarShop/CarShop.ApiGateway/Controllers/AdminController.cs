@@ -1,14 +1,18 @@
 using System.Net.Mime;
+using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
+using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.ServiceDefaults.ServiceInterfaces.FileService;
 using Google.Protobuf.Compiler;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarShop.ApiGateway.Controllers;
 
-[ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class AdminController
-    (FileServiceClient _fileServiceClient): ControllerBase
+    (FileServiceClient _fileServiceClient,
+        CarStorageClient _carStorageClient): ControllerBase
 {
     [HttpPost]
     [Route("uploadimage")]
@@ -35,5 +39,42 @@ public class AdminController
         }
         
         return Ok(publicPathes);
+    }
+
+    [HttpPost]
+    [Route("editcar/{id:long}/process")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    public async Task<IActionResult> EditCarProcessAsync(
+        [FromRoute] long id,
+        [FromBody] CarEditProcessData carEditProcessData)
+    {
+        var additionalCarOptions = carEditProcessData.AdditionalCarOptions;
+        if (!ModelState.IsValid ||
+            (carEditProcessData.FuelType != FuelType.Electric && carEditProcessData.EngineCapacity == 0) ||
+            (additionalCarOptions.Length > 0 && additionalCarOptions[0].Id < 0) ||
+            additionalCarOptions // Есть элементы с одинаковым типом
+                .GroupBy(option => option.Type)
+                .Where(group => group.Count() > 1)
+                .Select(group => group.Key).Any())
+        {
+            return BadRequest();
+        }
+
+        long adminId = long.Parse(User.Claims.FirstOrDefault(claim => claim.Type == "id")?.Value ?? "-1");
+        if (adminId <= 0)
+        {
+            return Problem();
+        }
+
+        var carEditProcess = new CarEditProcess
+        {
+            AdminId = adminId,
+            CarId = id,
+            Process = carEditProcessData,
+        };
+
+        carEditProcess = await _carStorageClient.UpdateOrCreateCarEditProcessAsync(carEditProcess);
+        
+        return Ok();
     }
 }

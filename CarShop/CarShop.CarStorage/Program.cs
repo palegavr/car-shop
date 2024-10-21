@@ -21,6 +21,7 @@ public class Program
 
         builder.Services.AddDbContext<CarStorageDatabase>();
         builder.Services.AddScoped<CarsRepository>();
+        builder.Services.AddScoped<CarEditProcessesRepository>();
 
         var app = builder.Build();
 

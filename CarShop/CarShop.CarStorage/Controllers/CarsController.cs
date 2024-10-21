@@ -1,4 +1,5 @@
-﻿using CarShop.CarStorage.Repositories;
+﻿using System.Net.Mime;
+using CarShop.CarStorage.Repositories;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -7,8 +8,9 @@ namespace CarShop.CarStorage.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Consumes("application/json")]
-    public class CarsController(CarsRepository _carsRepository) : ControllerBase
+    [Consumes(MediaTypeNames.Application.Json)]
+    public class CarsController(
+        CarsRepository _carsRepository, CarEditProcessesRepository _carEditProcessesRepository) : ControllerBase
     {
 
 
@@ -62,6 +64,26 @@ namespace CarShop.CarStorage.Controllers
             carConfiguration.Id = Guid.Empty;
             await _carsRepository.AddCarConfiguration(carConfiguration);
             return Ok(carConfiguration);
+        }
+
+        [HttpPost]
+        [Route("update-or-create-car-edit-process")]
+        public async Task<IActionResult> UpdateOrCreateCarEditProcessAsync(CarEditProcess carEditProcess)
+        {
+            CarEditProcess? carEditProcessInDb = await _carEditProcessesRepository
+                .GetCarEditProcessByAdminIdAndCarId(carEditProcess.AdminId, carEditProcess.CarId);
+            
+            if (carEditProcessInDb is null)
+            {
+                await _carEditProcessesRepository.AddCarEditProcessAsync(carEditProcess);
+            }
+            else
+            {
+                carEditProcess.Id = carEditProcessInDb.Id;
+                await _carEditProcessesRepository.UpdateCarEditProcessAsync(carEditProcess);
+            }
+            
+            return Ok(carEditProcess);
         }
     }
 }

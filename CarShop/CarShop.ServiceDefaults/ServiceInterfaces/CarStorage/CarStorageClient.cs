@@ -93,6 +93,15 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
 		        .PostAsJsonAsync("/api/cars/addcarconfiguration", carConfiguration, cancellationToken);
 	        return (await responce.Content.ReadFromJsonAsync<CarConfiguration>(cancellationToken))!;
         }
+
+        public async Task<CarEditProcess> UpdateOrCreateCarEditProcessAsync(CarEditProcess carEditProcess,
+	        CancellationToken cancellationToken = default)
+        {
+	        var responce = await _httpClient
+		        .PostAsJsonAsync("/api/cars/update-or-create-car-edit-process", carEditProcess, cancellationToken);
+	        return (await responce.Content.ReadFromJsonAsync<CarEditProcess>(cancellationToken))!;
+        }
+        
         public static void ConfigureClient(HttpClient httpClient)
         {
             httpClient.BaseAddress = new Uri(BASE_ADDRESS);

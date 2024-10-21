@@ -7,7 +7,13 @@ namespace CarShop.CarStorage.Database
     {
         public DbSet<Car> Cars { get; set; }
         public DbSet<CarConfiguration> CarConfigurations { get; set; }
+        public DbSet<CarEditProcess> CarEditProcesses { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CarEditProcess>()
+                .OwnsOne(e => e.Process);
+        }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             string host = "db";
