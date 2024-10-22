@@ -2,7 +2,6 @@ using System.Net.Mime;
 using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.ServiceDefaults.ServiceInterfaces.FileService;
-using Google.Protobuf.Compiler;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -66,6 +65,11 @@ public class AdminController
             return Problem();
         }
 
+        if ((await _carStorageClient.GetCarAsync(id)) is null)
+        {
+            return NotFound();
+        }
+
         var carEditProcess = new CarEditProcess
         {
             AdminId = adminId,
@@ -73,7 +77,7 @@ public class AdminController
             Process = carEditProcessData,
         };
 
-        carEditProcess = await _carStorageClient.UpdateOrCreateCarEditProcessAsync(carEditProcess);
+        await _carStorageClient.UpdateOrCreateCarEditProcessAsync(carEditProcess);
         
         return Ok();
     }
