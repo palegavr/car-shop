@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using System.Security.Claims;
 using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.ServiceDefaults.ServiceInterfaces.FileService;
@@ -59,8 +60,8 @@ public class AdminController
             return BadRequest();
         }
 
-        long adminId = long.Parse(User.Claims.FirstOrDefault(claim => claim.Type == "id")?.Value ?? "-1");
-        if (adminId <= 0)
+        long? adminId = GetAdminIdFromClaimsPrincipal(User);
+        if (adminId is null)
         {
             return Problem();
         }
@@ -72,7 +73,7 @@ public class AdminController
 
         var carEditProcess = new CarEditProcess
         {
-            AdminId = adminId,
+            AdminId = adminId.Value,
             CarId = id,
             Process = carEditProcessData,
         };
@@ -80,5 +81,100 @@ public class AdminController
         await _carStorageClient.UpdateOrCreateCarEditProcessAsync(carEditProcess);
         
         return Ok();
+    }
+
+    [HttpPost]
+    [Route("editcar/{id:long}/applychanges")]
+    [Consumes(MediaTypeNames.Application.Json)]
+    public async Task<IActionResult> EditCarApplyChangesAsync([FromRoute] long id)
+    {
+        long? adminId = GetAdminIdFromClaimsPrincipal(User);
+        if (adminId is null)
+        {
+            return Problem();
+        }
+
+        CarEditProcess? carEditProcess = await _carStorageClient.GetCarEditProcessAsync(new()
+        {
+            AdminId = adminId.Value,
+            CarId = id
+        });
+
+        if (carEditProcess is null)
+        {
+            return NotFound();
+        }
+
+        if (!await _carStorageClient.UpdateCarAsync(id, new UpdateCarRequest
+            {
+                Brand = carEditProcess.Process.Brand,
+                Model = carEditProcess.Process.Model,
+                Color = carEditProcess.Process.Color,
+                Count = carEditProcess.Process.Count,
+                FuelType = carEditProcess.Process.FuelType,
+                EngineCapacity = carEditProcess.Process.EngineCapacity,
+                CorpusType = carEditProcess.Process.CorpusType,
+                PriceForStandartConfiguration = carEditProcess.Process.Price,
+                ImageUrl = carEditProcess.Process.Image,
+                BigImageURLs = carEditProcess.Process.BigImages,
+                AdditionalCarOptionsJson = carEditProcess.Process.AdditionalCarOptionsJson,
+            }))
+        {
+            return Problem();
+        }
+
+        if (!await _carStorageClient.DeleteCarEditProcessAsync(new DeleteEditProcessRequest
+            {
+                AdminId = adminId.Value,
+                CarId = id
+            }))
+        {
+            return Problem();
+        }
+
+        var carConfigurations = await _carStorageClient.GetCarConfigurationAsync(id);
+        if (carConfigurations is null)
+        {
+            return Problem();
+        }
+        
+        foreach (var carConfiguration in carConfigurations)
+        {
+            bool[] conditions = new bool[4];
+            
+            var airConditionerOption = carEditProcess.Process.AdditionalCarOptions
+                .SingleOrDefault(o => o.Type == AdditionalCarOptionType.AirConditioner);
+            var heatedDriversSeatOption = carEditProcess.Process.AdditionalCarOptions
+                .SingleOrDefault(o => o.Type == AdditionalCarOptionType.HeatedDriversSeat);
+            var seatHeightAdjustmentOption = carEditProcess.Process.AdditionalCarOptions
+                .SingleOrDefault(o => o.Type == AdditionalCarOptionType.SeatHeightAdjustment);
+            var differentCarColorOption = carEditProcess.Process.AdditionalCarOptions
+                .SingleOrDefault(o => o.Type == AdditionalCarOptionType.DifferentCarColor);
+            
+            conditions[0] = (carConfiguration.AirConditioner && airConditionerOption == null) ||
+                            (!carConfiguration.AirConditioner && airConditionerOption?.IsRequired == true);
+            conditions[1] = (carConfiguration.HeatedDriversSeat && heatedDriversSeatOption == null) ||
+                            (!carConfiguration.HeatedDriversSeat && heatedDriversSeatOption?.IsRequired == true);
+            conditions[2] = (carConfiguration.SeatHeightAdjustment && seatHeightAdjustmentOption == null) ||
+                            (!carConfiguration.SeatHeightAdjustment && seatHeightAdjustmentOption?.IsRequired == true);
+            conditions[3] = (carConfiguration.DifferentCarColor is not null && differentCarColorOption == null) ||
+                            (carConfiguration.DifferentCarColor is null && differentCarColorOption?.IsRequired == true);
+            
+            if (conditions.Contains(true))
+            {
+                carConfiguration.IsAvaliable = false;
+                await _carStorageClient.UpdateCarConfigurationAsync(carConfiguration);
+            }
+            
+        }
+        
+        return Ok();
+    }
+
+    [NonAction]
+    private static long? GetAdminIdFromClaimsPrincipal(ClaimsPrincipal claimsPrincipal)
+    {
+        return long.TryParse(claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "id")?.Value ?? "NotNumber",
+                out long adminId) ? adminId : null;
     }
 }

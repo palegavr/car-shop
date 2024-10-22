@@ -22,25 +22,24 @@ namespace CarShop.CarStorage.Repositories
             _db.Entry(carWithNewData).State = EntityState.Detached;
         }
 
-        public async Task AddCarConfiguration(CarConfiguration carConfiguration)
-        {
-            _db.CarConfigurations.Add(carConfiguration);
-            await _db.SaveChangesAsync();
-            _db.Entry(carConfiguration).State = EntityState.Detached;
-        }
         public async Task UpdateCarAsync(long id, UpdateCarRequest updateCarRequest)
         {
             Car car = new Car { Id = id };
             updateCarRequest.GetType().GetProperties()
-                .Where(prop => prop.GetValue(updateCarRequest) is not null)
+                .Where(prop => prop.GetValue(updateCarRequest) is not null &&
+                               prop.Name != nameof(updateCarRequest.AdditionalCarOptions))
                 .ToList().ForEach(updateCarRequestPropery =>
                 {
-                    var carProperty = car.GetType()
-                    .GetProperties()
-                    .Where(p => p.Name == updateCarRequestPropery.Name)
-                    .Single();
-                    carProperty.SetValue(car, updateCarRequestPropery.GetValue(updateCarRequest));
-                    _db.Entry(car).Property(carProperty.Name).IsModified = true;
+                    var carProperty = car
+                        .GetType()
+                        .GetProperties()
+                        .SingleOrDefault(p => p.Name == updateCarRequestPropery.Name);
+
+                    if (carProperty is not null)
+                    {
+                        carProperty.SetValue(car, updateCarRequestPropery.GetValue(updateCarRequest));
+                        _db.Entry(car).Property(carProperty.Name).IsModified = true;
+                    }
                 });
             await _db.SaveChangesAsync();
             _db.Entry(car).State = EntityState.Detached;
@@ -50,7 +49,6 @@ namespace CarShop.CarStorage.Repositories
             Car notDeletedCar = new Car { Id = carId };
             _db.Cars.Remove(notDeletedCar);
             await _db.SaveChangesAsync();
-            _db.Entry(notDeletedCar).State = EntityState.Detached;
         }
         public async Task<GetCarsResult> GetCarsAsync(GetCarsOptions? getCarsOptions = null)
         {

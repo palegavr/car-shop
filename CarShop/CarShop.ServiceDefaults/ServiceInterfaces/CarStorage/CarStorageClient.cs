@@ -85,6 +85,12 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
             var responce = await _httpClient.PostAsJsonAsync("/api/cars/add", car, cancellationToken);
             return (await responce.Content.ReadFromJsonAsync<Car>(cancellationToken))!;
         }
+        
+        public async Task<bool> UpdateCarAsync(long carId, UpdateCarRequest updateCarRequest, CancellationToken cancellationToken = default)
+        {
+	        var responce = await _httpClient.PatchAsJsonAsync($"/api/cars/{carId}", updateCarRequest, cancellationToken);
+	        return responce.IsSuccessStatusCode;
+        }
 
         public async Task<CarConfiguration> AddCarConfigurationAsync(
 	        CarConfiguration carConfiguration, CancellationToken cancellationToken = default)
@@ -94,6 +100,14 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
 	        return (await responce.Content.ReadFromJsonAsync<CarConfiguration>(cancellationToken))!;
         }
 
+        public async Task<bool> UpdateCarConfigurationAsync(
+	        CarConfiguration carConfiguration, CancellationToken cancellationToken = default)
+        {
+	        var responce = 
+		        await _httpClient.PutAsJsonAsync("/api/cars/update-car-configuration", carConfiguration, cancellationToken);
+	        return responce.IsSuccessStatusCode;
+        }
+
         public async Task<CarEditProcess> UpdateOrCreateCarEditProcessAsync(CarEditProcess carEditProcess,
 	        CancellationToken cancellationToken = default)
         {
@@ -101,6 +115,41 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
 		        .PostAsJsonAsync("/api/cars/update-or-create-car-edit-process", carEditProcess, cancellationToken);
 	        return (await responce.Content.ReadFromJsonAsync<CarEditProcess>(cancellationToken))!;
         }
+
+        public async Task<CarEditProcess?> GetCarEditProcessAsync(GetCarEditProcessRequest getCarEditProcessRequest,
+	        CancellationToken cancellationToken = default)
+        {
+	        var responce = await _httpClient
+		        .PostAsJsonAsync("/api/cars/get-car-edit-process", getCarEditProcessRequest, cancellationToken);
+	        return responce.IsSuccessStatusCode ?
+		        (await responce.Content.ReadFromJsonAsync<CarEditProcess>(cancellationToken))! :
+		        null;
+        }
+        
+        public async Task<bool> DeleteCarEditProcessAsync(DeleteEditProcessRequest deleteEditProcessRequest,
+	        CancellationToken cancellationToken = default)
+        {
+	        var responce = await _httpClient
+		        .PostAsJsonAsync("/api/cars/delete-car-edit-process", deleteEditProcessRequest, cancellationToken);
+	        return responce.IsSuccessStatusCode;
+        }
+        
+        public async Task<CarConfiguration[]?> GetCarConfigurationAsync(long carId,
+	        CancellationToken cancellationToken = default)
+        {
+	        try
+	        {
+		        var carConfigurations = await _httpClient
+			        .GetFromJsonAsync<CarConfiguration[]>($"/api/cars/{carId}/car-configurations", cancellationToken);
+
+		        return carConfigurations;
+	        }
+	        catch (HttpRequestException)
+	        {
+		        return null;
+	        }
+        }
+
         
         public static void ConfigureClient(HttpClient httpClient)
         {

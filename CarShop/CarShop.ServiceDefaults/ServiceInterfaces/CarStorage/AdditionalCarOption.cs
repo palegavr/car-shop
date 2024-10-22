@@ -18,4 +18,6 @@ public class AdditionalCarOption
     [JsonPropertyName("isRequired")]
     [JsonRequired]
     public bool IsRequired { get; set; } = false;
+    [JsonIgnore]
+    public long CarId { get; set; }
 }

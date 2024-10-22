@@ -20,6 +20,13 @@ public class CarEditProcessesRepository(CarStorageDatabase _db)
         _db.Entry(carEditProcess).State = EntityState.Detached;
     }
     
+    public async Task DeleteCarEditProcessAsync(long id)
+    {
+        CarEditProcess carEditProcess = new CarEditProcess { Id = id };
+        _db.CarEditProcesses.Remove(carEditProcess);
+        await _db.SaveChangesAsync();
+    }
+    
     public async Task<CarEditProcess?> GetCarEditProcessByAdminIdAndCarId(long adminId, long carId)
     {
         CarEditProcess? carEditProcess = await _db.CarEditProcesses
