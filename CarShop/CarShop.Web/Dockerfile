@@ -20,7 +20,17 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "./CarShop.Web.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
+FROM node:18 as web-frontend
+WORKDIR /app
+COPY ../web-frontend/package*.json ./
+RUN npm install
+COPY ../web-frontend .
+RUN npm run build
+RUN rm out/404.html
+
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY --from=web-frontend /app/out ./wwwroot/
 ENTRYPOINT ["dotnet", "CarShop.Web.dll"]
+

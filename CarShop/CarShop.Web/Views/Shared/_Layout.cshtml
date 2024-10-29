@@ -6,6 +6,7 @@
     <link rel="stylesheet" href="~/@(nameof(CarShop)).@(nameof(CarShop.Web)).styles.css" />
     <link rel="stylesheet" href="~/bootstrap/dist/css/bootstrap.min.css" />
     <title>@ViewData["Title"]</title>
+    @await RenderSectionAsync("HeadContent", required: false)
 </head>
 <body>
     <header>

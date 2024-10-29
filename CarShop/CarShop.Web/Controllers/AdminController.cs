@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Net;
 using System.Net.Mime;
+using System.Text.RegularExpressions;
 using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.ServiceDefaults.ServiceInterfaces.Web;
@@ -121,6 +122,29 @@ namespace CarShop.Web.Controllers
 				};
 				return View(viewModel);
 			}
+		}
+
+		[Authorize]
+		[HttpGet]
+		[Route("editcar")]
+		public async Task<IActionResult> EditCarAsync()
+		{
+			string html = await System.IO.File.ReadAllTextAsync("wwwroot/admin/editcar/id.html");
+
+			return View(new EditCarViewModel
+			{
+				BodyHtmlContent = ExtractTagContent(html, "body"), 
+				HeadHtmlContent = ExtractTagContent(html, "head")
+			});
+		}
+
+		[NonAction]
+		private static string ExtractTagContent(string html, string tagName)
+		{
+			// Регулярное выражение для поиска содержимого внутри указанного тега
+			var regex = new Regex($"<{tagName}.*?>(.*?)</{tagName}>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+			var match = regex.Match(html);
+			return match.Success ? match.Groups[1].Value : string.Empty;
 		}
 
 		[NonAction]
