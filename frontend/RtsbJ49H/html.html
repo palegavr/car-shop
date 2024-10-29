@@ -1,0 +1,91 @@
+
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal"  style="font-size: 8mm;">...</button>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="align-items: flex-end;width: max-content;transform: translate(0, -55px);">
+          <div class="modal-content" style="width: 350px;">
+            <div class="modal-header">
+              <h1 class="modal-title fs-3 ms-auto ">Перейти к странице</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body mx-auto" style="font-size: 9mm;">
+                <input type="number" id="pageInput" style="text-align: center; width: 320px;" value="@Model.CurrentPage" min="1" max="@Model.PagesCount" step="1" required="required">
+            </div>
+            <div id="error-message" style="color: red; display: none;text-align: center; font-size: 7mm"></div>
+            <div class="modal-footer" >
+                <button type="button" class="btn btn-primary" title="Увеличить" style="font-size: 8mm;" aria-label="Увеличить">+</button>
+                <button type="button" class="btn btn-primary" title="Уменьшить" style="font-size: 8mm;" aria-label="Уменьшить">-</button>
+              <button type="button" class="btn btn-primary" style="font-size: 8mm;" id="confirmButton">Виполнить</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+const input = document.getElementById('pageInput');
+const errorMessage = document.getElementById('error-message');
+const btnIncrease = document.querySelector('.modal-footer button[title="Увеличить"]');
+const btnDecrease = document.querySelector('.modal-footer button[title="Уменьшить"]');
+const confirmButton = document.getElementById('confirmButton');
+
+// Функція для перевірки значення
+function validateValue() {
+    const currentValue = parseInt(input.value, 10);
+    const minValue = parseInt(input.min, 10);
+    const maxValue = parseInt(input.max, 10);
+    
+    if (isNaN(currentValue) || currentValue < minValue || currentValue > maxValue) {
+        errorMessage.textContent = `Будь ласка, введіть ціле число від ${minValue} до ${maxValue}.`;
+        errorMessage.style.display = 'block';
+        return false;
+    } else {
+        errorMessage.style.display = 'none'; // Сховати повідомлення про помилку
+        return true;
+    }
+}
+
+// Додати обробник подій для кнопки "Увеличить"
+btnIncrease.addEventListener('click', function() {
+    let currentValue = parseInt(input.value, 10);
+    if (currentValue < parseInt(input.max, 10)) {
+        input.value = currentValue + 1; // Збільшити на 1
+    }
+    validateValue(); // Перевірка значення після зміни
+});
+
+// Додати обробник подій для кнопки "Уменьшить"
+btnDecrease.addEventListener('click', function() {
+    let currentValue = parseInt(input.value, 10);
+    if (currentValue > parseInt(input.min, 10)) {
+        input.value = currentValue - 1; // Зменшити на 1
+    }
+    validateValue(); // Перевірка значення після зміни
+});
+
+// Додати обробник подій для кнопки "Understood"
+confirmButton.addEventListener('click', function() {
+    if (validateValue()) {
+        const pageNumber = input.value; // Отримати значення зі значення введення
+const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('page', pageNumber);
+            window.location.href = currentUrl.toString();
+
+
+
+    }
+});
+
+// Додати валідацію для вводу користувача
+input.addEventListener('input', function() {
+    // Перевірити, чи значення є цілим числом
+    const value = input.value;
+
+    // Якщо введено не число, то скинути значення
+    if (!/^\d*$/.test(value)) {
+        input.value = ''; // Скинути поле
+        errorMessage.textContent = 'Будь ласка, введіть тільки цілі числа.';
+        errorMessage.style.display = 'block';
+    } else {
+        errorMessage.style.display = 'none'; // Сховати повідомлення про помилку
+    }
+});
