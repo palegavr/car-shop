@@ -69,23 +69,8 @@
 
 @if (Model.PagesCount > 1)
 {
-	<div class="btn-toolbar mx-auto" role="toolbar" aria-label="Toolbar with button groups">
-		<div class="btn-group mx-auto pb-3" role="group" aria-label="First group">
-			@for(int i = 1; i <= Model.PagesCount; i++)
-			{
-				@if (i == Model.CurrentPage)
-				{
-					<a asp-controller="Catalog" asp-action="Index" asp-route-page="@i" class="btn btn-primary page-item active" style="font-size: 8mm;">@i</a>
-				}
-				else
-				{
-					<a asp-controller="Catalog" asp-action="Index" asp-route-page="@i" class="btn btn-primary" style="font-size: 8mm;">@i</a>
-				}
-			}
-		</div>
-	</div>
+	@await Html.PartialAsync("_PageButtonsToolbar", Model)
 }
-
 <!-- /* Форма що знаходиться в шторкі */ -->
 <form method="get" onsubmit="onSearchFormSubmit(event)" onchange="check()">
 	<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
