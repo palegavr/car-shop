@@ -30,9 +30,15 @@ namespace CarShop.AdminService.Repositories
             return admin;
         }
 
-        public async Task CreateAccountAsync(string email, string password)
+        public async Task CreateAccountAsync(string email, string password, int priority, string[]? roles = null)
         {
-            _db.Admins.Add(new Admin { Email = email, Password = password });
+            _db.Admins.Add(new Admin
+            {
+                Email = email, 
+                Password = password, 
+                Roles = roles ?? Constants.DEFAULT_ADMIN_ROLES,
+                Priority = priority
+            });
             await _db.SaveChangesAsync();
         }
         

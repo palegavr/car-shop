@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarShop.AdminService.Controllers
 {
@@ -20,7 +21,7 @@ namespace CarShop.AdminService.Controllers
         public async Task<IActionResult> CreateAccountAsync(
             [FromBody] CreateAccountRequest createAccountRequest)
         {
-            if (!Validator.TryValidateObject(createAccountRequest, new(createAccountRequest), null, true))
+            if (!ModelState.IsValid)
             {
                 return BadRequest();
             }
@@ -33,7 +34,8 @@ namespace CarShop.AdminService.Controllers
 
             await _adminsRepository.CreateAccountAsync(
                 createAccountRequest.Email,
-                Argon2.Hash(createAccountRequest.Password));
+                Argon2.Hash(createAccountRequest.Password),
+                createAccountRequest.Priority);
 
             return Ok();
         }
