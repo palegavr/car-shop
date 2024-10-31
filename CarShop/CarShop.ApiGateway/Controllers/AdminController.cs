@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using System.Security.Claims;
+using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.ServiceDefaults.ServiceInterfaces.FileService;
@@ -169,6 +170,20 @@ public class AdminController
         }
         
         return Ok();
+    }
+
+    [HttpDelete]
+    [Route("car/{id:long}")]
+    [Authorize(Roles = Role.Admin.Car.Delete)]
+    public async Task<IActionResult> DeleteCarAsync([FromRoute] long id)
+    {
+        if (await _carStorageClient.GetCarAsync(id) is null)
+        {
+            return NotFound();
+        }
+        
+        bool deleted = await _carStorageClient.DeleteCarAsync(id);
+        return deleted ? Ok() : Problem();
     }
 
     [NonAction]

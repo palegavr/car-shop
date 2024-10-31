@@ -70,7 +70,7 @@ namespace CarShop.AdminService.Controllers
                 return Unauthorized();
             }
 
-            TokensPair tokensPair = GenerateTokensPair(admin.Id, admin.Email, out DateTime refreshTokenExpires);
+            TokensPair tokensPair = GenerateTokensPair(admin.Id, admin.Email, admin.Roles, out DateTime refreshTokenExpires);
 
             await _refreshSessionsRepository.CreateSessionAsync(new RefreshSession
             {
@@ -104,7 +104,7 @@ namespace CarShop.AdminService.Controllers
             }
 
             Admin admin = (await _adminsRepository.GetByIdAsync(refreshSession.AdminId))!;
-            TokensPair tokensPair = GenerateTokensPair(admin.Id, admin.Email, out DateTime refreshTokenExpires);
+            TokensPair tokensPair = GenerateTokensPair(admin.Id, admin.Email, admin.Roles, out DateTime refreshTokenExpires);
 
             refreshSession.RefreshToken = tokensPair.RefreshToken;
             refreshSession.ExpiresIn = refreshTokenExpires;
@@ -161,7 +161,7 @@ namespace CarShop.AdminService.Controllers
         }
 
         [NonAction]
-        private TokensPair GenerateTokensPair(long id, string email, out DateTime refreshTokenExpires)
+        private TokensPair GenerateTokensPair(long id, string email, string[] roles, out DateTime refreshTokenExpires)
         {
             refreshTokenExpires = DateTime.UtcNow.Add(AuthOptions.REFRESH_TOKEN_LIFETIME);
             JwtSecurityToken refreshJwt = new JwtSecurityToken(
@@ -170,14 +170,18 @@ namespace CarShop.AdminService.Controllers
                 expires: refreshTokenExpires,
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             string refreshToken = new JwtSecurityTokenHandler().WriteToken(refreshJwt);
+            
+            var roleClaims = from role in roles select new Claim(ClaimTypes.Role, role);
+            var claims = new List<Claim>(roleClaims)
+            {
+                new("id", id.ToString()),
+                new("email", email)
+            };
 
             JwtSecurityToken accessJwt = new JwtSecurityToken(
                 issuer: AuthOptions.ISSUER,
                 audience: AuthOptions.AUDIENCE,
-                claims: [
-                    new("id", id.ToString()),
-                    new("email", email)
-                ],
+                claims: claims,
                 expires: DateTime.UtcNow.Add(AuthOptions.ACCESS_TOKEN_LIFETIME),
                 signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
             string accessToken = new JwtSecurityTokenHandler().WriteToken(accessJwt);
