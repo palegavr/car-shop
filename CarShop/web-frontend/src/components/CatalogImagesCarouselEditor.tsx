@@ -1,15 +1,16 @@
 'use client'
-import {ProcessData} from "@/types/types";
 import styles from './styles/catalog-images-carousel-editor.module.css'
-import {ChangeEvent, Dispatch, SetStateAction, useRef} from "react";
+import {ChangeEvent, useEffect, useRef, useState} from "react";
 import {uploadImageAsync} from "@/clients/backendСlient";
 import {backgroundImageStyle} from "@/utilities/backgroundImageStyle";
+import CatalogImagesCarousel from "@/components/CatalogImagesCarousel";
 
 type Params = {
     imageUrls: string[],
-    getSelectedImageIndex(): number | undefined
-    onChange?(imageUrls: string[]): void,
-    onReset?(): void
+    edited: boolean
+    onChange?(imageUrls: string[]): Promise<void>,
+    onReset?(): Promise<void>,
+    onUploadFailed?: () => void,
 }
 
 enum SideButton {
@@ -17,8 +18,25 @@ enum SideButton {
     Right
 }
 
-export default function CatalogImagesCarouselEditor({imageUrls, onChange, getSelectedImageIndex, onReset}: Params) {
+export default function CatalogImagesCarouselEditor({imageUrls, onChange, onReset, edited, onUploadFailed}: Params) {
     const hiddenFileInputRef = useRef<HTMLInputElement>(null);
+    const [selectedImageIndex, setSelectedImageIndex] = useState<number>();
+    const [waitingAcceptChange, setWaitingAcceptChange] = useState<boolean>(false);
+
+
+    useEffect(() => {
+        if (imageUrls.length === 0) {
+            handleSelectedImageChange(undefined);
+        } else if (selectedImageIndex !== undefined) {
+            if (selectedImageIndex >= imageUrls.length) {
+                handleSelectedImageChange(imageUrls.length - 1);
+            } else if (selectedImageIndex < 0) {
+                handleSelectedImageChange(0);
+            }
+        } else if (imageUrls.length > 0) {
+            handleSelectedImageChange(0);
+        }
+    }, [imageUrls]);
 
     // Срабатывает, когда пользователь выбрал (или не выбрал) картинки, которые нужно добавить
     async function handleFileInputChange(event: ChangeEvent<HTMLInputElement>) {
@@ -30,12 +48,18 @@ export default function CatalogImagesCarouselEditor({imageUrls, onChange, getSel
         for (let file of event.target.files) {
             files.push(file);
         }
+        setWaitingAcceptChange(true);
         const result = await uploadImageAsync(files);
         if (result.success) {
             if (onChange) {
-                onChange([...imageUrls, ...result.publicImageUrls!])
+                await onChange([...imageUrls, ...result.publicImageUrls!]);
+            }
+        } else {
+            if (onUploadFailed) {
+                onUploadFailed();
             }
         }
+        setWaitingAcceptChange(false);
     }
 
     // При клике на "+"
@@ -44,64 +68,93 @@ export default function CatalogImagesCarouselEditor({imageUrls, onChange, getSel
     }
 
     // При клике на кнопку удаления
-    function handleDeleteClick() {
-        const selectedImageIndex = getSelectedImageIndex();
+    async function handleDeleteClick() {
         if (onChange && selectedImageIndex !== undefined) {
-            onChange(imageUrls.filter((_, index) => index !== selectedImageIndex));
+            setWaitingAcceptChange(true);
+            await onChange(imageUrls.filter((_, index) => index !== selectedImageIndex));
+            setWaitingAcceptChange(false);
         }
     }
 
-    function handleSideButtonsClick(sideButton: SideButton) {
-        const selectedImageIndex = getSelectedImageIndex()!;
+    async function handleSideButtonsClick(sideButton: SideButton) {
         const newImageUrls = [...imageUrls];
 
+        let newSelectedImageIndex;
         if (sideButton === SideButton.Left) {
-            [newImageUrls[selectedImageIndex - 1], newImageUrls[selectedImageIndex]] =
-                [newImageUrls[selectedImageIndex], newImageUrls[selectedImageIndex - 1]];
+            [newImageUrls[selectedImageIndex! - 1], newImageUrls[selectedImageIndex!]] =
+                [newImageUrls[selectedImageIndex!], newImageUrls[selectedImageIndex! - 1]];
+            newSelectedImageIndex = selectedImageIndex! - 1;
         } else if (sideButton === SideButton.Right) {
-            [newImageUrls[selectedImageIndex], newImageUrls[selectedImageIndex + 1]] =
-                [newImageUrls[selectedImageIndex + 1], newImageUrls[selectedImageIndex]];
+            [newImageUrls[selectedImageIndex!], newImageUrls[selectedImageIndex! + 1]] =
+                [newImageUrls[selectedImageIndex! + 1], newImageUrls[selectedImageIndex!]];
+            newSelectedImageIndex = selectedImageIndex! + 1;
         }
 
         if (onChange) {
-            onChange(newImageUrls);
+            setWaitingAcceptChange(true);
+            await onChange(newImageUrls);
+            setWaitingAcceptChange(false);
+            setSelectedImageIndex(newSelectedImageIndex);
         }
     }
 
-    function handleReset() {
+    async function handleReset() {
         if (onReset) {
-            onReset();
+            setWaitingAcceptChange(true);
+            await onReset();
+            setWaitingAcceptChange(false);
         }
+    }
+
+    function handleSelectedImageChange(index: number | undefined) {
+        setSelectedImageIndex(index);
     }
 
     return (
         <>
-            <div className="bg-secondary p-1 d-inline-block rounded">
-                <input type="button" // <
-                       style={{
-                           ...backgroundImageStyle('/images/keyboard-right-arrow-button-1_icon-icons.com_72690.svg'),
-                           transform: 'rotate(180deg)'
-                       }}
-                       className={`btn btn-light me-1 ${styles.actionButton} ${getSelectedImageIndex() === undefined || getSelectedImageIndex() === 0 ? 'disabled' : ''}`}
-                       onClick={() => handleSideButtonsClick(SideButton.Left)}/>
-                <button // DELETE
-                    className={`btn btn-danger me-1 ${styles.actionButton} ${styles.deleteActionButton} ${getSelectedImageIndex() === undefined ? 'disabled' : ''}`}
-                    onClick={handleDeleteClick}></button>
-                <button className={`btn btn-success me-1 ${styles.actionButton} ${styles.addActionButton}`} // PLUS
-                        onClick={handlePlusClick}></button>
-                <input type="button" // >
-                       style={{
-                           ...backgroundImageStyle('/images/keyboard-right-arrow-button-1_icon-icons.com_72690.svg'),
-                       }}
-                       className={`btn btn-light me-1 ${styles.actionButton} ${getSelectedImageIndex() === undefined || getSelectedImageIndex() === (imageUrls.length - 1) ? 'disabled' : ''}`}
-                       onClick={() => handleSideButtonsClick(SideButton.Right)}/>
-                <button className={`btn btn-danger ${styles.actionButton}`}
-                        onClick={handleReset}
-                        style={backgroundImageStyle('/images/reset_icon_246246.svg')}>
-                </button>
+            {imageUrls.length > 0 ? (
+                <div className={'mb-1'}>
+                    <CatalogImagesCarousel
+                        imageUrls={imageUrls}
+                        selectedImageIndex={selectedImageIndex!}
+                        onSelectedImageChange={handleSelectedImageChange}/>
+                </div>
+            ) : (
+                <div className="alert alert-info">Картинок пока нет.</div>
+            )}
+            <div className={edited ? 'd-inline-block rounded bg-warning p-1' : ''}>
+                <div className={`bg-secondary p-1 d-inline-block rounded`}>
+                    <input type="button" // <
+                           style={{
+                               ...backgroundImageStyle('/images/keyboard-right-arrow-button-1_icon-icons.com_72690.svg'),
+                               transform: 'rotate(180deg)'
+                           }}
+                           className={`btn btn-light me-1 ${styles.actionButton}`}
+                           disabled={selectedImageIndex === undefined || selectedImageIndex === 0 || waitingAcceptChange}
+                           onClick={() => handleSideButtonsClick(SideButton.Left)}/>
+                    <button className={`btn btn-success me-1 ${styles.actionButton} ${styles.addActionButton}`} // PLUS
+                            disabled={waitingAcceptChange}
+                            onClick={handlePlusClick}></button>
+                    <input type="button" // >
+                           style={{
+                               ...backgroundImageStyle('/images/keyboard-right-arrow-button-1_icon-icons.com_72690.svg'),
+                           }}
+                           className={`btn btn-light me-1 ${styles.actionButton}`}
+                           disabled={selectedImageIndex === undefined || selectedImageIndex === (imageUrls.length - 1) || waitingAcceptChange}
+                           onClick={() => handleSideButtonsClick(SideButton.Right)}/>
+                    <button className={`btn btn-danger ${styles.actionButton}`} // RESET
+                            onClick={handleReset}
+                            disabled={waitingAcceptChange}
+                            style={backgroundImageStyle('/images/reset_icon_246246.svg')}>
+                    </button>
+                    <button // DELETE
+                        className={`btn btn-danger ms-1 ${styles.actionButton} ${styles.deleteActionButton}`}
+                        disabled={selectedImageIndex === undefined || waitingAcceptChange}
+                        onClick={handleDeleteClick}></button>
 
-                <input multiple type="file" ref={hiddenFileInputRef} onChange={handleFileInputChange}
-                       className="d-none"/>
+                    <input multiple type="file" ref={hiddenFileInputRef} onChange={handleFileInputChange}
+                           className="d-none"/>
+                </div>
             </div>
         </>
     )

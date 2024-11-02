@@ -1,5 +1,5 @@
 import {AdditionalCarOption} from "@/types/types";
-import {useEffect, useRef, useState} from "react";
+import {useEffect, useRef} from "react";
 import {stringToNumber} from "@/utilities/converters/stringToNumber";
 import {validateNumber} from "@/utilities/validators/numberValidator";
 
@@ -9,45 +9,45 @@ type Props = {
 }
 
 export default function AdditionalCarOptionInput({additionalCarOption, onChange}: Props) {
-    const [currentOptionState, setCurrentOptionState]
-        = useState<AdditionalCarOption>({...additionalCarOption})
     const requiredCheckboxRef = useRef<HTMLInputElement>(null);
     const priceInputRef = useRef<HTMLInputElement>(null);
 
+    if (priceInputRef.current !== null) {
+        priceInputRef.current!.value = String(additionalCarOption.price);
+    }
     useEffect(() => {
-        priceInputRef.current!.value = String(currentOptionState.price);
+        priceInputRef.current!.value = String(additionalCarOption.price);
     }, []);
 
     function handleRequiredChange() {
         const newValue = {
-            ...currentOptionState,
+            ...additionalCarOption,
             isRequired: requiredCheckboxRef.current!.checked
         };
 
-        setCurrentOptionState(newValue);
         if (onChange)
             onChange(newValue);
     }
 
-    function handlePriceInput() {
+    function handlePriceInputBlur() {
         const price = stringToNumber(priceInputRef.current!.value);
         if (price !== undefined && validateNumber(price, {
             allowFloat: true,
             minNumberValue: 0
         })) {
             const newValue = {
-                ...currentOptionState,
+                ...additionalCarOption,
                 price: price
             };
 
-            setCurrentOptionState(newValue);
-        }
-    }
+            if (onChange) {
+                onChange(newValue);
+            }
 
-    function handlePriceInputBlur() {
-        priceInputRef.current!.value = String(currentOptionState.price);
-        if (onChange)
-            onChange(currentOptionState);
+            priceInputRef.current!.value = String(newValue.price);
+        } else {
+            priceInputRef.current!.value = String(additionalCarOption.price);
+        }
     }
 
     return (
@@ -57,7 +57,7 @@ export default function AdditionalCarOptionInput({additionalCarOption, onChange}
                     <div className="col d-block d-md-flex justify-content-center align-items-center">
                         <div className="form-check">
                             <input className="form-check-input" type="checkbox"
-                                   checked={currentOptionState.isRequired}
+                                   checked={additionalCarOption.isRequired}
                                    ref={requiredCheckboxRef}
                                    onChange={handleRequiredChange}/>
                             <label className="form-check-label">
@@ -67,7 +67,7 @@ export default function AdditionalCarOptionInput({additionalCarOption, onChange}
                     </div>
                     <div className="col">
                         <input type="text" className="form-control" placeholder="Цена"
-                               ref={priceInputRef} onInput={handlePriceInput}
+                               ref={priceInputRef}
                                onBlur={handlePriceInputBlur}/>
                     </div>
                 </div>

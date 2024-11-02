@@ -4,6 +4,7 @@ using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.ServiceDefaults.ServiceInterfaces.FileService;
+using CarShop.ServiceDefaults.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -61,7 +62,7 @@ public class AdminController
             return BadRequest();
         }
 
-        long? adminId = GetAdminIdFromClaimsPrincipal(User);
+        long? adminId = Utils.GetAdminIdFromClaimsPrincipal(User);
         if (adminId is null)
         {
             return Problem();
@@ -89,7 +90,7 @@ public class AdminController
     [Consumes(MediaTypeNames.Application.Json)]
     public async Task<IActionResult> EditCarApplyChangesAsync([FromRoute] long id)
     {
-        long? adminId = GetAdminIdFromClaimsPrincipal(User);
+        long? adminId = Utils.GetAdminIdFromClaimsPrincipal(User);
         if (adminId is null)
         {
             return Problem();
@@ -184,12 +185,5 @@ public class AdminController
         
         bool deleted = await _carStorageClient.DeleteCarAsync(id);
         return deleted ? Ok() : Problem();
-    }
-
-    [NonAction]
-    private static long? GetAdminIdFromClaimsPrincipal(ClaimsPrincipal claimsPrincipal)
-    {
-        return long.TryParse(claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "id")?.Value ?? "NotNumber",
-                out long adminId) ? adminId : null;
     }
 }

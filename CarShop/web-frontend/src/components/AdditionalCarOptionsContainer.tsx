@@ -1,13 +1,14 @@
 import {AdditionalCarOption, AdditionalCarOptionType, additionalCarOptionTypeToString} from "@/types/types";
 import AdditionalCarOptionInput from "@/components/AdditionalCarOptionInput";
-import React, {MouseEventHandler, useState} from "react";
+import React, {CSSProperties, MouseEventHandler, useState} from "react";
 import {EDITED_CLASS} from "@/constants";
+import {backgroundImageStyle} from "@/utilities/backgroundImageStyle";
 
 type Props = {
     additionalCarOptions: AdditionalCarOption[],
     markAsEditedTypes?: AdditionalCarOptionType[],
-    onChange?: (optionsWithEnabled: AdditionalCarOptionWithEnabled[]) => void,
-    onReset?: (optionType: AdditionalCarOptionType) => AdditionalCarOption[]
+    onChange?: (optionsWithEnabled: AdditionalCarOptionWithEnabled[]) => Promise<void>,
+    onReset?: (optionType: AdditionalCarOptionType) => Promise<void>
 }
 
 type AdditionalCarOptionWithEnabled = {
@@ -15,30 +16,39 @@ type AdditionalCarOptionWithEnabled = {
     additionalCarOption: AdditionalCarOption
 }
 
-export default function AdditionalCarOptionsContainer({additionalCarOptions, onChange, markAsEditedTypes = [], onReset}: Props) {
+export default function AdditionalCarOptionsContainer({
+                                                          additionalCarOptions,
+                                                          onChange,
+                                                          markAsEditedTypes = [],
+                                                          onReset
+                                                      }: Props) {
     const [opened, setOpened] = useState<boolean>(false);
-    const [currentOptions, setCurrentOptions]
-        = useState<AdditionalCarOptionWithEnabled[]>(makeAdditionalCarOptionsWithEnabled(additionalCarOptions));
+    const currentOptionsWithEnabled = makeAdditionalCarOptionsWithEnabled(additionalCarOptions);
+    const [waitingAcceptChange, setWaitingAcceptChange] = useState<boolean>(false);
 
-    function handleChangeOptionEnabled(optionType: AdditionalCarOptionType, enabled: boolean) {
-        const newCurrentOptions = [...currentOptions];
-        newCurrentOptions.find(e => e.additionalCarOption.type === optionType)!
+    async function handleChangeOptionEnabled(optionType: AdditionalCarOptionType, enabled: boolean) {
+        const newCurrentOptionsWithEnabled = [...currentOptionsWithEnabled];
+        newCurrentOptionsWithEnabled.find(e => e.additionalCarOption.type === optionType)!
             .enabled = enabled;
 
-        setCurrentOptions(newCurrentOptions);
+        //setCurrentOptions(newCurrentOptions);
         if (onChange) {
-            onChange(newCurrentOptions);
+            setWaitingAcceptChange(true);
+            await onChange(newCurrentOptionsWithEnabled);
+            setWaitingAcceptChange(false);
         }
     }
 
-    function handleChangeOptionData(additionalCarOption: AdditionalCarOption) {
-        const newCurrentOptions = [...currentOptions];
-        const optionWithEnabled = newCurrentOptions.find(e => e.additionalCarOption.type === additionalCarOption.type)!;
+    async function handleChangeOptionData(additionalCarOption: AdditionalCarOption) {
+        const newCurrentOptionsWithEnabled = [...currentOptionsWithEnabled];
+        const optionWithEnabled = newCurrentOptionsWithEnabled.find(e => e.additionalCarOption.type === additionalCarOption.type)!;
         optionWithEnabled.additionalCarOption = additionalCarOption;
 
-        setCurrentOptions(newCurrentOptions);
+        //setCurrentOptions(newCurrentOptions);
         if (onChange) {
-            onChange(newCurrentOptions);
+            setWaitingAcceptChange(true);
+            await onChange(newCurrentOptionsWithEnabled);
+            setWaitingAcceptChange(false);
         }
     }
 
@@ -46,19 +56,11 @@ export default function AdditionalCarOptionsContainer({additionalCarOptions, onC
         setOpened(!opened);
     }
 
-    function handleReset(optionType: AdditionalCarOptionType) {
+    async function handleReset(optionType: AdditionalCarOptionType) {
         if (onReset) {
-            let optionsWithEnabled = makeAdditionalCarOptionsWithEnabled(onReset(optionType));
-            setCurrentOptions(optionsWithEnabled.map(o => {o.enabled = false; return o;}));
-            optionsWithEnabled = makeAdditionalCarOptionsWithEnabled(onReset(optionType));
-            setTimeout(setCurrentOptions, 0, optionsWithEnabled);
-            //setCurrentOptions(makeAdditionalCarOptionsWithEnabled(onReset(optionType)));
-            // const scrollYPosition = window.pageYOffset;
-            // setOpened(false);
-            // setTimeout(() => {
-            //     setOpened(true);
-            //     setTimeout(() => window.scrollTo(0, scrollYPosition), 0);
-            // }, 0);
+            setWaitingAcceptChange(true);
+            await onReset(optionType);
+            setWaitingAcceptChange(false);
         }
     }
 
@@ -69,22 +71,30 @@ export default function AdditionalCarOptionsContainer({additionalCarOptions, onC
                     <button className={`accordion-button ${!opened ? 'collapsed' : ''}`} type="button"
                             onClick={handleOpenButtonClick}>
                         <span className={'fs-5'}>Дополнительные опции</span>
+                        {waitingAcceptChange && (
+                            <div className="spinner-border spinner-border-sm ms-2" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                        )}
                     </button>
                 </h2>
                 <div className={`accordion-collapse collapse ${opened ? 'show' : ''}`}>
-                    <div className="accordion-body">
+                    <div className="accordion-body"
+                         style={waitingAcceptChange ? {pointerEvents: 'none', opacity: '0.7'} : {}}>
                         {Object.values(AdditionalCarOptionType)
                             .filter(e => typeof e === 'number')
                             .map(optionType => {
-                                const optionWithEnabled = currentOptions
+                                const optionWithEnabled = currentOptionsWithEnabled
                                     .find(optionWithEnabled => optionWithEnabled.additionalCarOption.type === optionType)!;
 
                                 return (
-                                    <div key={optionType} className={`border border-1 rounded p-2 shadow-sm mb-3 ${markAsEditedTypes.includes(optionType) ? EDITED_CLASS : ''}`}>
+                                    <div key={optionType}
+                                         className={`border border-1 rounded p-2 shadow-sm mb-3 ${markAsEditedTypes.includes(optionType) ? EDITED_CLASS : ''}`}>
                                         <div className="form-check form-switch">
-                                            <input className="form-check-input" type="checkbox" role="button" checked={optionWithEnabled.enabled}
-                                            onChange={(event) =>
-                                                handleChangeOptionEnabled(optionType, event.currentTarget.checked)}/>
+                                            <input className="form-check-input" type="checkbox" role="button"
+                                                   checked={optionWithEnabled.enabled}
+                                                   onChange={(event) =>
+                                                       handleChangeOptionEnabled(optionType, event.currentTarget.checked)}/>
                                             <label
                                                 className="form-check-label">{additionalCarOptionTypeToString(optionType)}</label>
                                             <span className="ms-2">
@@ -107,8 +117,19 @@ export default function AdditionalCarOptionsContainer({additionalCarOptions, onC
     )
 }
 
-function ResetChangesButton({onClick} : {onClick?: MouseEventHandler<HTMLButtonElement>}) {
-    return <button className={'btn btn-danger'} onClick={onClick}>R</button>
+function ResetChangesButton({onClick}: { onClick?: MouseEventHandler<HTMLButtonElement> }) {
+    let buttonStyles: CSSProperties = {
+        width: '30px',
+        height: '30px'
+    };
+
+    return <button className={'btn btn-danger'}
+                   style={
+                       {
+                           ...backgroundImageStyle('/images/reset_icon_246246.svg'),
+                           ...buttonStyles
+                       }}
+                   onClick={onClick}></button>
 }
 
 function makeAdditionalCarOptionsWithEnabled(additionalCarOptions: AdditionalCarOption[]): AdditionalCarOptionWithEnabled[] {

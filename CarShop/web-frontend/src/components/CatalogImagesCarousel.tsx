@@ -1,8 +1,9 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 
 type Params = {
     imageUrls: string[],
-    onSelectedImageChange?: (index: number) => void
+    selectedImageIndex: number,
+    onSelectedImageChange?(index: number): void
 }
 
 enum SideButton {
@@ -10,23 +11,14 @@ enum SideButton {
     Right
 }
 
-export default function CatalogImagesCarousel({imageUrls, onSelectedImageChange}: Params) {
-    const [selectedImageIndex, setSelectedImageIndex] = useState<number>(0);
+export default function CatalogImagesCarousel({imageUrls, selectedImageIndex, onSelectedImageChange}: Params) {
     const [sideButtonsDisabled, setSideButtonsDisabled] = useState<boolean>(false);
 
-    if (imageUrls.length === 0)
+    if (imageUrls.length === 0) {
         throw new Error('Должна быть минимум 1 картинка.')
-
-    useEffect(() => {
-        if (selectedImageIndex >= imageUrls.length) {
-            handleSelectedImageChange(imageUrls.length - 1);
-        } else if (selectedImageIndex < 0) {
-            handleSelectedImageChange(0);
-        }
-    }, [imageUrls]);
+    }
 
     function handleSelectedImageChange(newSelectedImageIndex: number) {
-        setSelectedImageIndex(newSelectedImageIndex);
         if (onSelectedImageChange) {
             onSelectedImageChange(newSelectedImageIndex);
         }
@@ -68,7 +60,7 @@ export default function CatalogImagesCarousel({imageUrls, onSelectedImageChange}
                         {imageUrls.map((imgUrl, index) => {
                             return (
                                 <div key={index} className={`carousel-item ${selectedImageIndex === index ? 'active' : ''}`}>
-                                    <img src={imgUrl} style={{height: '400px', maxWidth: '1000px'}}
+                                    <img src={imgUrl} style={{maxHeight: '400px', maxWidth: '1000px'}}
                                          className="d-block mx-auto"/>
                                 </div>
                             )

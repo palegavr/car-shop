@@ -5,14 +5,14 @@
 }
 
 .deleteActionButton {
-    background-image: url('/images/dustbin_120823.svg');
+    background-image: url('../../../public/images/dustbin_120823.svg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
 }
 
 .addActionButton {
-    background-image: url('/images/Plus_icon-icons.com_71848.svg');
+    background-image: url('../../../public/images/Plus_icon-icons.com_71848.svg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;

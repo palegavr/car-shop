@@ -42,7 +42,7 @@ export async function applyChangesAsync(carId: number): Promise<ApplyChangesResu
     }
 }
 
-type PushProcessDataResult = {
+export type PushProcessDataResult = {
     success: boolean,
 }
 export async function pushProcessData(carId: number, processData: ProcessData): Promise<PushProcessDataResult> {

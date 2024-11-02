@@ -4,10 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Net;
 using System.Net.Mime;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
+using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
 using CarShop.ServiceDefaults.ServiceInterfaces.Web;
+using CarShop.ServiceDefaults.Utils;
 using CarShop.Web.Models;
 using CarShop.Web.Models.Admin;
 using Microsoft.AspNetCore.Authorization;
@@ -126,15 +129,51 @@ namespace CarShop.Web.Controllers
 
 		[Authorize]
 		[HttpGet]
-		[Route("editcar")]
-		public async Task<IActionResult> EditCarAsync()
+		[Route("editcar/{id:long}")]
+		public async Task<IActionResult> EditCarAsync([FromRoute] long id)
 		{
+			long? adminId = Utils.GetAdminIdFromClaimsPrincipal(User);
+			if (adminId is null)
+			{
+				return Problem();
+			}
+
+			var carEditProcess = await _carStorageClient.GetCarEditProcessAsync(new GetCarEditProcessRequest
+			{
+				AdminId = adminId.Value,
+				CarId = id
+			});
+			
+			var car = await _carStorageClient.GetCarAsync(id);
+			if (car is null)
+			{
+				return NotFound();
+			}
+
 			string html = await System.IO.File.ReadAllTextAsync("wwwroot/admin/editcar/id.html");
 
+			string processDataInDbJsonEncoded = JsonSerializer.Serialize(new CarEditProcessData
+			{
+				Brand = car.Brand,
+				Model = car.Model,
+				Color = car.Color,
+				EngineCapacity = car.EngineCapacity,
+				CorpusType = car.CorpusType,
+				FuelType = car.FuelType,
+				Count = car.Count,
+				AdditionalCarOptionsJson = JsonSerializer.Serialize(car.AdditionalCarOptions),
+				Image = car.ImageUrl,
+				BigImages = car.BigImageURLs,
+				Price = car.PriceForStandartConfiguration,
+			});
 			return View(new EditCarViewModel
 			{
 				BodyHtmlContent = ExtractTagContent(html, "body"), 
-				HeadHtmlContent = ExtractTagContent(html, "head")
+				HeadHtmlContent = ExtractTagContent(html, "head"),
+				ProcessDataInDbJsonEncoded = processDataInDbJsonEncoded,
+				CurrentProcessDataJsonEncoded = carEditProcess is not null ? 
+					JsonSerializer.Serialize(carEditProcess.Process) : processDataInDbJsonEncoded,
+				CarId = id
 			});
 		}
 

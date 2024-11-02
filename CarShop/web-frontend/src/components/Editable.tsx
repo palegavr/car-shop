@@ -1,10 +1,9 @@
 import {CorpusType, corpusTypeToString, FuelType, FuelTypes, fuelTypesToString} from "@/types/types";
-import React, {FormEvent, MouseEventHandler, useEffect, useRef, useState} from "react";
+import React, {CSSProperties, FormEvent, MouseEventHandler, useRef, useState} from "react";
 import '@/utilities/extentions/stringExtentions'
 import {hasFlag} from "@/utilities/hasFlag";
 import {NumberValidatorOptions, validateNumber} from "@/utilities/validators/numberValidator";
 import {stringToNumber} from "@/utilities/converters/stringToNumber";
-import {EDITED_CLASS} from "@/constants";
 import {backgroundImageStyle} from "@/utilities/backgroundImageStyle";
 
 type Props = {
@@ -15,8 +14,8 @@ type Props = {
     // Для случая с числом
     numberValidationOptions?: NumberValidatorOptions,
     // События
-    onChange?: (newValue: EditableSupportedTypes) => void,
-    onReset?: () => EditableSupportedTypes
+    onChange?: (newValue: EditableSupportedTypes) => Promise<EditableSupportedTypes | undefined>,
+    onReset?: () => Promise<EditableSupportedTypes | undefined>
 }
 
 type EditableType = 'string' | 'number' | 'FuelTypes' | 'CorpusType';
@@ -35,6 +34,7 @@ export default function Editable(
         = useState<FuelTypes | undefined>(type === 'FuelTypes' ? initialValue as FuelTypes : undefined);
     const [editing, setEditing] = useState(false);
     const [applyChangesButtonEnabled, setApplyChangesButtonEnabled] = useState(true);
+    const [waitingAcceptChange, setWaitingAcceptChange] = useState<boolean>(false);
 
     function handleStartEdit() {
         setEditing(true);
@@ -59,16 +59,26 @@ export default function Editable(
         setEditing(false);
     }
 
-    function handleApplyChanges() {
+    async function handleApplyChanges() {
         const valueFromInput = getValueFromInput();
         if (typeof valueFromInput === 'undefined')
             return;
 
         if (isValueValid({value: valueFromInput})) {
-            setCurrentValue(valueFromInput);
-            setEditing(false);
-            if (typeof onChange !== 'undefined')
-                setTimeout(onChange, 0, valueFromInput);
+            if (typeof onChange !== 'undefined') {
+                setWaitingAcceptChange(true);
+                setApplyChangesButtonEnabled(false);
+                const result = await onChange(valueFromInput);
+                if (result !== undefined) {
+                    setCurrentValue(result);
+                    setEditing(false);
+                }
+                setWaitingAcceptChange(false);
+                setApplyChangesButtonEnabled(true);
+            } else {
+                setCurrentValue(valueFromInput);
+                setEditing(false);
+            }
         }
     }
 
@@ -109,9 +119,14 @@ export default function Editable(
         }
     }
 
-    function handleReset() {
+    async function handleReset() {
         if (onReset) {
-            setCurrentValue(onReset());
+            setWaitingAcceptChange(true);
+            const result = await onReset();
+            if (result !== undefined) {
+                setCurrentValue(result);
+            }
+            setWaitingAcceptChange(false);
         }
     }
 
@@ -122,7 +137,7 @@ export default function Editable(
                     <>
                         {(type === 'string' || type === 'number') && ( // Тип: строка
                             <input type="text" ref={inputRef} onInput={handleChangeInputValue}
-                                   onBlur={handleBlurInput}
+
                                    onKeyDown={(event) => {
                                        if (event.key === 'Enter') handleApplyChanges()
                                    }}
@@ -155,7 +170,8 @@ export default function Editable(
                         <div className="me-1">
                             <CancelChangesButton onClick={handleCancelChangesButton}/>
                         </div>
-                        <ApplyChangesButton onClick={handleApplyChanges} enabled={applyChangesButtonEnabled}/>
+                        <ApplyChangesButton onClick={handleApplyChanges} enabled={applyChangesButtonEnabled}
+                                            loading={waitingAcceptChange}/>
                     </>
                 ) : ( // Если режим редактирования ВЫКЛЮЧЕН
                     <div>
@@ -198,12 +214,6 @@ export default function Editable(
         } else if (type === 'number') {
             const valueAsNumber = (value as number);
             return validateNumber(valueAsNumber, numberValidationOptions);
-            // !isNaN(valueAsNumber) &&
-            //     (!allowFloat ? Number.isInteger(valueAsNumber) : true) &&
-            //     (typeof minNumberValue !== 'undefined' ?
-            //         (minNumberValueInclusive ? valueAsNumber >= minNumberValue : valueAsNumber > minNumberValue) : true) &&
-            //     (typeof maxNumberValue !== 'undefined' ?
-            //         (maxNumberValueInclusive ? valueAsNumber <= maxNumberValue : valueAsNumber < maxNumberValue) : true)
         } else if (type === 'CorpusType') {
             const valueAsCorpusType = value as CorpusType;
             return valueAsCorpusType === CorpusType.Sedan ||
@@ -216,39 +226,56 @@ export default function Editable(
         return false;
     }
 
+    function CancelChangesButton({onClick}: {
+        onClick?: MouseEventHandler<HTMLButtonElement>
+    }) {
+        return <button className="btn btn-danger" disabled={waitingAcceptChange} onClick={onClick}>X</button>
+    }
+
+    function ResetChangesButton({onClick}: { onClick?: MouseEventHandler<HTMLButtonElement> }) {
+        let buttonStyles: CSSProperties = {
+                width: '30px',
+                height: '30px'
+        };
+
+        if (!waitingAcceptChange) {
+            buttonStyles = {...buttonStyles, ...backgroundImageStyle('/images/reset_icon_246246.svg')}
+        }
+        return <button className={'btn btn-danger'} disabled={waitingAcceptChange} onClick={onClick}
+                style={buttonStyles}>
+            {waitingAcceptChange && (
+                <div style={{transform: 'translate(-5px, -5px)'}}>
+                    <span className="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                    <span className="visually-hidden" role="status">Loading...</span>
+                </div>
+            )}
+        </button>
+    }
+
+    function StartEditButton({onClick}: {
+        onClick?: MouseEventHandler<HTMLButtonElement>
+    }) {
+        return <button className="btn btn-primary" disabled={waitingAcceptChange} onClick={onClick}
+                       style={{
+                           ...backgroundImageStyle('/images/edit_icon-icons.com_61193.svg'), ...{
+                               width: '30px',
+                               height: '30px'
+                           }
+                       }}></button>
+    }
 }
 
-function StartEditButton({onClick}: {
-    onClick?: MouseEventHandler<HTMLButtonElement>
-}) {
-    return <button className="btn btn-primary" onClick={onClick}
-                   style={{
-                       ...backgroundImageStyle('/images/edit_icon-icons.com_61193.svg'), ...{
-                           width: '30px',
-                           height: '30px'
-                       }
-                   }}></button>
-}
-
-function ApplyChangesButton({onClick, enabled = true}: {
+function ApplyChangesButton({onClick, enabled = true, loading = false}: {
     onClick?: MouseEventHandler<HTMLButtonElement>,
-    enabled: boolean
+    enabled: boolean,
+    loading: boolean
 }) {
-    return <button className={`btn btn-success ${enabled ? '' : 'disabled'}`} onClick={onClick}>+</button>
-}
-
-function CancelChangesButton({onClick}: {
-    onClick?: MouseEventHandler<HTMLButtonElement>
-}) {
-    return <button className="btn btn-danger" onClick={onClick}>X</button>
-}
-
-function ResetChangesButton({onClick}: { onClick?: MouseEventHandler<HTMLButtonElement> }) {
-    return <button className={'btn btn-danger'} onClick={onClick}
-                   style={{
-                       ...backgroundImageStyle('/images/reset_icon_246246.svg'), ...{
-                           width: '30px',
-                           height: '30px'
-                       }
-                   }}></button>
+    return <button className={`btn btn-success ${enabled ? '' : 'disabled'}`} onClick={onClick}>
+        {loading ? (
+            <>
+                <span className="spinner-grow spinner-grow-sm" aria-hidden="true"></span>
+                <span className="visually-hidden" role="status">Loading...</span>
+            </>
+        ) : '+'}
+    </button>
 }

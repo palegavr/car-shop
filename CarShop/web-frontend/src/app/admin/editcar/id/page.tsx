@@ -1,23 +1,28 @@
 'use client'
-import {MouseEventHandler, useEffect, useState} from "react";
-import {AdditionalCarOption, AdditionalCarOptionType, FuelType, ProcessData} from "@/types/types";
-import CatalogImagesCarousel from "@/components/CatalogImagesCarousel";
+import {MouseEventHandler, useEffect, useRef, useState} from "react";
+import {AdditionalCarOptionType, FuelType, ProcessData} from "@/types/types";
 import CatalogImagesCarouselEditor from "@/components/CatalogImagesCarouselEditor";
 import {parseJsonEncodedProcessData} from "@/utilities/processDataOperations";
 import Editable, {EditableSupportedTypes} from "@/components/Editable";
-import {applyChangesAsync, pushProcessData} from "@/clients/backendСlient";
+import {applyChangesAsync, pushProcessData, PushProcessDataResult} from "@/clients/backendСlient";
 import AdditionalCarOptionsContainer from "@/components/AdditionalCarOptionsContainer";
 import {EDITED_CLASS} from "@/constants";
 import {deepEqual} from "assert";
-import { ToastContainer, toast } from 'react-toastify';
+import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ImageChanger from "@/components/ImageChanger";
+import {delay} from "@/utilities/delay";
 
 
 type DataFromBackend = {
     processDataInDbJsonEncoded: string,
     currentProcessDataJsonEncoded: string,
     carId: number
+}
+
+type HandleChangeSomethingResult = {
+    pushResult: PushProcessDataResult,
+    newProcessData?: ProcessData
 }
 
 const defaultToastTime = 2000;
@@ -29,44 +34,11 @@ export default function Page() {
     const [currentProcessData, setCurrentProcessData] = useState<ProcessData>(null!);
     const [processData, setProcessData] = useState<ProcessData>(null!);
     const [carId, setCarId] = useState(null!);
-    const [carouselSelectedImageIndex, setCarouselSelectedImageIndex] = useState<number>();
-    const [alertMessage, setAlertMessage] = useState<string>();
+    const pushingChangesRef = useRef<boolean>(false);
+    const processDataRef = useRef<ProcessData>(processData);
+    processDataRef.current = processData;
 
     useEffect(() => {
-        // @ts-ignore
-        window.carShopData = {
-            processDataInDbJsonEncoded: `{
-                "brand": "ccscs",
-                "model": "ggg",
-                "price": 222,
-                "color": "string",
-                "engine_capacity": 1,
-                "corpus_type": 0,
-                "fuel_type": 3,
-                "count": 123,
-                "image_url": "https://img2.akspic.ru/previews/2/8/1/8/7/178182/178182-legkovyye_avtomobili-sportkar-lambordzhini-superkar-lamborgini_aventador-x750.jpg",
-                "big_image_urls": ["hello", "world"],
-                "additional_car_options": "[{\\"type\\":0,\\"price\\":888,\\"isRequired\\":true},{\\"type\\":2,\\"price\\":1999,\\"isRequired\\":false}]"
-            }`,
-            currentProcessDataJsonEncoded: `{
-                "brand": "ccscs",
-                "model": "ggg",
-                "price": 222,
-                "color": "string",
-                "engine_capacity": 1,
-                "corpus_type": 0,
-                "fuel_type": 3,
-                "count": 124,
-                "image_url": "https://img2.akspic.ru/previews/2/8/1/8/7/178182/178182-legkovyye_avtomobili-sportkar-lambordzhini-superkar-lamborgini_aventador-x750.jpg",
-                "big_image_urls": 
-                ["https://img3.akspic.ru/previews/1/7/8/7/7/177871/177871-zelenyj_lamborgini-lamborghini_gallardo-lambordzhini-lamborghini_urakan-legkovyye_avtomobili-x750.jpg", 
-                "https://img2.akspic.ru/previews/2/8/1/8/7/178182/178182-legkovyye_avtomobili-sportkar-lambordzhini-superkar-lamborgini_aventador-x750.jpg",
-                 "https://img1.akspic.ru/previews/3/8/0/8/7/178083/178083-gonochnyj_avtomobil-legkovyye_avtomobili-avtomobilnoe_osveshhenie-koleso-purpurnyj_cvet-x750.jpg"],
-                "additional_car_options": "[{\\"type\\":0,\\"price\\":888,\\"isRequired\\":true},{\\"type\\":2,\\"price\\":1999,\\"isRequired\\":false}]"
-            }`,
-            carId: 67
-        };
-
         try {
             // @ts-ignore
             let processDataInDb = parseJsonEncodedProcessData(window['carShopData'].processDataInDbJsonEncoded);
@@ -80,41 +52,39 @@ export default function Page() {
             setCurrentProcessData(currentProcessData);
             setCarId(carId);
             setDataFromBackendLoaded(true);
-
-            if (currentProcessData.bigImageUrls.length > 0)
-                setCarouselSelectedImageIndex(0);
         } catch (e) {
             setDataFromBackendLoaded(false);
         }
     }, [])
 
-    async function handleChangeSomething(progressDataPropName: keyof ProcessData, newValue: any) {
-        const newProcessData = {...processData, [progressDataPropName]: newValue} as ProcessData;
-        if (progressDataPropName === 'bigImageUrls') {
-            if (newProcessData.bigImageUrls.length === 0)
-                setCarouselSelectedImageIndex(undefined);
-
-            if (processData.bigImageUrls.length === 0 && newProcessData.bigImageUrls.length > 0)
-                setCarouselSelectedImageIndex(0);
+    async function handleChangeSomething(progressDataPropName: keyof ProcessData, newValue: any)
+        : Promise<HandleChangeSomethingResult> {
+        while (pushingChangesRef.current) {
+            await delay(100);
         }
-
+        pushingChangesRef.current = true;
+        const newProcessData = {...processDataRef.current, [progressDataPropName]: newValue} as ProcessData;
         const result = await pushProcessData(carId,
             newProcessData.fuelType === FuelType.Electric ? {...newProcessData, engineCapacity: 0} : newProcessData);
         if (result.success) {
             setCurrentProcessData(newProcessData);
+            setProcessData(newProcessData);
         } else {
             toast.error('Не удалось синхронизировать изменения.', {
                 position: 'bottom-right',
                 autoClose: defaultToastTime
             });
         }
-        setProcessData(newProcessData);
-        return result;
+        pushingChangesRef.current = false;
+        return {
+            pushResult: result,
+            newProcessData: result.success ? newProcessData : undefined
+        };
     }
 
     async function handleSaveChangesButton() {
-        const pushResult = await handleChangeSomething('brand', processData.brand);
-        if (!pushResult.success) {
+        const handleChangeSomethingResult = await handleChangeSomething('brand', processData.brand);
+        if (!handleChangeSomethingResult.pushResult.success) {
             return;
         }
 
@@ -133,22 +103,40 @@ export default function Page() {
         }
     }
 
-    function handleReset({progressDataPropName, optionType} : {progressDataPropName: keyof ProcessData, optionType?: AdditionalCarOptionType})
-    : EditableSupportedTypes | AdditionalCarOption[] {
+    async function handleReset({progressDataPropName, optionType}: {
+        progressDataPropName: keyof ProcessData,
+        optionType?: AdditionalCarOptionType
+    })
+        : Promise<HandleChangeSomethingResult> {
         if (progressDataPropName === 'additionalCarOptions') {
-            let newAdditionalCarOptions = processData.additionalCarOptions;
-            newAdditionalCarOptions = newAdditionalCarOptions
-                .map(option => option.type === optionType ?
-                    processDataInDb.additionalCarOptions.find(option => option.type === optionType) : option)
-                .filter(v => v !== undefined);
+            let newAdditionalCarOptions = [...processData.additionalCarOptions]
+                .filter(el => el.type !== optionType);
 
+            for (const optionInDb of processDataInDb.additionalCarOptions) {
+                if (optionInDb.type === optionType) {
+                    newAdditionalCarOptions.push(optionInDb);
+                    break;
+                }
+            }
 
-            handleChangeSomething(progressDataPropName, newAdditionalCarOptions);
-            return newAdditionalCarOptions;
+            const result = await handleChangeSomething(progressDataPropName, newAdditionalCarOptions);
+            return result;
         } else {
-            handleChangeSomething(progressDataPropName, processDataInDb[progressDataPropName as keyof ProcessData]);
-            return processDataInDb[progressDataPropName as keyof ProcessData] as EditableSupportedTypes;
+            const result = await handleChangeSomething(progressDataPropName, processDataInDb[progressDataPropName as keyof ProcessData]);
+            return result;
         }
+    }
+
+    async function handleEditableChange(progressDataPropName: keyof ProcessData, newValue: EditableSupportedTypes)
+        : Promise<EditableSupportedTypes | undefined> {
+        const result = await handleChangeSomething(progressDataPropName, newValue);
+        return result.newProcessData !== undefined ? result.newProcessData[progressDataPropName] as EditableSupportedTypes : undefined;
+    }
+
+    async function handleEditableReset(progressDataPropName: keyof ProcessData)
+        : Promise<EditableSupportedTypes | undefined> {
+        const result = await handleReset({progressDataPropName});
+        return result.newProcessData !== undefined ? result.newProcessData[progressDataPropName] as EditableSupportedTypes : undefined;
     }
 
     if (dataFromBackendLoaded === undefined) {
@@ -167,26 +155,35 @@ export default function Page() {
             <div className={'text-center mb-1'}>
                 <h5>Картинка для /catalog</h5>
                 <ImageChanger
-                    imageUrl={processData.imageUrl}
-                    onReset={() => handleReset({progressDataPropName: 'imageUrl'})}
-                    onChange={imageUrl => handleChangeSomething('imageUrl', imageUrl !== undefined ? imageUrl : '')}/>
+                    imageUrl={processData.imageUrl !== '' ? processData.imageUrl : undefined}
+                    edited={processData.imageUrl !== processDataInDb.imageUrl}
+                    onReset={async() => {
+                        await handleReset({progressDataPropName: 'imageUrl'})
+                    }}
+                    onChange={async imageUrl => {
+                        await handleChangeSomething('imageUrl', imageUrl !== undefined ? imageUrl : '')
+                    }}
+                    onUploadFailed={() => toast.error('Не удалось загрузить изображение.', {
+                        position: 'bottom-right',
+                        autoClose: defaultToastTime
+                    })}/>
             </div>
 
-            {processData.bigImageUrls.length > 0 ? (
-                <CatalogImagesCarousel
-                    imageUrls={processData.bigImageUrls}
-                    onSelectedImageChange={setCarouselSelectedImageIndex}/>
-            ) : (
-                <div className="text-center mt-1">
-                    <div className="alert alert-info d-inline-block">Картинок пока нет.</div>
-                </div>
-            )}
             <div className="text-center mt-2">
                 <CatalogImagesCarouselEditor
                     imageUrls={processData.bigImageUrls}
-                    getSelectedImageIndex={() => carouselSelectedImageIndex}
-                    onReset={() => handleReset({progressDataPropName: 'bigImageUrls'})}
-                    onChange={(imageUrls) => handleChangeSomething('bigImageUrls', imageUrls)}/>
+                    edited={JSON.stringify(processData.bigImageUrls) !==
+                        JSON.stringify(processDataInDb.bigImageUrls)}
+                    onReset={async () => {
+                        await handleReset({progressDataPropName: 'bigImageUrls'});
+                    }}
+                    onChange={async imageUrls => {
+                        await handleChangeSomething('bigImageUrls', imageUrls);
+                    }}
+                    onUploadFailed={() => toast.error('Не удалось загрузить изображение(я).', {
+                        position: 'bottom-right',
+                        autoClose: defaultToastTime
+                    })}/>
             </div>
 
             <table className="table mt-3" style={{fontSize: '6mm'}}>
@@ -200,24 +197,24 @@ export default function Page() {
                     <td className={processData.brand !== processDataInDb.brand ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.brand} type={'string'}
                                   edited={processData.brand !== processDataInDb.brand}
-                                  onReset={() => handleReset({progressDataPropName: 'brand'}) as EditableSupportedTypes}
-                                  onChange={(newValue) => handleChangeSomething('brand', newValue)}/></td>
+                                  onReset={() => handleEditableReset('brand')}
+                                  onChange={newValue => handleEditableChange('brand', newValue)}/></td>
                 </tr>
                 <tr>
                     <td>Модель</td>
                     <td className={processData.model !== processDataInDb.model ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.model} type={'string'}
                                   edited={processData.model !== processDataInDb.model}
-                                  onReset={() => handleReset({progressDataPropName: 'model'}) as EditableSupportedTypes}
-                                  onChange={(newValue) => handleChangeSomething('model', newValue)}/></td>
+                                  onReset={() => handleEditableReset('model')}
+                                  onChange={newValue => handleEditableChange('model', newValue)}/></td>
                 </tr>
                 <tr>
                     <td>Цвет</td>
                     <td className={processData.color !== processDataInDb.color ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.color} type={'string'}
                                   edited={processData.color !== processDataInDb.color}
-                                  onReset={() => handleReset({progressDataPropName: 'color'}) as EditableSupportedTypes}
-                                  onChange={(newValue) => handleChangeSomething('color', newValue)}/></td>
+                                  onReset={() => handleEditableReset('color')}
+                                  onChange={newValue => handleEditableChange('color', newValue)}/></td>
                 </tr>
                 {processData.fuelType !== FuelType.Electric && (
                     <tr>
@@ -233,8 +230,8 @@ export default function Page() {
                                 displayIfNotEditFormat={'{0} л'}
                                 type={'number'}
                                 edited={processData.engineCapacity !== processDataInDb.engineCapacity}
-                                onReset={() => handleReset({progressDataPropName: 'engineCapacity'}) as EditableSupportedTypes}
-                                onChange={(newValue) => handleChangeSomething('engineCapacity', newValue)}/></td>
+                                onReset={() => handleEditableReset('engineCapacity')}
+                                onChange={newValue => handleEditableChange('engineCapacity', newValue)}/></td>
                     </tr>
                 )}
                 <tr>
@@ -242,16 +239,16 @@ export default function Page() {
                     <td className={processData.corpusType !== processDataInDb.corpusType ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.corpusType} type={'CorpusType'}
                                   edited={processData.corpusType !== processDataInDb.corpusType}
-                                  onReset={() => handleReset({progressDataPropName: 'corpusType'}) as EditableSupportedTypes}
-                                  onChange={(newValue) => handleChangeSomething('corpusType', newValue)}/></td>
+                                  onReset={() => handleEditableReset('corpusType')}
+                                  onChange={newValue => handleEditableChange('corpusType', newValue)}/></td>
                 </tr>
                 <tr>
                     <td>Вид топлива</td>
                     <td className={processData.fuelType !== processDataInDb.fuelType ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.fuelType} type={'FuelTypes'}
                                   edited={processData.fuelType !== processDataInDb.fuelType}
-                                  onReset={() => handleReset({progressDataPropName: 'fuelType'}) as EditableSupportedTypes}
-                                  onChange={(newValue) => handleChangeSomething('fuelType', newValue)}/></td>
+                                  onReset={() => handleEditableReset('fuelType')}
+                                  onChange={newValue => handleEditableChange('fuelType', newValue)}/></td>
                 </tr>
                 <tr>
                     <td>Количество единиц товара на складе</td>
@@ -263,8 +260,8 @@ export default function Page() {
                                 minNumberValue: 0
                             }}
                             edited={processData.count !== processDataInDb.count}
-                            onReset={() => handleReset({progressDataPropName: 'count'}) as EditableSupportedTypes}
-                            onChange={(newValue) => handleChangeSomething('count', newValue)}/></td>
+                            onReset={() => handleEditableReset('count')}
+                            onChange={newValue => handleEditableChange('count', newValue)}/></td>
                 </tr>
                 <tr>
                     <td style={{backgroundColor: 'rgb(141, 248, 141)'}}>Цена за стандартную комплектацию</td>
@@ -279,8 +276,8 @@ export default function Page() {
                             }}
                             displayIfNotEditFormat={'{0} грн'}
                             edited={processData.price !== processDataInDb.price}
-                            onReset={() => handleReset({progressDataPropName: 'price'}) as EditableSupportedTypes}
-                            onChange={(newValue) => handleChangeSomething('price', newValue)}/></td>
+                            onReset={() => handleEditableReset('price')}
+                            onChange={newValue => handleEditableChange('price', newValue)}/></td>
                 </tr>
                 </tbody>
             </table>
@@ -289,11 +286,14 @@ export default function Page() {
                     additionalCarOptions={processData.additionalCarOptions}
                     markAsEditedTypes={getMarkAsEditedTypes()}
                     // @ts-ignore
-                    onReset={(optionType) => handleReset({progressDataPropName: 'additionalCarOptions', optionType})}
-                    onChange={optionsWithEnabled =>
-                        handleChangeSomething('additionalCarOptions',
+                    onReset={async (optionType) =>
+                        await handleReset({progressDataPropName: 'additionalCarOptions', optionType})}
+                    onChange={async optionsWithEnabled => {
+                        await handleChangeSomething('additionalCarOptions',
                             optionsWithEnabled.filter(e => e.enabled)
-                                .map(optionWithEnabled => optionWithEnabled.additionalCarOption))}/>
+                                .map(optionWithEnabled => optionWithEnabled.additionalCarOption));
+                        return;
+                    }}/>
             </div>
             <div className={'mb-2'}>
                 <SaveChangesButton onClick={handleSaveChangesButton}/>
@@ -306,9 +306,9 @@ export default function Page() {
         return Object.values(AdditionalCarOptionType)
             .filter(e => typeof e === 'number')
             .filter(optionType => {
-                const option = processData.additionalCarOptions
-                    .find(option => option.type === optionType);
-                const optionInDb = processDataInDb.additionalCarOptions
+                    const option = processData.additionalCarOptions
+                        .find(option => option.type === optionType);
+                    const optionInDb = processDataInDb.additionalCarOptions
                         .find(option => option.type === optionType);
 
                     if (option !== undefined && optionInDb !== undefined) {
@@ -326,6 +326,6 @@ export default function Page() {
     }
 }
 
-function SaveChangesButton({onClick} : {onClick?: MouseEventHandler<HTMLButtonElement>}) {
+function SaveChangesButton({onClick}: { onClick?: MouseEventHandler<HTMLButtonElement> }) {
     return (<button className={'btn btn-lg btn-outline-success w-100'} onClick={onClick}>Сохранить изменения</button>)
 }
