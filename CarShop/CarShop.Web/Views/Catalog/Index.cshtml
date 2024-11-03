@@ -2,7 +2,7 @@
 @model CarShop.Web.Models.Catalog.CatalogViewModel
 <div class="text-center mt-2">
 	<!-- /* кнопка яка відкриває шторку зліва*/ -->
-	<button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+	<button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" onclick="check()">
 		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
 			<path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
 		</svg>
@@ -72,7 +72,7 @@
 	@await Html.PartialAsync("_PageButtonsToolbar", Model)
 }
 <!-- /* Форма що знаходиться в шторкі */ -->
-<form method="get" onsubmit="onSearchFormSubmit(event)" onchange="check()">
+<form method="get" onsubmit="onSearchFormSubmit(event)" oninput="check()">
 	<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
 		<div class="offcanvas-header">
 
