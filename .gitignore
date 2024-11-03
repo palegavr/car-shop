@@ -401,3 +401,4 @@ FodyWeavers.xsd
 /CarShop/data/
 /CarShop/CarShop.Web/wwwroot/images/
 /CarShop/.idea/
+/CarShop/scripts/venv/

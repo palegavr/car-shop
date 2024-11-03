@@ -1,7 +1,6 @@
 using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
-using CarShop.ServiceDefaults.ServiceInterfaces.FileService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace CarShop.ApiGateway;
@@ -19,9 +18,14 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddControllers();
-        builder.Services.AddHttpClient<FileServiceClient>(FileServiceClient.ConfigureClient);
         builder.Services.AddHttpClient<CarStorageClient>(CarStorageClient.ConfigureClient);
         builder.Services.AddHttpClient<AdminServiceClient>(AdminServiceClient.ConfigureClient);
+        builder.Services.AddGrpcClient<FileService.Grpc.FileService.FileServiceClient>(options =>
+        {
+            options.Address = new Uri(ServiceAddresses.FileServiceUrl);
+        });
+        
+        
         builder.Services.AddAuthorization();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>

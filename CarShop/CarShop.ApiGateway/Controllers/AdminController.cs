@@ -1,10 +1,11 @@
 using System.Net.Mime;
 using System.Security.Claims;
+using CarShop.FileService.Grpc;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
 using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
-using CarShop.ServiceDefaults.ServiceInterfaces.FileService;
 using CarShop.ServiceDefaults.Utils;
+using Google.Protobuf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,34 +13,31 @@ namespace CarShop.ApiGateway.Controllers;
 
 [Authorize]
 [Route("api/[controller]")]
-public class AdminController
-    (FileServiceClient _fileServiceClient,
-        CarStorageClient _carStorageClient): ControllerBase
+public class AdminController(
+    FileService.Grpc.FileService.FileServiceClient _fileServiceClient,
+    CarStorageClient _carStorageClient) : ControllerBase
 {
     [HttpPost]
     [Route("uploadimage")]
     [Consumes(MediaTypeNames.Multipart.FormData)]
+    [DisableRequestSizeLimit]
     public async Task<IActionResult> UploadImageAsync([FromForm(Name = "images")] IFormFileCollection formFiles)
     {
         List<string> publicPathes = new(formFiles.Count);
         foreach (IFormFile formFile in formFiles)
         {
-            byte[] buffer = new byte [formFile.Length];
-            if ((await formFile.OpenReadStream().ReadAsync(buffer, 0, buffer.Length)) == buffer.Length)
+            var result = await _fileServiceClient.SaveCatalogImageAsync(new SaveCatalogImageRequest
             {
-                var publicPath = await _fileServiceClient.SaveCatalogImageAsync(new SaveCatalogImageRequest
-                {
-                    ImageBytes = buffer,
-                    FileExtention = Path.GetExtension(formFile.FileName)
-                });
+                ImageBytes = await ByteString.FromStreamAsync(formFile.OpenReadStream()),
+                FileExtention = Path.GetExtension(formFile.FileName)
+            });
 
-                if (publicPath is not null)
-                {
-                    publicPathes.Add(publicPath);
-                }
+            if (result.Result == SaveCatalogImageResult.Success)
+            {
+                publicPathes.Add(result.PublicPath);
             }
         }
-        
+
         return Ok(publicPathes);
     }
 
@@ -81,7 +79,7 @@ public class AdminController
         };
 
         await _carStorageClient.UpdateOrCreateCarEditProcessAsync(carEditProcess);
-        
+
         return Ok();
     }
 
@@ -139,11 +137,11 @@ public class AdminController
         {
             return Problem();
         }
-        
+
         foreach (var carConfiguration in carConfigurations)
         {
             bool[] conditions = new bool[4];
-            
+
             var airConditionerOption = carEditProcess.Process.AdditionalCarOptions
                 .SingleOrDefault(o => o.Type == AdditionalCarOptionType.AirConditioner);
             var heatedDriversSeatOption = carEditProcess.Process.AdditionalCarOptions
@@ -152,7 +150,7 @@ public class AdminController
                 .SingleOrDefault(o => o.Type == AdditionalCarOptionType.SeatHeightAdjustment);
             var differentCarColorOption = carEditProcess.Process.AdditionalCarOptions
                 .SingleOrDefault(o => o.Type == AdditionalCarOptionType.DifferentCarColor);
-            
+
             conditions[0] = (carConfiguration.AirConditioner && airConditionerOption == null) ||
                             (!carConfiguration.AirConditioner && airConditionerOption?.IsRequired == true);
             conditions[1] = (carConfiguration.HeatedDriversSeat && heatedDriversSeatOption == null) ||
@@ -161,15 +159,14 @@ public class AdminController
                             (!carConfiguration.SeatHeightAdjustment && seatHeightAdjustmentOption?.IsRequired == true);
             conditions[3] = (carConfiguration.DifferentCarColor is not null && differentCarColorOption == null) ||
                             (carConfiguration.DifferentCarColor is null && differentCarColorOption?.IsRequired == true);
-            
+
             if (conditions.Contains(true))
             {
                 carConfiguration.IsAvaliable = false;
                 await _carStorageClient.UpdateCarConfigurationAsync(carConfiguration);
             }
-            
         }
-        
+
         return Ok();
     }
 
@@ -182,7 +179,7 @@ public class AdminController
         {
             return NotFound();
         }
-        
+
         bool deleted = await _carStorageClient.DeleteCarAsync(id);
         return deleted ? Ok() : Problem();
     }

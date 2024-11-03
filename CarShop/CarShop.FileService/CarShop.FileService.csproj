@@ -8,6 +8,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Protobuf Include="Protos\file_service.proto" GrpcServices="Server"/>
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="Grpc.AspNetCore" Version="2.67.0-pre1" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.6"/>
         <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0"/>
     </ItemGroup>
