@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+option csharp_namespace = "CarShop.AdminService.Grpc";
+
+package car_shop.admin_service.admin_service;
+
+service AdminService {
+  rpc CreateAccount(CreateAccountRequest)
+      returns (CreateAccountReply);
+  rpc Login(LoginRequest)
+      returns (LoginReply);
+  rpc UpdateTokens(UpdateTokensRequest)
+      returns (UpdateTokensReply);
+  rpc BanAccount(BanAccountRequest)
+      returns (BanAccountReply);
+  rpc UnbanAccount(UnbanAccountRequest)
+      returns (UnbanAccountReply);
+}
+
+// + UnbanAccount
+message UnbanAccountRequest {
+  int64 account_id = 1;
+}
+
+message UnbanAccountReply {
+  UnbanAccountResult result = 1;
+  
+  enum UnbanAccountResult {
+    UNDEFINED = 0;
+    ACCOUNT_NOT_FOUND = 1;
+    ACCOUNT_NOT_BANNED = 2;
+    SUCCESS = 3;
+  }
+}
+// - UnbanAccount
+
+// + BanAccount
+message BanAccountRequest {
+  int64 account_id = 1;
+}
+
+message BanAccountReply {
+  BanAccountResult result = 1;
+  
+  enum BanAccountResult {
+    UNDEFINED = 0;
+    ACCOUNT_NOT_FOUND = 1;
+    ACCOUNT_ALREADY_BANNED = 2;
+    SUCCESS = 3;
+  }
+}
+// - BanAccount
+
+// + UpdateTokens
+message UpdateTokensRequest {
+  string refresh_token = 1;
+}
+
+message UpdateTokensReply {
+  UpdateTokensResult result = 1;
+  optional string access_token = 2;
+  optional string refresh_token = 3;
+  
+  enum UpdateTokensResult {
+    UNDEFINED = 0;
+    BAD_REQUEST = 1;
+    SESSION_NOT_FOUND = 2;
+    SUCCESS = 3;
+  }
+}
+// - UpdateTokens
+
+// + Login
+message LoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message LoginReply {
+  LoginResult result = 1;
+  optional string access_token = 2;
+  optional string refresh_token = 3;
+  
+  enum LoginResult {
+    UNDEFINED = 0;
+    BAD_REQUEST = 1;
+    ACCOUNT_NOT_FOUND = 2;
+    ACCOUNT_BANNED = 3;
+    INCORRECT_PASSWORD = 4;
+    SUCCESS = 5;
+  }
+}
+// - Login
+
+// + CreateAccount
+message CreateAccountRequest {
+  string email = 1;
+  string password = 2;
+  int32 priority = 3;
+}
+
+message CreateAccountReply {
+  CreateAccountResult result = 1;
+  
+  enum CreateAccountResult {
+    UNDEFINED = 0;
+    BAD_REQUEST = 1;
+    USER_WITH_THIS_EMAIL_ALREADY_EXISTS = 2;
+    SUCCESS = 3;
+  }
+}
+// - CreateAccount
+

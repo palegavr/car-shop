@@ -36,7 +36,7 @@ namespace CarShop.AdminService.Repositories
             {
                 Email = email, 
                 Password = password, 
-                Roles = roles ?? Constants.DEFAULT_ADMIN_ROLES,
+                Roles = roles ?? Constants.DefaultAdminRoles,
                 Priority = priority
             });
             await _db.SaveChangesAsync();

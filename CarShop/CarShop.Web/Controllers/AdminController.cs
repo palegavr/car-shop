@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Mime;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using CarShop.AdminService.Grpc;
 using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
@@ -15,11 +16,14 @@ using CarShop.Web.Models;
 using CarShop.Web.Models.Admin;
 using Microsoft.AspNetCore.Authorization;
 using static System.Net.Mime.MediaTypeNames;
+using LoginRequest = CarShop.AdminService.Grpc.LoginRequest;
 
 namespace CarShop.Web.Controllers
 {
 	[Route("[controller]")]
-	public class AdminController(CarStorageClient _carStorageClient, AdminServiceClient _adminServiceClient) : Controller
+	public class AdminController(
+		CarStorageClient _carStorageClient, 
+		AdminService.Grpc.AdminService.AdminServiceClient _adminServiceClient) : Controller
 	{
 		public static readonly string[] ALLOWED_IMAGES_EXTENTIONS = ["jpg", "jpeg", "png"];
 
@@ -105,26 +109,26 @@ namespace CarShop.Web.Controllers
 			[FromForm(Name = "email")] string login, 
 			[FromForm(Name = "password")] string password)
 		{
-			var responce = await _adminServiceClient.LoginAsync(login, password);
-			if (responce.StatusCode == HttpStatusCode.OK)
+			var response = await _adminServiceClient.LoginAsync(new LoginRequest
 			{
-				TokensPairResponce tokensPairResponce 
-					= (await responce.Content.ReadFromJsonAsync<TokensPairResponce>())!;
-				
-				Response.Cookies.SetAccessTokenCookie(tokensPairResponce.AccessToken);
-				Response.Cookies.SetRefreshTokenCookie(tokensPairResponce.RefreshToken);
+				Email = login ?? string.Empty,
+				Password = password ?? string.Empty
+			});
+			
+			if (response.Result == LoginReply.Types.LoginResult.Success)
+			{
+				Response.Cookies.SetAccessTokenCookie(response.AccessToken);
+				Response.Cookies.SetRefreshTokenCookie(response.RefreshToken);
 				return Redirect("/admin");
 			}
-			else
+
+			var viewModel = new LoginViewModel
 			{
-				var viewModel = new LoginViewModel
-				{
-					ErrorMessage = "Не удалось войти в аккаунт.",
-					Login = login,
-					Password = password
-				};
-				return View(viewModel);
-			}
+				ErrorMessage = "Не удалось войти в аккаунт.",
+				Login = login,
+				Password = password
+			};
+			return View(viewModel);
 		}
 
 		[Authorize]

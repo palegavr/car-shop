@@ -19,10 +19,13 @@ public class Program
         builder.Services.AddSwaggerGen();
         builder.Services.AddControllers();
         builder.Services.AddHttpClient<CarStorageClient>(CarStorageClient.ConfigureClient);
-        builder.Services.AddHttpClient<AdminServiceClient>(AdminServiceClient.ConfigureClient);
         builder.Services.AddGrpcClient<FileService.Grpc.FileService.FileServiceClient>(options =>
         {
             options.Address = new Uri(ServiceAddresses.FileServiceUrl);
+        });
+        builder.Services.AddGrpcClient<AdminService.Grpc.AdminService.AdminServiceClient>(options =>
+        {
+            options.Address = new Uri(ServiceAddresses.AdminServiceUrl);
         });
         
         

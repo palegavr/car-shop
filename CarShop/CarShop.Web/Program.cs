@@ -20,7 +20,10 @@ public class Program
         });
 
         builder.Services.AddHttpClient<CarStorageClient>(CarStorageClient.ConfigureClient);
-        builder.Services.AddHttpClient<AdminServiceClient>(AdminServiceClient.ConfigureClient);
+        builder.Services.AddGrpcClient<AdminService.Grpc.AdminService.AdminServiceClient>(options =>
+        {
+            options.Address = new Uri(ServiceAddresses.AdminServiceUrl);
+        });
 
         builder.Services.AddAuthorization();
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
