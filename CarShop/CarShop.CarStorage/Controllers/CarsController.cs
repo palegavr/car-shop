@@ -79,7 +79,7 @@ namespace CarShop.CarStorage.Controllers
         public async Task<IActionResult> DeleteCarAsync([FromRoute(Name = "id")] long id)
         {
             await _carsRepository.DeleteCarAsync(id);
-            return Ok(new {Id = id});
+            return Ok();
         }
 
         [HttpGet]

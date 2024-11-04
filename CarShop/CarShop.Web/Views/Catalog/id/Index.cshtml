@@ -25,7 +25,7 @@
 			@foreach (string imgUrl in car.BigImageURLs)
 			{
 				<div class="carousel-item @(imgUrl == car.BigImageURLs[0] ? "active" : "")">
-					<img src="@imgUrl" style="height: 400px; max-width: 1000px;" class="d-block  mx-auto">
+					<img src="@imgUrl" style="max-height: 400px; max-width: 1000px;" class="d-block  mx-auto">
 				</div>
 			}
 		</div>

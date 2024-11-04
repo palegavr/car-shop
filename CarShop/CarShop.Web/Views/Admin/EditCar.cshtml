@@ -1,0 +1,15 @@
+@model CarShop.Web.Models.Admin.EditCarViewModel
+
+@section HeadContent
+{
+    @Html.Raw(Model.HeadHtmlContent)
+}
+<script>
+    window.carShopData = {
+        processDataInDbJsonEncoded: JSON.stringify(@Html.Raw(Model.ProcessDataInDbJsonEncoded)),
+        currentProcessDataJsonEncoded: JSON.stringify(@Html.Raw(Model.CurrentProcessDataJsonEncoded)),
+        carId: @Model.CarId,
+        navHtml: document.getElementsByTagName('nav')[0]
+    };
+</script>
+@Html.Raw(Model.BodyHtmlContent)

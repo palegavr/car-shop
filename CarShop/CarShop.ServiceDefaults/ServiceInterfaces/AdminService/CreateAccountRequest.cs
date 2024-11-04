@@ -18,5 +18,8 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.AdminService
         [Required]
         [ModelBinder(Name = "password")]
         public string Password { get; set; }
+        
+        [Range(1, 2000000000)]
+        public int Priority { get; set; }
     }
 }

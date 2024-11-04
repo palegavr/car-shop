@@ -2,7 +2,7 @@
 @model CarShop.Web.Models.Catalog.CatalogViewModel
 <div class="text-center mt-2">
 	<!-- /* кнопка яка відкриває шторку зліва*/ -->
-	<button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample">
+	<button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" onclick="check()">
 		<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
 			<path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
 		</svg>
@@ -69,25 +69,10 @@
 
 @if (Model.PagesCount > 1)
 {
-	<div class="btn-toolbar mx-auto" role="toolbar" aria-label="Toolbar with button groups">
-		<div class="btn-group mx-auto pb-3" role="group" aria-label="First group">
-			@for(int i = 1; i <= Model.PagesCount; i++)
-			{
-				@if (i == Model.CurrentPage)
-				{
-					<a asp-controller="Catalog" asp-action="Index" asp-route-page="@i" class="btn btn-primary page-item active" style="font-size: 8mm;">@i</a>
-				}
-				else
-				{
-					<a asp-controller="Catalog" asp-action="Index" asp-route-page="@i" class="btn btn-primary" style="font-size: 8mm;">@i</a>
-				}
-			}
-		</div>
-	</div>
+	@await Html.PartialAsync("_PageButtonsToolbar", Model)
 }
-
 <!-- /* Форма що знаходиться в шторкі */ -->
-<form method="get" onsubmit="onSearchFormSubmit(event)" onchange="check()">
+<form method="get" onsubmit="onSearchFormSubmit(event)" oninput="check()">
 	<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasExample" aria-labelledby="offcanvasExampleLabel">
 		<div class="offcanvas-header">
 
@@ -103,10 +88,10 @@
 			</div>
 			<div class="mb-3">
 				<label for="exampleFormControlInput1" class="form-label">Объём двигателя</label>
-				<input type="number" step="0.01" min="1" class="form-control mb-2" name="minimum_engine_capacity" id="e1xampleFormControlInput2" placeholder="Минимальный объём двигателя"
+				<input type="number" step="0.01" min="0.01" class="form-control mb-2" name="minimum_engine_capacity" id="e1xampleFormControlInput2" placeholder="Минимальный объём двигателя"
 				       value="@Model.GetCarsOptions.MinimumEngineCapacity">
 
-				<input type="number" step="0.01" min="1" class="form-control" name="maximum_engine_capacity" id="e1xampleFormControlInput3" placeholder="Максимальный объём двигателя"
+				<input type="number" step="0.01" min="0.01" class="form-control" name="maximum_engine_capacity" id="e1xampleFormControlInput3" placeholder="Максимальный объём двигателя"
 				       value="@Model.GetCarsOptions.MaximumEngineCapacity">
 			</div>
 

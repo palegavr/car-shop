@@ -147,6 +147,8 @@ namespace CarShop.CarStorage.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CarId");
+
                     b.ToTable("CarEditProcesses");
                 });
 
@@ -170,6 +172,12 @@ namespace CarShop.CarStorage.Migrations
 
             modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.CarEditProcess", b =>
                 {
+                    b.HasOne("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.Car", null)
+                        .WithMany("CarEditProcesses")
+                        .HasForeignKey("CarId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.OwnsOne("CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway.CarEditProcessData", "Process", b1 =>
                         {
                             b1.Property<long>("CarEditProcessId")
@@ -241,6 +249,8 @@ namespace CarShop.CarStorage.Migrations
                     b.Navigation("AdditionalCarOptions");
 
                     b.Navigation("CarConfigurations");
+
+                    b.Navigation("CarEditProcesses");
                 });
 #pragma warning restore 612, 618
         }

@@ -41,6 +41,13 @@ namespace CarShop.AdminService.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<int>("Priority")
+                        .HasColumnType("integer");
+
+                    b.Property<string[]>("Roles")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
                     b.HasKey("Id");
 
                     b.ToTable("Admins");
@@ -51,7 +58,9 @@ namespace CarShop.AdminService.Migrations
                             Id = 1L,
                             Banned = false,
                             Email = "admin@admin.com",
-                            Password = "$argon2id$v=19$m=65536,t=3,p=1$iICM/5uHlAHETRq8PtSHxg$jnk1HHpTP4voBpY80g5LCciaToO9WNT4X4IM7FL2KKk"
+                            Password = "$argon2id$v=19$m=65536,t=3,p=1$iICM/5uHlAHETRq8PtSHxg$jnk1HHpTP4voBpY80g5LCciaToO9WNT4X4IM7FL2KKk",
+                            Priority = 0,
+                            Roles = new string[0]
                         });
                 });
 

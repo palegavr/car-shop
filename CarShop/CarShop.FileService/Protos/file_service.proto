@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option csharp_namespace = "CarShop.FileService.Grpc";
+
+package car_shop.file_service.file_service;
+
+service FileService {
+  rpc SaveCatalogImage(SaveCatalogImageRequest) 
+      returns (SaveCatalogImageReply);
+}
+
+message SaveCatalogImageRequest {
+  bytes image_bytes = 1;
+  string file_extention = 2;
+}
+
+message SaveCatalogImageReply {
+  SaveCatalogImageResult result = 1;
+  string public_path = 2;
+}
+
+enum SaveCatalogImageResult {
+  UNDEFINED = 0;
+  SUCCESS = 1;
+  UNACCEPTABLE_FILE_EXTENTION = 2;
+}

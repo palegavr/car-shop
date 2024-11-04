@@ -8,7 +8,18 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Protobuf Include="../CarShop.FileService/Protos/file_service.proto" GrpcServices="Client" />
+  </ItemGroup>
+
+  <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.67.0-pre1" />
+    <PackageReference Include="Google.Protobuf" Version="3.29.0-rc2" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.67.0-pre1" />
+    <PackageReference Include="Grpc.Tools" Version="2.67.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
 
     <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="8.8.0" />

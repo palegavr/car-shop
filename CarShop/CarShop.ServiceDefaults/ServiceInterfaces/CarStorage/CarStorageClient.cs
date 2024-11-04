@@ -91,6 +91,13 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
 	        var responce = await _httpClient.PatchAsJsonAsync($"/api/cars/{carId}", updateCarRequest, cancellationToken);
 	        return responce.IsSuccessStatusCode;
         }
+        
+        public async Task<bool> DeleteCarAsync(long carId, CancellationToken cancellationToken = default)
+        {
+	        var responce = await _httpClient
+		        .DeleteAsync($"/api/cars/{carId}", cancellationToken);
+	        return responce.IsSuccessStatusCode;
+        }
 
         public async Task<CarConfiguration> AddCarConfigurationAsync(
 	        CarConfiguration carConfiguration, CancellationToken cancellationToken = default)

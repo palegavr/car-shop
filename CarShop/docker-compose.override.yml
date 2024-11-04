@@ -10,7 +10,7 @@ services:
       #- "80:8080"
       #- "443:8081"
     volumes:
-      - ./CarShop.Web/wwwroot:/app/wwwroot
+      - ./CarShop.Web/wwwroot/images/route:/app/wwwroot/images/route
   carshop.carstorage:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
