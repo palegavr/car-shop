@@ -15,6 +15,42 @@ namespace Microsoft.Extensions.Hosting;
 // To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
 public static class Extensions
 {
+    public static string ToDisplayString(this CorpusType corpusType)
+    {
+        return corpusType switch
+        {
+            CorpusType.Sedan => "Седан",
+            CorpusType.Hatchback => "Хэтчбек",
+        };
+    }
+    
+    public static string ToDisplayString(this FuelType fuelType)
+    {
+        var fuelTypesDictionary = new Dictionary<FuelType, Func<string>>
+        {
+            { FuelType.Petrol, () => SingleFuelTypeToDisplayString(FuelType.Petrol) },
+            { FuelType.Diesel, () => SingleFuelTypeToDisplayString(FuelType.Diesel) },
+            { FuelType.Gas, () => SingleFuelTypeToDisplayString(FuelType.Gas) },
+            { FuelType.Electric, () => SingleFuelTypeToDisplayString(FuelType.Electric) }
+        };
+
+        return string.Join(", ", fuelTypesDictionary
+            .Where(kv => fuelType.HasFlag(kv.Key))
+            .Select(kv => kv.Value()));
+    }
+
+    private static string SingleFuelTypeToDisplayString(FuelType fuelType)
+    {
+        return fuelType switch
+        {
+            FuelType.Diesel => "Дизель",
+            FuelType.Petrol => "Бензин",
+            FuelType.Gas => "Газ",
+            FuelType.Electric => "Электрика",
+            _ => string.Empty,
+        };
+    }
+    
     public static string ToDisplayString(this SortBy sortBy)
     {
         return sortBy switch

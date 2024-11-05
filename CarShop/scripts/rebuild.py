@@ -30,6 +30,6 @@ with open("../docker-compose.yml", 'r') as stream:
             continue
 
         subprocess.call(['docker-compose', 'up', '--build', '-d', services[service_index - 1]])
-        break
+        #break
 
 
