@@ -1,4 +1,4 @@
-﻿using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
+﻿using CarShop.CarStorageService.Grpc;
 
 namespace CarShop.Web.Models.Catalog
 {
@@ -8,6 +8,6 @@ namespace CarShop.Web.Models.Catalog
         public bool IsSearchResultsPage { get; set; } = false;
 		public int CurrentPage { get; set; } = 1;
 		public int PagesCount { get; set; } = 1;
-        public GetCarsOptions GetCarsOptions { get; set; }
-    }
+		public GetCarsRequest GetCarsOptions { get; set; } = null!;
+	}
 }

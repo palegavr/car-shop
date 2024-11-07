@@ -1,5 +1,4 @@
-﻿using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
-using Microsoft.AspNetCore.Connections.Features;
+﻿using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Net;
@@ -7,23 +6,23 @@ using System.Net.Mime;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using CarShop.AdminService.Grpc;
+using CarShop.CarStorageService.Grpc;
+using CarShop.FileService.Grpc;
 using CarShop.ServiceDefaults;
-using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
-using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
-using CarShop.ServiceDefaults.ServiceInterfaces.Web;
 using CarShop.ServiceDefaults.Utils;
 using CarShop.Web.Models;
 using CarShop.Web.Models.Admin;
+using Google.Protobuf;
 using Microsoft.AspNetCore.Authorization;
-using static System.Net.Mime.MediaTypeNames;
 using LoginRequest = CarShop.AdminService.Grpc.LoginRequest;
 
 namespace CarShop.Web.Controllers
 {
 	[Route("[controller]")]
 	public class AdminController(
-		CarStorageClient _carStorageClient, 
-		AdminService.Grpc.AdminService.AdminServiceClient _adminServiceClient) : Controller
+		CarStorageService.Grpc.CarStorageService.CarStorageServiceClient _carStorageClient, 
+		AdminService.Grpc.AdminService.AdminServiceClient _adminServiceClient,
+		FileService.Grpc.FileService.FileServiceClient _fileServiceClient) : Controller
 	{
 		public static readonly string[] ALLOWED_IMAGES_EXTENTIONS = ["jpg", "jpeg", "png"];
 
@@ -46,25 +45,28 @@ namespace CarShop.Web.Controllers
 		[Consumes(MediaTypeNames.Multipart.FormData)]
 		public async Task<IActionResult> AddCarAsync([FromForm] AddCarFormModel addCarFormModel)
 		{
-			var additionalCarOptions = addCarFormModel.AdditionalCarOptions;
-			if (!ModelState.IsValid ||
-			    (addCarFormModel.FuelType != FuelType.Electric && addCarFormModel.EngineCapacity == 0) ||
-			    !HaveAllowedImageExtention(addCarFormModel)||
-			    (additionalCarOptions.Length > 0 && additionalCarOptions[0].Id < 0) ||
-			    additionalCarOptions // Есть элементы с одинаковым типом
-				    .GroupBy(option => option.Type)
-				    .Where(group => group.Count() > 1)
-				    .Select(group => group.Key).Any())
+			if (!ModelState.IsValid)
 			{
 				return BadRequest();
 			}
-
+			
+			// Загружаем картинку для /catalog, если была отправлена пользователем
 			string imageUrl = string.Empty;
 			if (addCarFormModel.Image is not null && addCarFormModel.Image.Length > 0)
 			{
-				imageUrl = (await SaveImageAsync(addCarFormModel.Image)).Split("wwwroot", 2)[1];
+				var saveCatalogImageReply = await _fileServiceClient.SaveCatalogImageAsync(new()
+				{
+					ImageBytes = await ByteString.FromStreamAsync(addCarFormModel.Image.OpenReadStream()),
+					FileExtention = Path.GetExtension(addCarFormModel.Image.FileName)
+				});
+
+				if (saveCatalogImageReply.Result == SaveCatalogImageResult.Success)
+				{
+					imageUrl = saveCatalogImageReply.PublicPath;
+				}
 			}
 
+			// Загружаем картинки для /catalog/{id}, если были отправлены пользователем
 			List<string> bigImageUrls = new();
 			if (addCarFormModel.BigImages is not null)
 			{
@@ -72,28 +74,55 @@ namespace CarShop.Web.Controllers
 				{
 					if (bigImage.Length > 0)
 					{
-						bigImageUrls.Add((await SaveImageAsync(bigImage)).Split("wwwroot", 2)[1]);
+						var saveCatalogImageReply = await _fileServiceClient.SaveCatalogImageAsync(new()
+						{
+							ImageBytes = await ByteString.FromStreamAsync(bigImage.OpenReadStream()),
+							FileExtention = Path.GetExtension(bigImage.FileName)
+						});
+
+						if (saveCatalogImageReply.Result == SaveCatalogImageResult.Success)
+						{
+							bigImageUrls.Add(saveCatalogImageReply.PublicPath);
+						}
 					}
 				}
 			}
-            
 
-            Car carInDatabase = await _carStorageClient.AddCarAsync(new Car
+			var addCarReply = await _carStorageClient.AddCarAsync(new AddCarRequest
 			{
-				Brand = addCarFormModel.Brand,
-				Model = addCarFormModel.Model,
-				PriceForStandartConfiguration = addCarFormModel.Price,
-				Color = addCarFormModel.Color,
-				EngineCapacity = addCarFormModel.EngineCapacity,
-				CorpusType = addCarFormModel.CorpusType,
-				FuelType = addCarFormModel.FuelType,
-				Count = addCarFormModel.Count,
-				ImageUrl = imageUrl,
-				BigImageURLs = bigImageUrls.ToArray(),
-				AdditionalCarOptions = additionalCarOptions.ToList()
+				Car = new Car
+				{
+					Brand = addCarFormModel.Brand,
+					Model = addCarFormModel.Model,
+					PriceForStandartConfiguration = addCarFormModel.Price,
+					Color = addCarFormModel.Color,
+					EngineCapacity = addCarFormModel.EngineCapacity,
+					CorpusType = addCarFormModel.CorpusType,
+					FuelType = addCarFormModel.FuelType,
+					Count = addCarFormModel.Count,
+					ImageUrl = imageUrl,
+					BigImageUrls = { bigImageUrls },
+					AdditionalCarOptions =
+					{
+						addCarFormModel.AdditionalCarOptions
+							.Select(optionPayload => new AdditionalCarOption
+							{
+								Type = optionPayload.Type,
+								IsRequired = optionPayload.IsRequired,
+								Price = optionPayload.Price
+							})
+					},
+				}
 			});
 
-			return Redirect($"/catalog/{carInDatabase.Id}");
+			if (addCarReply.Result == AddCarReply.Types.AddCarResult.BadRequest)
+			{
+				return BadRequest();
+			}
+			
+			var car = addCarReply.Car;
+
+			return Redirect($"/catalog/{car.Id}");
 		}
 
 		[HttpGet]
@@ -142,45 +171,83 @@ namespace CarShop.Web.Controllers
 				return Problem();
 			}
 
-			var carEditProcess = await _carStorageClient.GetCarEditProcessAsync(new GetCarEditProcessRequest
+			var getCarEditProcessReply = await _carStorageClient.GetCarEditProcessAsync(new()
 			{
 				AdminId = adminId.Value,
 				CarId = id
 			});
-			
-			var car = await _carStorageClient.GetCarAsync(id);
-			if (car is null)
+
+			var carEditProcess =
+				getCarEditProcessReply.Result == GetCarEditProcessReply.Types.GetCarEditProcessResult.Success
+					? getCarEditProcessReply.CarEditProcess
+					: null;
+
+			var getCarReply = await _carStorageClient.GetCarAsync(new()
+			{
+				CarId = id
+			});
+
+			if (getCarReply.Result == GetCarReply.Types.GetCarResult.CarNotFound)
 			{
 				return NotFound();
 			}
 
+			var car = getCarReply.Car;
+			
 			string html = await System.IO.File.ReadAllTextAsync("wwwroot/admin/editcar/id.html");
-
-			string processDataInDbJsonEncoded = JsonSerializer.Serialize(new CarEditProcessData
+			string processDataInDbJsonEncoded = JsonSerializer.Serialize(new
 			{
-				Brand = car.Brand,
-				Model = car.Model,
-				Color = car.Color,
-				EngineCapacity = car.EngineCapacity,
-				CorpusType = car.CorpusType,
-				FuelType = car.FuelType,
-				Count = car.Count,
-				AdditionalCarOptionsJson = JsonSerializer.Serialize(car.AdditionalCarOptions),
-				Image = car.ImageUrl,
-				BigImages = car.BigImageURLs,
-				Price = car.PriceForStandartConfiguration,
+				brand = car.Brand,
+				model = car.Model,
+				price = car.PriceForStandartConfiguration,
+				color = car.Color,
+				engineCapacity = car.EngineCapacity,
+				corpusType = car.CorpusType,
+				fuelType = car.FuelType,
+				count = car.Count,
+				imageUrl = car.ImageUrl,
+				bigImageUrls = car.BigImageUrls.ToArray(),
+				additionalCarOptions = JsonSerializer.Serialize(car.AdditionalCarOptions
+					.Select(option => new
+					{
+						type = option.Type,
+						price = option.Price,
+						isRequired = option.IsRequired
+					}).ToArray())
 			});
+
 			return View(new EditCarViewModel
 			{
 				BodyHtmlContent = ExtractTagContent(html, "body"), 
 				HeadHtmlContent = ExtractTagContent(html, "head"),
 				ProcessDataInDbJsonEncoded = processDataInDbJsonEncoded,
 				CurrentProcessDataJsonEncoded = carEditProcess is not null ? 
-					JsonSerializer.Serialize(carEditProcess.Process) : processDataInDbJsonEncoded,
+					JsonSerializer.Serialize(new
+					{
+						brand = carEditProcess.Data.Brand,
+						model = carEditProcess.Data.Model,
+						price = carEditProcess.Data.Price,
+						color = carEditProcess.Data.Color,
+						engineCapacity = carEditProcess.Data.EngineCapacity,
+						corpusType = carEditProcess.Data.CorpusType,
+						fuelType = carEditProcess.Data.FuelType,
+						count = carEditProcess.Data.Count,
+						imageUrl = carEditProcess.Data.ImageUrl,
+						bigImageUrls = carEditProcess.Data.BigImageUrls.ToArray(),
+						additionalCarOptions = JsonSerializer.Serialize(
+							carEditProcess.Data.AdditionalCarOptions
+							.Select(option => new
+							{
+								type = option.Type,
+								price = option.Price,
+								isRequired = option.IsRequired
+							}).ToArray())
+					})
+					: processDataInDbJsonEncoded,
 				CarId = id
 			});
 		}
-
+		
 		[NonAction]
 		private static string ExtractTagContent(string html, string tagName)
 		{
@@ -188,58 +255,6 @@ namespace CarShop.Web.Controllers
 			var regex = new Regex($"<{tagName}.*?>(.*?)</{tagName}>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
 			var match = regex.Match(html);
 			return match.Success ? match.Groups[1].Value : string.Empty;
-		}
-
-		[NonAction]
-		private bool HaveAllowedImageExtention(AddCarFormModel addCarFormModel)
-		{
-			if (addCarFormModel.Image is not null &&
-				!HaveAllowedImageExtention(addCarFormModel.Image))
-				return false;
-
-			if (addCarFormModel.BigImages is not null)
-			{
-                foreach (var bigImage in addCarFormModel.BigImages)
-                {
-					if (!HaveAllowedImageExtention(bigImage))
-						return false;
-                }
-            }
-
-			return true;
-		}
-
-		[NonAction]
-		private bool HaveAllowedImageExtention(IFormFile formFile)
-		{
-			var extention = Path.GetExtension(formFile.FileName);
-			return extention != "" && ALLOWED_IMAGES_EXTENTIONS.Contains(extention.Substring(1).ToLower());
-		}
-
-		[NonAction]
-		private async Task<string> SaveImageAsync(IFormFile fileForSaving)
-		{
-			var path = Path.Combine(Directory.GetCurrentDirectory(),
-					$"wwwroot/images/route/catalog");
-			
-			if (!Directory.Exists(path))
-			{
-				Directory.CreateDirectory(path);
-			}
-
-			Guid imageGuid = Guid.NewGuid();
-			while(Directory.GetFiles(path).Contains(imageGuid.ToString()))
-			{
-				imageGuid = Guid.NewGuid();
-			}
-
-			string imagePath = Path.Combine(path, imageGuid.ToString() + Path.GetExtension(fileForSaving.FileName));
-			using (var stream = new FileStream(imagePath, FileMode.Create))
-			{
-				await fileForSaving.CopyToAsync(stream);
-			}
-
-			return imagePath;
 		}
 	}
 }

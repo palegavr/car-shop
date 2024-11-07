@@ -1,9 +1,7 @@
 using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
-using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.Web.ModelBuilders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 
 namespace CarShop.Web;
 
@@ -19,10 +17,17 @@ public class Program
             options.ModelBinderProviders.Insert(0, new DoubleModelBinderProvider());
         });
 
-        builder.Services.AddHttpClient<CarStorageClient>(CarStorageClient.ConfigureClient);
+        builder.Services.AddGrpcClient<CarStorageService.Grpc.CarStorageService.CarStorageServiceClient>(options =>
+        {
+            options.Address = new Uri(ServiceAddresses.CarStorageServiceUrl);
+        });
         builder.Services.AddGrpcClient<AdminService.Grpc.AdminService.AdminServiceClient>(options =>
         {
             options.Address = new Uri(ServiceAddresses.AdminServiceUrl);
+        });
+        builder.Services.AddGrpcClient<FileService.Grpc.FileService.FileServiceClient>(options =>
+        {
+            options.Address = new Uri(ServiceAddresses.FileServiceUrl);
         });
 
         builder.Services.AddAuthorization();

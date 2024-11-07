@@ -1,6 +1,6 @@
-﻿@using CarShop.ServiceDefaults.ServiceInterfaces.AdminService
-@using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage
-@model CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.Car
+﻿@using CarShop.CarStorageService.Grpc
+@using CarShop.ServiceDefaults.ServiceInterfaces.AdminService
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @{
 	Car car = Model;
 	bool renderDeleteButton = User.IsInRole(Role.Admin.Car.Delete);
@@ -50,11 +50,11 @@
 	</div>
 }
 
-@if (car.BigImageURLs.Length > 0)
+@if (car.BigImageUrls.Count > 0)
 {
 	<div id="carouselExampleIndicators" class="carousel slide" style="background-color: darkgrey;">
 		<div class="carousel-indicators">
-			@for (int i = 0; i < car.BigImageURLs.Length; i++)
+			@for (int i = 0; i < car.BigImageUrls.Count; i++)
 			{
 				@if (i == 0)
 				{
@@ -68,9 +68,9 @@
 
 		</div>
 		<div class="carousel-inner">
-			@foreach (string imgUrl in car.BigImageURLs)
+			@foreach (string imgUrl in car.BigImageUrls)
 			{
-				<div class="carousel-item @(imgUrl == car.BigImageURLs[0] ? "active" : "")">
+				<div class="carousel-item @(imgUrl == car.BigImageUrls[0] ? "active" : "")">
 					<img src="@imgUrl" style="max-height: 400px; max-width: 1000px;" class="d-block  mx-auto">
 				</div>
 			}
@@ -101,7 +101,7 @@
 			<td>Цвет</td>
 			<td>@car.Color</td>
 		</tr>
-		@if (car.FuelType != FuelType.Electric)
+		@if (car.FuelType != Car.Types.FuelType.Electric)
 		{
 			<tr>
 				<td>Объём двигателя</td>

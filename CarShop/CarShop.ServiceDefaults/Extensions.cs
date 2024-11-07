@@ -1,4 +1,4 @@
-using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
+using CarShop.CarStorageService.Grpc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,23 +15,23 @@ namespace Microsoft.Extensions.Hosting;
 // To learn more about using this project, see https://aka.ms/dotnet/aspire/service-defaults
 public static class Extensions
 {
-    public static string ToDisplayString(this CorpusType corpusType)
+    public static string ToDisplayString(this Car.Types.CorpusType corpusType)
     {
         return corpusType switch
         {
-            CorpusType.Sedan => "Седан",
-            CorpusType.Hatchback => "Хэтчбек",
+            Car.Types.CorpusType.Sedan => "Седан",
+            Car.Types.CorpusType.Hatchback => "Хэтчбек",
         };
     }
     
-    public static string ToDisplayString(this FuelType fuelType)
+    public static string ToDisplayString(this Car.Types.FuelType fuelType)
     {
-        var fuelTypesDictionary = new Dictionary<FuelType, Func<string>>
+        var fuelTypesDictionary = new Dictionary<Car.Types.FuelType, Func<string>>
         {
-            { FuelType.Petrol, () => SingleFuelTypeToDisplayString(FuelType.Petrol) },
-            { FuelType.Diesel, () => SingleFuelTypeToDisplayString(FuelType.Diesel) },
-            { FuelType.Gas, () => SingleFuelTypeToDisplayString(FuelType.Gas) },
-            { FuelType.Electric, () => SingleFuelTypeToDisplayString(FuelType.Electric) }
+            { Car.Types.FuelType.Petrol, () => SingleFuelTypeToDisplayString(Car.Types.FuelType.Petrol) },
+            { Car.Types.FuelType.Diesel, () => SingleFuelTypeToDisplayString(Car.Types.FuelType.Diesel) },
+            { Car.Types.FuelType.Gas, () => SingleFuelTypeToDisplayString(Car.Types.FuelType.Gas) },
+            { Car.Types.FuelType.Electric, () => SingleFuelTypeToDisplayString(Car.Types.FuelType.Electric) }
         };
 
         return string.Join(", ", fuelTypesDictionary
@@ -39,36 +39,36 @@ public static class Extensions
             .Select(kv => kv.Value()));
     }
 
-    private static string SingleFuelTypeToDisplayString(FuelType fuelType)
+    private static string SingleFuelTypeToDisplayString(Car.Types.FuelType fuelType)
     {
         return fuelType switch
         {
-            FuelType.Diesel => "Дизель",
-            FuelType.Petrol => "Бензин",
-            FuelType.Gas => "Газ",
-            FuelType.Electric => "Электрика",
+            Car.Types.FuelType.Diesel => "Дизель",
+            Car.Types.FuelType.Petrol => "Бензин",
+            Car.Types.FuelType.Gas => "Газ",
+            Car.Types.FuelType.Electric => "Электрика",
             _ => string.Empty,
         };
     }
     
-    public static string ToDisplayString(this SortBy sortBy)
+    public static string ToDisplayString(this GetCarsRequest.Types.SortBy sortBy)
     {
         return sortBy switch
         {
-            SortBy.Brand => "Марка",
-            SortBy.EngineCapacity => "Объём двигателя",
-            SortBy.FuelType => "Вид топлива",
-            SortBy.CorpusType => "Вид корпуса",
-            SortBy.PriceForStandartConfiguration => "Цена"
+            GetCarsRequest.Types.SortBy.Brand => "Марка",
+            GetCarsRequest.Types.SortBy.EngineCapacity => "Объём двигателя",
+            GetCarsRequest.Types.SortBy.FuelType => "Вид топлива",
+            GetCarsRequest.Types.SortBy.CorpusType => "Вид корпуса",
+            GetCarsRequest.Types.SortBy.PriceForStandardConfiguration => "Цена"
         };
     }
 
-	public static string ToDisplayString(this SortType sortType)
+	public static string ToDisplayString(this GetCarsRequest.Types.SortType sortType)
 	{
 		return sortType switch
 		{
-			SortType.Ascending => "По возрастанию",
-            SortType.Descending => "По убыванию"
+			GetCarsRequest.Types.SortType.Ascending => "По возрастанию",
+            GetCarsRequest.Types.SortType.Descending => "По убыванию"
 		};
 	}
 

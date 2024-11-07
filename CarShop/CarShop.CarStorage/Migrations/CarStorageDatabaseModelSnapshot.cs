@@ -49,7 +49,7 @@ namespace CarShop.CarStorage.Migrations
 
                     b.HasIndex("CarId");
 
-                    b.ToTable("AdditionalCarOptions");
+                    b.ToTable("AdditionalCarOptions", (string)null);
                 });
 
             modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.Car", b =>
@@ -97,7 +97,7 @@ namespace CarShop.CarStorage.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cars");
+                    b.ToTable("Cars", (string)null);
                 });
 
             modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.CarConfiguration", b =>
@@ -128,7 +128,7 @@ namespace CarShop.CarStorage.Migrations
 
                     b.HasIndex("CarId");
 
-                    b.ToTable("CarConfigurations");
+                    b.ToTable("CarConfigurations", (string)null);
                 });
 
             modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.CarEditProcess", b =>
@@ -149,7 +149,7 @@ namespace CarShop.CarStorage.Migrations
 
                     b.HasIndex("CarId");
 
-                    b.ToTable("CarEditProcesses");
+                    b.ToTable("CarEditProcesses", (string)null);
                 });
 
             modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.AdditionalCarOption", b =>
@@ -178,7 +178,7 @@ namespace CarShop.CarStorage.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway.CarEditProcessData", "Process", b1 =>
+                    b.OwnsOne("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.CarEditProcess.Process#CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway.CarEditProcessData", "Process", b1 =>
                         {
                             b1.Property<long>("CarEditProcessId")
                                 .HasColumnType("bigint");
@@ -234,7 +234,7 @@ namespace CarShop.CarStorage.Migrations
 
                             b1.HasKey("CarEditProcessId");
 
-                            b1.ToTable("CarEditProcesses");
+                            b1.ToTable("CarEditProcesses", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("CarEditProcessId");

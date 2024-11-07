@@ -1,9 +1,9 @@
 using System.Net.Mime;
 using System.Security.Claims;
+using CarShop.ApiGateway.Models;
+using CarShop.CarStorageService.Grpc;
 using CarShop.FileService.Grpc;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
-using CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway;
-using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.ServiceDefaults.Utils;
 using Google.Protobuf;
 using Microsoft.AspNetCore.Authorization;
@@ -15,7 +15,7 @@ namespace CarShop.ApiGateway.Controllers;
 [Route("api/[controller]")]
 public class AdminController(
     FileService.Grpc.FileService.FileServiceClient _fileServiceClient,
-    CarStorageClient _carStorageClient) : ControllerBase
+    CarStorageService.Grpc.CarStorageService.CarStorageServiceClient _carStorageClient) : ControllerBase
 {
     [HttpPost]
     [Route("uploadimage")]
@@ -46,16 +46,9 @@ public class AdminController(
     [Consumes(MediaTypeNames.Application.Json)]
     public async Task<IActionResult> EditCarProcessAsync(
         [FromRoute] long id,
-        [FromBody] CarEditProcessData carEditProcessData)
+        [FromBody] CarEditProcessDataPayload carEditProcessDataPayload)
     {
-        var additionalCarOptions = carEditProcessData.AdditionalCarOptions;
-        if (!ModelState.IsValid ||
-            (carEditProcessData.FuelType != FuelType.Electric && carEditProcessData.EngineCapacity == 0) ||
-            (additionalCarOptions.Length > 0 && additionalCarOptions[0].Id < 0) ||
-            additionalCarOptions // Есть элементы с одинаковым типом
-                .GroupBy(option => option.Type)
-                .Where(group => group.Count() > 1)
-                .Select(group => group.Key).Any())
+        if (!ModelState.IsValid)
         {
             return BadRequest();
         }
@@ -66,19 +59,42 @@ public class AdminController(
             return Problem();
         }
 
-        if ((await _carStorageClient.GetCarAsync(id)) is null)
-        {
-            return NotFound();
-        }
-
         var carEditProcess = new CarEditProcess
         {
             AdminId = adminId.Value,
             CarId = id,
-            Process = carEditProcessData,
+            Data = new CarEditProcessData
+            {
+                Brand = carEditProcessDataPayload.Brand,
+                Model = carEditProcessDataPayload.Model,
+                Count = carEditProcessDataPayload.Count,
+                FuelType = carEditProcessDataPayload.FuelType,
+                ImageUrl = carEditProcessDataPayload.ImageUrl,
+                BigImageUrls = { carEditProcessDataPayload.BigImageUrls },
+                CorpusType = carEditProcessDataPayload.CorpusType,
+                Color = carEditProcessDataPayload.Color,
+                EngineCapacity = carEditProcessDataPayload.EngineCapacity,
+                Price = carEditProcessDataPayload.Price,
+                AdditionalCarOptions = { carEditProcessDataPayload.AdditionalCarOptions },
+            },
         };
 
-        await _carStorageClient.UpdateOrCreateCarEditProcessAsync(carEditProcess);
+        var updateOrCreateCarEditProcessReply = await _carStorageClient.UpdateOrCreateCarEditProcessAsync(new()
+        {
+            CarEditProcess = carEditProcess,
+        });
+
+        if (updateOrCreateCarEditProcessReply.Result ==
+            UpdateOrCreateCarEditProcessReply.Types.UpdateOrCreateCarEditProcessResult.CarNotFound)
+        {
+            return NotFound();
+        }
+
+        if (updateOrCreateCarEditProcessReply.Result ==
+            UpdateOrCreateCarEditProcessReply.Types.UpdateOrCreateCarEditProcessResult.BadRequest)
+        {
+            return BadRequest();
+        }
 
         return Ok();
     }
@@ -94,77 +110,52 @@ public class AdminController(
             return Problem();
         }
 
-        CarEditProcess? carEditProcess = await _carStorageClient.GetCarEditProcessAsync(new()
+        var getCarEditProcessReply =
+            await _carStorageClient.GetCarEditProcessAsync(new()
+            {
+                AdminId = adminId.Value,
+                CarId = id
+            });
+
+        if (getCarEditProcessReply.Result == GetCarEditProcessReply.Types.GetCarEditProcessResult.NotFound)
+        {
+            return NotFound();
+        }
+
+        var carEditProcess = getCarEditProcessReply.CarEditProcess;
+
+        var updateCarReply = await _carStorageClient.UpdateCarAsync(new()
+        {
+            CarId = carEditProcess.CarId,
+            CorpusType = carEditProcess.Data.CorpusType,
+            PriceForStandartConfiguration = carEditProcess.Data.Price,
+            Color = carEditProcess.Data.Color,
+            EngineCapacity = carEditProcess.Data.EngineCapacity,
+            Brand = carEditProcess.Data.Brand,
+            Model = carEditProcess.Data.Model,
+            Count = carEditProcess.Data.Count,
+            FuelType = carEditProcess.Data.FuelType,
+            ImageUrl = carEditProcess.Data.ImageUrl,
+            BigImageUrls = { carEditProcess.Data.BigImageUrls },
+            AdditionalCarOptions = { carEditProcess.Data.AdditionalCarOptions },
+            UpdateBigImageUrls = true,
+            UpdateAdditionalCarOptions = true
+        });
+
+        if (updateCarReply.Result != UpdateCarReply.Types.UpdateCarResult.Success)
+        {
+            return Problem();
+        }
+
+        var deleteCarEditProcessReply = await _carStorageClient.DeleteCarEditProcessAsync(new()
         {
             AdminId = adminId.Value,
             CarId = id
         });
 
-        if (carEditProcess is null)
-        {
-            return NotFound();
-        }
-
-        if (!await _carStorageClient.UpdateCarAsync(id, new UpdateCarRequest
-            {
-                Brand = carEditProcess.Process.Brand,
-                Model = carEditProcess.Process.Model,
-                Color = carEditProcess.Process.Color,
-                Count = carEditProcess.Process.Count,
-                FuelType = carEditProcess.Process.FuelType,
-                EngineCapacity = carEditProcess.Process.EngineCapacity,
-                CorpusType = carEditProcess.Process.CorpusType,
-                PriceForStandartConfiguration = carEditProcess.Process.Price,
-                ImageUrl = carEditProcess.Process.Image,
-                BigImageURLs = carEditProcess.Process.BigImages,
-                AdditionalCarOptionsJson = carEditProcess.Process.AdditionalCarOptionsJson,
-            }))
+        if (deleteCarEditProcessReply.Result != DeleteCarEditProcessReply.Types.DeleteCarEditProcessResult.Success)
         {
             return Problem();
-        }
-
-        if (!await _carStorageClient.DeleteCarEditProcessAsync(new DeleteEditProcessRequest
-            {
-                AdminId = adminId.Value,
-                CarId = id
-            }))
-        {
-            return Problem();
-        }
-
-        var carConfigurations = await _carStorageClient.GetCarConfigurationAsync(id);
-        if (carConfigurations is null)
-        {
-            return Problem();
-        }
-
-        foreach (var carConfiguration in carConfigurations)
-        {
-            bool[] conditions = new bool[4];
-
-            var airConditionerOption = carEditProcess.Process.AdditionalCarOptions
-                .SingleOrDefault(o => o.Type == AdditionalCarOptionType.AirConditioner);
-            var heatedDriversSeatOption = carEditProcess.Process.AdditionalCarOptions
-                .SingleOrDefault(o => o.Type == AdditionalCarOptionType.HeatedDriversSeat);
-            var seatHeightAdjustmentOption = carEditProcess.Process.AdditionalCarOptions
-                .SingleOrDefault(o => o.Type == AdditionalCarOptionType.SeatHeightAdjustment);
-            var differentCarColorOption = carEditProcess.Process.AdditionalCarOptions
-                .SingleOrDefault(o => o.Type == AdditionalCarOptionType.DifferentCarColor);
-
-            conditions[0] = (carConfiguration.AirConditioner && airConditionerOption == null) ||
-                            (!carConfiguration.AirConditioner && airConditionerOption?.IsRequired == true);
-            conditions[1] = (carConfiguration.HeatedDriversSeat && heatedDriversSeatOption == null) ||
-                            (!carConfiguration.HeatedDriversSeat && heatedDriversSeatOption?.IsRequired == true);
-            conditions[2] = (carConfiguration.SeatHeightAdjustment && seatHeightAdjustmentOption == null) ||
-                            (!carConfiguration.SeatHeightAdjustment && seatHeightAdjustmentOption?.IsRequired == true);
-            conditions[3] = (carConfiguration.DifferentCarColor is not null && differentCarColorOption == null) ||
-                            (carConfiguration.DifferentCarColor is null && differentCarColorOption?.IsRequired == true);
-
-            if (conditions.Contains(true))
-            {
-                carConfiguration.IsAvaliable = false;
-                await _carStorageClient.UpdateCarConfigurationAsync(carConfiguration);
-            }
         }
 
         return Ok();
@@ -175,12 +166,16 @@ public class AdminController(
     [Authorize(Roles = Role.Admin.Car.Delete)]
     public async Task<IActionResult> DeleteCarAsync([FromRoute] long id)
     {
-        if (await _carStorageClient.GetCarAsync(id) is null)
+        var deleteCarReply = await _carStorageClient.DeleteCarAsync(new()
+        {
+            CarId = id
+        });
+        
+        if (deleteCarReply.Result == DeleteCarReply.Types.DeleteCarResult.CarNotFound)
         {
             return NotFound();
         }
-
-        bool deleted = await _carStorageClient.DeleteCarAsync(id);
-        return deleted ? Ok() : Problem();
+        
+        return Ok();
     }
 }
