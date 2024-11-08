@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using CarShop.AdminService.Database.Entities;
 using CarShop.AdminService.Repositories;
 using CarShop.AdminService.Services;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;

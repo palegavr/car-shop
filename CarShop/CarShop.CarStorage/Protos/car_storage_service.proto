@@ -310,7 +310,6 @@ message CarConfiguration {
   bool heated_drivers_seat = 4;
   bool seat_height_adjustment = 5;
   optional string different_car_color = 6;
-  bool is_available = 7;
 }
 
 message CarEditProcess {

@@ -1,4 +1,5 @@
-﻿using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
+﻿using CarShop.AdminService.Database.Entities;
+using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarShop.AdminService.Database

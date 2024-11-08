@@ -11,5 +11,4 @@ public class CarConfiguration
     public bool HeatedDriversSeat { get; set; } = false;
     public bool SeatHeightAdjustment { get; set; } = false;
     public string? DifferentCarColor { get; set; } = null;
-    public bool IsAvaliable { get; set; } = true;
 }

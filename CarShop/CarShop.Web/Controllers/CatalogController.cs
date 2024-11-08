@@ -177,7 +177,6 @@ namespace CarShop.Web.Controllers
                     Request.Form.TryGetValue("different_car_color", out var differentCarColor)
                         ? differentCarColor.First()!.ToLowerInvariant()
                         : null,
-                IsAvailable = true,
             };
 
             // Если не пришел ни один параметр

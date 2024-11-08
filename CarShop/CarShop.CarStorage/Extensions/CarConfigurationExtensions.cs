@@ -15,7 +15,6 @@ public static class CarConfigurationExtensions
             AirConditioner = carConfiguration.AirConditioner,
             HeatedDriversSeat = carConfiguration.HeatedDriversSeat,
             SeatHeightAdjustment = carConfiguration.SeatHeightAdjustment,
-            IsAvailable = carConfiguration.IsAvaliable,
         };
         if (carConfiguration.DifferentCarColor is not null)
         {
@@ -37,7 +36,6 @@ public static class CarConfigurationExtensions
             DifferentCarColor = carConfiguration.HasDifferentCarColor
                 ? carConfiguration.DifferentCarColor
                 : null,
-            IsAvaliable = carConfiguration.IsAvailable,
         };
     }
 
