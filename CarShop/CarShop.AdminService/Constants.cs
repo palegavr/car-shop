@@ -7,6 +7,8 @@ public static class Constants
         "admin.account.ban.own"
     ];
 
+    public const string AllRolesSymbol = "*";
+
     public const int HighestAdminPriority = 1;
     public const int LowestAdminPriority = 2000000000;
 }

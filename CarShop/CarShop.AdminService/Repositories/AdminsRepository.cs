@@ -13,9 +13,10 @@ namespace CarShop.AdminService.Repositories
 
             if (admin is not null)
             {
+                admin.Roles = PrepareRoles(admin.Roles);
                 _db.Entry(admin).State = EntityState.Detached;
             }
-            
+
             return admin;
         }
 
@@ -25,6 +26,7 @@ namespace CarShop.AdminService.Repositories
 
             if (admin is not null)
             {
+                admin.Roles = PrepareRoles(admin.Roles);
                 _db.Entry(admin).State = EntityState.Detached;
             }
 
@@ -35,14 +37,14 @@ namespace CarShop.AdminService.Repositories
         {
             _db.Admins.Add(new Admin
             {
-                Email = email, 
-                Password = password, 
-                Roles = roles ?? Constants.DefaultAdminRoles,
+                Email = email,
+                Password = password,
+                Roles = PrepareRoles(roles ?? Constants.DefaultAdminRoles),
                 Priority = priority
             });
             await _db.SaveChangesAsync();
         }
-        
+
         public async Task DeleteAccountAsync(long id)
         {
             _db.Admins.Remove(new Admin { Id = id });
@@ -54,6 +56,20 @@ namespace CarShop.AdminService.Repositories
             _db.Admins.Update(admin);
             await _db.SaveChangesAsync();
             _db.Entry(admin).State = EntityState.Detached;
+        }
+
+        private string[] PrepareRoles(string[] roles)
+        {
+            if (roles.Contains(Constants.AllRolesSymbol))
+            {
+                roles = Role.AllExistingRoles;
+            }
+            else if (roles.All(role => Role.AllExistingRoles.Contains(role)))
+            {
+                roles = [Constants.AllRolesSymbol];
+            }
+
+            return roles;
         }
     }
 }

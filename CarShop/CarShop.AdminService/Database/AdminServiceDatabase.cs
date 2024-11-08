@@ -17,7 +17,9 @@ namespace CarShop.AdminService.Database
                 Email = "admin@admin.com",
                 Password =
                     "$argon2id$v=19$m=65536,t=3,p=1$iICM/5uHlAHETRq8PtSHxg$jnk1HHpTP4voBpY80g5LCciaToO9WNT4X4IM7FL2KKk",
-                Banned = false
+                Banned = false,
+                Priority = 1,
+                Roles = [Constants.AllRolesSymbol]
             });
         }
 
