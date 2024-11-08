@@ -22,7 +22,7 @@ namespace CarShop.CarStorage.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.AdditionalCarOption", b =>
+            modelBuilder.Entity("CarShop.CarStorage.Database.Entities.AdditionalCarOption.AdditionalCarOption", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -52,7 +52,7 @@ namespace CarShop.CarStorage.Migrations
                     b.ToTable("AdditionalCarOptions");
                 });
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.Car", b =>
+            modelBuilder.Entity("CarShop.CarStorage.Database.Entities.Car.Car", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -100,7 +100,7 @@ namespace CarShop.CarStorage.Migrations
                     b.ToTable("Cars");
                 });
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.CarConfiguration", b =>
+            modelBuilder.Entity("CarShop.CarStorage.Database.Entities.CarConfiguration", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -118,9 +118,6 @@ namespace CarShop.CarStorage.Migrations
                     b.Property<bool>("HeatedDriversSeat")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsAvaliable")
-                        .HasColumnType("boolean");
-
                     b.Property<bool>("SeatHeightAdjustment")
                         .HasColumnType("boolean");
 
@@ -131,7 +128,7 @@ namespace CarShop.CarStorage.Migrations
                     b.ToTable("CarConfigurations");
                 });
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.CarEditProcess", b =>
+            modelBuilder.Entity("CarShop.CarStorage.Database.Entities.CarEditProcess.CarEditProcess", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -152,33 +149,33 @@ namespace CarShop.CarStorage.Migrations
                     b.ToTable("CarEditProcesses");
                 });
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.AdditionalCarOption", b =>
+            modelBuilder.Entity("CarShop.CarStorage.Database.Entities.AdditionalCarOption.AdditionalCarOption", b =>
                 {
-                    b.HasOne("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.Car", null)
+                    b.HasOne("CarShop.CarStorage.Database.Entities.Car.Car", null)
                         .WithMany("AdditionalCarOptions")
                         .HasForeignKey("CarId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.CarConfiguration", b =>
+            modelBuilder.Entity("CarShop.CarStorage.Database.Entities.CarConfiguration", b =>
                 {
-                    b.HasOne("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.Car", null)
+                    b.HasOne("CarShop.CarStorage.Database.Entities.Car.Car", null)
                         .WithMany("CarConfigurations")
                         .HasForeignKey("CarId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.CarEditProcess", b =>
+            modelBuilder.Entity("CarShop.CarStorage.Database.Entities.CarEditProcess.CarEditProcess", b =>
                 {
-                    b.HasOne("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.Car", null)
+                    b.HasOne("CarShop.CarStorage.Database.Entities.Car.Car", null)
                         .WithMany("CarEditProcesses")
                         .HasForeignKey("CarId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("CarShop.ServiceDefaults.ServiceInterfaces.ApiGateway.CarEditProcessData", "Process", b1 =>
+                    b.OwnsOne("CarShop.CarStorage.Database.Entities.CarEditProcess.CarEditProcessData", "Process", b1 =>
                         {
                             b1.Property<long>("CarEditProcessId")
                                 .HasColumnType("bigint");
@@ -244,7 +241,7 @@ namespace CarShop.CarStorage.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.CarStorage.Car", b =>
+            modelBuilder.Entity("CarShop.CarStorage.Database.Entities.Car.Car", b =>
                 {
                     b.Navigation("AdditionalCarOptions");
 

@@ -64,8 +64,12 @@ export default function Page() {
         }
         pushingChangesRef.current = true;
         const newProcessData = {...processDataRef.current, [progressDataPropName]: newValue} as ProcessData;
+        if (newProcessData.fuelType !== FuelType.Electric && newProcessData.engineCapacity <= 0) {
+            newProcessData.engineCapacity = 1;
+        }
         const result = await pushProcessData(carId,
-            newProcessData.fuelType === FuelType.Electric ? {...newProcessData, engineCapacity: 0} : newProcessData);
+            newProcessData.fuelType === FuelType.Electric ? {...newProcessData, engineCapacity: 0} :
+                newProcessData);
         if (result.success) {
             setCurrentProcessData(newProcessData);
             setProcessData(newProcessData);

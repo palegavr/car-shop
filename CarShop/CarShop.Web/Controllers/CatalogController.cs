@@ -1,16 +1,17 @@
 ﻿using System.Drawing;
-using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
 using CarShop.Web.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Globalization;
 using System.Text.RegularExpressions;
+using CarShop.CarStorageService.Grpc;
 using CarShop.Web.Models.Catalog;
 
 namespace CarShop.Web.Controllers
 {
     [Route("[controller]")]
-    public class CatalogController(CarStorageClient _carStorageClient) : Controller
+    public class CatalogController(
+        CarStorageService.Grpc.CarStorageService.CarStorageServiceClient _carStorageClient) : Controller
     {
         private const int CARS_COUNT_ON_ONE_PAGE = 30;
 
@@ -23,13 +24,13 @@ namespace CarShop.Web.Controllers
             double? minimumEngineCapacity,
             [FromQuery(Name = "maximum_engine_capacity")]
             double? maximumEngineCapacity,
-            [FromQuery(Name = "fuel_type")] FuelType? fuelType,
-            [FromQuery(Name = "corpus_type")] CorpusType? corpusType,
+            [FromQuery(Name = "fuel_type")] Car.Types.FuelType? fuelType,
+            [FromQuery(Name = "corpus_type")] Car.Types.CorpusType? corpusType,
             [FromQuery(Name = "minimum_price")] double? minimumPrice,
             [FromQuery(Name = "maximum_price")] double? maximumPrice,
             [FromQuery(Name = "page")] int page = 1,
-            [FromQuery(Name = "sort_by")] SortBy sortBy = SortBy.Brand,
-            [FromQuery(Name = "sort_type")] SortType sortType = SortType.Ascending)
+            [FromQuery(Name = "sort_by")] GetCarsRequest.Types.SortBy sortBy = GetCarsRequest.Types.SortBy.Brand,
+            [FromQuery(Name = "sort_type")] GetCarsRequest.Types.SortType sortType = GetCarsRequest.Types.SortType.Ascending)
         {
             if (id is not null)
             {
@@ -42,32 +43,56 @@ namespace CarShop.Web.Controllers
             }
 
             if (!Enum.IsDefined(sortBy))
-                sortBy = SortBy.Brand;
+                sortBy = GetCarsRequest.Types.SortBy.Brand;
             if (!Enum.IsDefined(sortType))
-                sortType = SortType.Ascending;
+                sortType = GetCarsRequest.Types.SortType.Ascending;
 
-            GetCarsOptions getCarsOptions = new GetCarsOptions
+            var getCarsRequest = new GetCarsRequest
             {
-                Brand = brand,
-                MinimumEngineCapacity = minimumEngineCapacity,
-                MaximumEngineCapacity = maximumEngineCapacity,
-                FuelType = fuelType,
-                CorpusType = corpusType,
-                MinimumPrice = minimumPrice,
-                MaximumPrice = maximumPrice,
                 SortBy = sortBy,
-                SortType = sortType,
+                SortType = sortType
             };
 
-            GetCarsResult getCarsResult = await _carStorageClient.GetCarsAsync(getCarsOptions);
+            if (brand is not null)
+            {
+                getCarsRequest.Brand = brand;
+            }
+            if (minimumEngineCapacity is not null)
+            {
+                getCarsRequest.MinimumEngineCapacity = minimumEngineCapacity.Value;
+            }
+            if (maximumEngineCapacity is not null)
+            {
+                getCarsRequest.MaximumEngineCapacity = maximumEngineCapacity.Value;
+            }
+            if (fuelType is not null)
+            {
+                getCarsRequest.FuelType = fuelType.Value;
+            }
+            if (corpusType is not null)
+            {
+                getCarsRequest.CorpusType = corpusType.Value;
+            }
+            if (minimumPrice is not null)
+            {
+                getCarsRequest.MinimumPrice = minimumPrice.Value;
+            }
+            if (maximumPrice is not null)
+            {
+                getCarsRequest.MaximumPrice = maximumPrice.Value;
+            }
 
-            IEnumerable<Car> cars = getCarsResult.Cars
+            var getCarsReply = await _carStorageClient.GetCarsAsync(getCarsRequest);
+
+            IEnumerable<Car> cars = getCarsReply.Cars
                 .Skip(CARS_COUNT_ON_ONE_PAGE * (page - 1))
                 .Take(CARS_COUNT_ON_ONE_PAGE);
 
-            int pagesCount = getCarsResult.TotalResultsCount / CARS_COUNT_ON_ONE_PAGE;
-            if (getCarsResult.TotalResultsCount % CARS_COUNT_ON_ONE_PAGE > 0)
+            int pagesCount = getCarsReply.TotalResultsCount / CARS_COUNT_ON_ONE_PAGE;
+            if (getCarsReply.TotalResultsCount % CARS_COUNT_ON_ONE_PAGE > 0)
+            {
                 pagesCount++;
+            }
 
             bool containsSearchParameters =
                 brand is not null ||
@@ -84,37 +109,43 @@ namespace CarShop.Web.Controllers
                 CurrentPage = page,
                 PagesCount = pagesCount,
                 IsSearchResultsPage = containsSearchParameters,
-                GetCarsOptions = getCarsOptions,
+                GetCarsOptions = getCarsRequest,
             };
             return View(viewModel);
         }
 
         private async Task<IActionResult> IdIndexAsync(long id)
         {
-            Car? car = await _carStorageClient.GetCarAsync(id);
-
-            if (car is null)
+            var getCarReply = await _carStorageClient.GetCarAsync(new()
+            {
+                CarId = id
+            });
+            
+            if (getCarReply.Result == GetCarReply.Types.GetCarResult.CarNotFound)
             {
                 return NotFound();
             }
 
-            return View("~/Views/Catalog/id/Index.cshtml", car);
+            return View("~/Views/Catalog/id/Index.cshtml", getCarReply.Car);
         }
 
         [HttpGet]
         [Route("{id:long}/configure")]
         public async Task<IActionResult> ConfigureAsync([FromRoute(Name = "id")] long id)
         {
-            Car? car = await _carStorageClient.GetCarAsync(id);
-
-            if (car is null)
+            var getCarReply = await _carStorageClient.GetCarAsync(new()
+            {
+                CarId = id
+            });
+            
+            if (getCarReply.Result == GetCarReply.Types.GetCarResult.CarNotFound)
             {
                 return NotFound();
             }
 
             ConfigureViewModel viewModel = new()
             {
-                Car = car
+                Car = getCarReply.Car
             };
 
             return View("~/Views/Catalog/id/Configure.cshtml", viewModel);
@@ -124,12 +155,17 @@ namespace CarShop.Web.Controllers
         [Route("{id:long}/configure")]
         public async Task<IActionResult> ConfigurePostAsync([FromRoute(Name = "id")] long id)
         {
-            Car? car = await _carStorageClient.GetCarAsync(id);
-
-            if (car is null)
+            var getCarReply = await _carStorageClient.GetCarAsync(new()
+            {
+                CarId = id
+            });
+            
+            if (getCarReply.Result == GetCarReply.Types.GetCarResult.CarNotFound)
             {
                 return NotFound();
             }
+
+            var car = getCarReply.Car;
 
             CarConfiguration carConfiguration = new()
             {
@@ -137,28 +173,44 @@ namespace CarShop.Web.Controllers
                 AirConditioner = Request.Form.ContainsKey("air_conditioner"),
                 HeatedDriversSeat = Request.Form.ContainsKey("heated_drivers_seat"),
                 SeatHeightAdjustment = Request.Form.ContainsKey("seat_height_adjustment"),
-                DifferentCarColor =
-                    Request.Form.TryGetValue("different_car_color", out var differentCarColor)
-                        ? differentCarColor.First()!.ToLowerInvariant()
-                        : null,
             };
+
+            if (Request.Form.TryGetValue("different_car_color", out var differentCarColor))
+            {
+                carConfiguration.DifferentCarColor = differentCarColor.First()!.ToLowerInvariant();
+            }
 
             // Если не пришел ни один параметр
             if ((!carConfiguration.AirConditioner &&
                 !carConfiguration.HeatedDriversSeat &&
                 !carConfiguration.SeatHeightAdjustment &&
-                carConfiguration.DifferentCarColor is null) || // или в поле цвета пришел не цвет
-                (carConfiguration.DifferentCarColor is not null && 
+                !carConfiguration.HasDifferentCarColor) || 
+                (carConfiguration.HasDifferentCarColor && // или в поле цвета пришел не цвет
                  !IsValidRgbHexColor(carConfiguration.DifferentCarColor)))
             {
                 return BadRequest();
             }
 
-            carConfiguration = await _carStorageClient.AddCarConfigurationAsync(carConfiguration);
+            var addCarConfigurationReply = await _carStorageClient.AddCarConfigurationAsync(new()
+            {
+                CarConfiguration = carConfiguration
+            });
+
+            if (addCarConfigurationReply.Result == AddCarConfigurationReply.Types.AddCarConfigurationResult
+                    .CarConfigurationHaveUnavailableOptions)
+            {
+                return BadRequest();
+            }
+            
+            if (addCarConfigurationReply.Result != AddCarConfigurationReply.Types.AddCarConfigurationResult.Success)
+            {
+                return Problem();
+            }
+            
             ConfigureViewModel viewModel = new()
             {
                 Car = car,
-                AddedCarConfiguration = carConfiguration,
+                AddedCarConfiguration = addCarConfigurationReply.CarConfiguration,
             };
             return View("~/Views/Catalog/id/Configure.cshtml", viewModel);
         }

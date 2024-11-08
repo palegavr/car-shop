@@ -1,4 +1,7 @@
-﻿using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
+﻿using CarShop.CarStorage.Database.Entities;
+using CarShop.CarStorage.Database.Entities.AdditionalCarOption;
+using CarShop.CarStorage.Database.Entities.Car;
+using CarShop.CarStorage.Database.Entities.CarEditProcess;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarShop.CarStorage.Database

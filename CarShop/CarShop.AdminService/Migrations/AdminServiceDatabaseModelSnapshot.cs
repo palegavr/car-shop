@@ -22,7 +22,7 @@ namespace CarShop.AdminService.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.AdminService.Admin", b =>
+            modelBuilder.Entity("CarShop.AdminService.Database.Entities.Admin", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
@@ -59,12 +59,12 @@ namespace CarShop.AdminService.Migrations
                             Banned = false,
                             Email = "admin@admin.com",
                             Password = "$argon2id$v=19$m=65536,t=3,p=1$iICM/5uHlAHETRq8PtSHxg$jnk1HHpTP4voBpY80g5LCciaToO9WNT4X4IM7FL2KKk",
-                            Priority = 0,
-                            Roles = new string[0]
+                            Priority = 1,
+                            Roles = new[] { "*" }
                         });
                 });
 
-            modelBuilder.Entity("CarShop.ServiceDefaults.ServiceInterfaces.AdminService.RefreshSession", b =>
+            modelBuilder.Entity("CarShop.AdminService.Database.Entities.RefreshSession", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()

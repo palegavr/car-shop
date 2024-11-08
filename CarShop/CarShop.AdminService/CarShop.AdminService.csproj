@@ -9,6 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Protobuf Include="Protos\admin_service.proto" GrpcServices="Server"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.67.0-pre1" />
     <PackageReference Include="Isopoh.Cryptography.Argon2" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
@@ -22,5 +27,4 @@
   <ItemGroup>
     <ProjectReference Include="..\CarShop.ServiceDefaults\CarShop.ServiceDefaults.csproj" />
   </ItemGroup>
-
 </Project>

@@ -1,6 +1,8 @@
 
 using CarShop.AdminService.Database;
+using CarShop.AdminService.Grpc;
 using CarShop.AdminService.Repositories;
+using CarShop.AdminService.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarShop.AdminService;
@@ -10,37 +12,19 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        builder.AddServiceDefaults();
-
-        // Add services to the container.
-
-        builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
+        
+        builder.Services.AddGrpc();
 
         builder.Services.AddDbContext<AdminServiceDatabase>();
         builder.Services.AddScoped<AdminsRepository>();
         builder.Services.AddScoped<RefreshSessionsRepository>();
+        builder.Services.AddSingleton<TokensPairGenerator>();
 
         var app = builder.Build();
 
-        app.MapDefaultEndpoints();
-
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
-        }
-
-        app.UseHttpsRedirection();
-
-        app.UseAuthorization();
-
 		WaitUntilMigrationDone().Wait();
 
-		app.MapControllers();
+		app.MapGrpcService<AdminServiceImpl>();
 
         app.Run();
     }

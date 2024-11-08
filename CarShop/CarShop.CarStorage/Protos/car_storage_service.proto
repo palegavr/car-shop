@@ -1,0 +1,333 @@
+syntax = "proto3";
+
+option csharp_namespace = "CarShop.CarStorageService.Grpc";
+
+package car_shop.car_storage_service.car_storage_service;
+
+service CarStorageService {
+  // Car
+  rpc AddCar(AddCarRequest)
+      returns (AddCarReply);
+  rpc UpdateCar(UpdateCarRequest)
+      returns (UpdateCarReply);
+  rpc DeleteCar(DeleteCarRequest)
+      returns (DeleteCarReply);
+  rpc GetCar(GetCarRequest)
+      returns (GetCarReply);
+  rpc GetCars(GetCarsRequest)
+      returns (GetCarsReply);
+  // CarConfiguration
+  rpc AddCarConfiguration(AddCarConfigurationRequest)
+      returns (AddCarConfigurationReply);
+  rpc UpdateCarConfiguration(UpdateCarConfigurationRequest)
+      returns (UpdateCarConfigurationReply);
+  rpc GetCarConfiguration(GetCarConfigurationRequest)
+      returns (GetCarConfigurationReply);
+  rpc GetCarConfigurations(GetCarConfigurationsRequest)
+      returns (GetCarConfigurationsReply);
+  // CarEditProcess
+  rpc GetCarEditProcess(GetCarEditProcessRequest)
+      returns (GetCarEditProcessReply);
+  rpc DeleteCarEditProcess(DeleteCarEditProcessRequest)
+      returns (DeleteCarEditProcessReply);
+  rpc UpdateOrCreateCarEditProcess(UpdateOrCreateCarEditProcessRequest)
+      returns (UpdateOrCreateCarEditProcessReply);
+}
+
+// + UpdateOrCreateCarEditProcess
+message UpdateOrCreateCarEditProcessRequest {
+  CarEditProcess car_edit_process = 1;
+}
+
+message UpdateOrCreateCarEditProcessReply {
+  UpdateOrCreateCarEditProcessResult result = 1;
+  optional CarEditProcess car_edit_process = 2;
+  
+  enum UpdateOrCreateCarEditProcessResult {
+    UNDEFINED = 0;
+    CAR_NOT_FOUND = 1;
+    BAD_REQUEST = 2;
+    SUCCESS = 3;
+  }
+}
+// - UpdateOrCreateCarEditProcess
+
+// + DeleteCarEditProcess
+message DeleteCarEditProcessRequest {
+  int64 admin_id = 1;
+  int64 car_id = 2;
+}
+
+message DeleteCarEditProcessReply {
+  DeleteCarEditProcessResult result = 1;
+
+  enum DeleteCarEditProcessResult {
+    UNDEFINED = 0;
+    NOT_FOUND = 1;
+    SUCCESS = 2;
+  }
+}
+// - DeleteCarEditProcess
+
+// + GetCarEditProcess
+message GetCarEditProcessRequest {
+  int64 admin_id = 1;
+  int64 car_id = 2;
+}
+
+message GetCarEditProcessReply {
+  GetCarEditProcessResult result = 1;
+  optional CarEditProcess car_edit_process = 2;
+  
+  enum GetCarEditProcessResult {
+    UNDEFINED = 0;
+    NOT_FOUND = 1;
+    SUCCESS = 2;
+  }
+}
+// - GetCarEditProcess
+
+// + GetCarConfigurations
+message GetCarConfigurationsRequest {
+  int64 car_id = 1;
+}
+
+message GetCarConfigurationsReply {
+  repeated CarConfiguration car_configuration = 1;
+}
+// - GetCarConfigurations
+
+// + GetCarConfiguration
+message GetCarConfigurationRequest {
+  string car_configuration_id = 1;
+}
+
+message GetCarConfigurationReply {
+  GetCarConfigurationResult result = 1;
+  optional CarConfiguration car_configuration = 2;
+  
+  enum GetCarConfigurationResult {
+    UNDEFINED = 0;
+    CAR_CONFIGURATION_NOT_FOUND = 1;
+    SUCCESS = 2;
+  }
+}
+// - GetCarConfiguration
+
+// + UpdateCarConfiguration
+message UpdateCarConfigurationRequest {
+  CarConfiguration car_configuration = 1;
+}
+
+message UpdateCarConfigurationReply {
+  UpdateCarConfigurationResult result = 1;
+  optional CarConfiguration car_configuration = 2;
+  
+  enum UpdateCarConfigurationResult {
+    UNDEFINED = 0;
+    CAR_CONFIGURATION_NOT_FOUND = 1;
+    SUCCESS = 2;
+  }
+}
+// - UpdateCarConfiguration
+
+// + AddCarConfiguration
+message AddCarConfigurationRequest {
+  CarConfiguration car_configuration = 1;
+}
+
+message AddCarConfigurationReply {
+  AddCarConfigurationResult result = 1;
+  optional CarConfiguration car_configuration = 2;
+  
+  enum AddCarConfigurationResult {
+    UNDEFINED = 0;
+    CAR_NOT_FOUND = 1;
+    CAR_CONFIGURATION_HAVE_UNAVAILABLE_OPTIONS = 2;
+    SUCCESS = 3;
+  }
+}
+// - AddCarConfiguration
+
+// + GetCars
+message GetCarsRequest {
+  optional int32 start_index = 1;
+  optional int32 end_index = 2;
+  optional string brand = 3;
+  optional double minimum_engine_capacity = 4;
+  optional double maximum_engine_capacity = 5;
+  optional Car.FuelType fuel_type = 6;
+  optional Car.CorpusType corpus_type = 7;
+  optional double minimum_price = 8;
+  optional double maximum_price = 9;
+  optional SortType sort_type = 10;
+  optional SortBy sort_by = 11;
+
+  enum SortType {
+    ASCENDING = 0;
+    DESCENDING = 1;
+  }
+
+  enum SortBy {
+    BRAND = 0;
+    ENGINE_CAPACITY = 1;
+    FUEL_TYPE = 2;
+    CORPUS_TYPE = 3;
+    PRICE_FOR_STANDARD_CONFIGURATION = 4;
+  }
+}
+
+message GetCarsReply {
+  repeated Car cars = 1;
+  int32 total_results_count = 2;
+}
+// - GetCars
+
+// + GetCar
+message GetCarRequest {
+  int64 car_id = 1;
+}
+
+message GetCarReply {
+  GetCarResult result = 1;
+  optional Car car = 2;
+  
+  enum GetCarResult {
+    UNDEFINED = 0;
+    CAR_NOT_FOUND = 1;
+    SUCCESS = 2;
+  }
+}
+// - GetCar
+
+// + DeleteCar
+message DeleteCarRequest {
+  int64 car_id = 1;
+}
+
+message DeleteCarReply {
+  DeleteCarResult result = 1;
+  
+  enum DeleteCarResult {
+    UNDEFINED = 0;
+    CAR_NOT_FOUND = 1;
+    SUCCESS = 2;
+  }
+}
+// - DeleteCar
+
+// + UpdateCar
+message UpdateCarRequest {
+  int64 car_id = 1;
+  optional string brand = 2;
+  optional string model = 3;
+  optional double price_for_standart_configuration = 4;
+  optional string color = 5;
+  optional double engine_capacity = 6;
+  optional Car.CorpusType corpus_type = 7;
+  optional Car.FuelType fuel_type = 8;
+  optional int32 count = 9;
+  optional string image_url = 10;
+  repeated string big_image_urls = 11;
+  bool update_big_image_urls = 12;
+  repeated AdditionalCarOption additional_car_options = 13;
+  bool update_additional_car_options = 14;
+}
+
+message UpdateCarReply {
+  UpdateCarResult result = 1;
+  
+  enum UpdateCarResult {
+    UNDEFINED = 0;
+    BAD_REQUEST = 1;
+    SUCCESS = 2;
+  }
+}
+// - UpdateCar
+
+// + AddCar
+message AddCarRequest {
+  Car car = 1;
+}
+
+message AddCarReply {
+  AddCarResult result = 1;
+  optional Car car = 2;
+  
+  enum AddCarResult {
+    UNDEFINED = 0;
+    BAD_REQUEST = 1;
+    SUCCESS = 2;
+  }
+}
+// - AddCar
+
+message Car {
+  int64 id = 1;
+  string brand = 2;
+  string model = 3;
+  double price_for_standart_configuration = 4;
+  string color = 5;
+  double engine_capacity = 6;
+  CorpusType corpus_type = 7;
+  FuelType fuel_type = 8;
+  int32 count = 9;
+  string image_url = 10;
+  repeated string big_image_urls = 11;
+  repeated AdditionalCarOption additional_car_options = 12;
+  
+  enum CorpusType {
+    SEDAN = 0;
+    HATCHBACK = 1;
+  }
+  
+  enum FuelType {
+    NONE = 0;
+    PETROL = 1;
+    DIESEL = 2;
+    GAS = 4;
+    ELECTRIC = 8;
+  }
+}
+
+message AdditionalCarOption {
+  Type type = 1;
+  double price = 2;
+  bool is_required = 3;
+  
+  enum Type {
+    AIR_CONDITIONER = 0;
+    HEATED_DRIVERS_SEAT = 1;
+    SEAT_HEIGHT_ADJUSTMENT = 2;
+    DIFFERENT_CAR_COLOR = 3;
+  }
+}
+
+message CarConfiguration {
+  string id = 1;
+  int64 car_id = 2;
+  bool air_conditioner = 3;
+  bool heated_drivers_seat = 4;
+  bool seat_height_adjustment = 5;
+  optional string different_car_color = 6;
+}
+
+message CarEditProcess {
+  int64 admin_id = 1;
+  int64 car_id = 2;
+  CarEditProcessData data = 3;
+}
+
+message CarEditProcessData {
+  string brand = 1;
+  string model = 2;
+  double price = 3;
+  string color = 4;
+  double engine_capacity = 5;
+  Car.CorpusType corpus_type = 6;
+  Car.FuelType fuel_type = 7;
+  int32 count = 8;
+  optional string image_url = 9;
+  repeated string big_image_urls = 10;
+  repeated AdditionalCarOption additional_car_options = 11;
+}

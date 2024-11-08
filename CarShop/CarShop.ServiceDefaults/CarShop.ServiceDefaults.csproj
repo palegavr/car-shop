@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <Protobuf Include="../CarShop.FileService/Protos/file_service.proto" GrpcServices="Client" />
+    <Protobuf Include="../CarShop.AdminService/Protos/admin_service.proto" GrpcServices="Client" />
+    <Protobuf Include="../CarShop.CarStorage/Protos/car_storage_service.proto" GrpcServices="Client" />
   </ItemGroup>
 
   <ItemGroup>

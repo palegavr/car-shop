@@ -36,4 +36,18 @@ public static class Role
             public const string Unban = "admin.account.unban";
         }
     }
+    
+    public static string[] AllExistingRoles => [
+        Admin.Car.Add,
+        Admin.Car.Edit,
+        Admin.Car.Delete,
+        Admin.Account.Create,
+        Admin.Account.ChangePassword.Own,
+        Admin.Account.ChangePassword.Other,
+        Admin.Account.Ban.Own,
+        Admin.Account.Ban.Other,
+        Admin.Account.Role.Give,
+        Admin.Account.Role.Take,
+        Admin.Account.Unban
+    ];
 }

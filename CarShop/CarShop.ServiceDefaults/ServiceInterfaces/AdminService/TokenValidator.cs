@@ -1,6 +1,7 @@
 ﻿using System.Net.Http.Json;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using static Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions;
+using CarShop.AdminService.Grpc;
 
 namespace CarShop.ServiceDefaults.ServiceInterfaces.AdminService
 {
@@ -43,17 +44,20 @@ namespace CarShop.ServiceDefaults.ServiceInterfaces.AdminService
 
                 if (refreshToken is not null && accessToken is null)
                 {
-                    AdminServiceClient adminServiceClient =
-                        context.HttpContext.RequestServices.GetService<AdminServiceClient>()!;
-                    var responce = await adminServiceClient.UpdateTokensAsync(refreshToken);
-                    if (responce.StatusCode == System.Net.HttpStatusCode.OK)
+                    var adminServiceClient =
+                        context.HttpContext.RequestServices
+                            .GetService<CarShop.AdminService.Grpc.AdminService.AdminServiceClient>()!;
+                    
+                    var response = await adminServiceClient.UpdateTokensAsync(new()
                     {
-                        TokensPairResponce tokensPairResponce
-                            = (await responce.Content.ReadFromJsonAsync<TokensPairResponce>())!;
+                        RefreshToken = refreshToken,
+                    });
 
-                        context.Response.Cookies.SetAccessTokenCookie(tokensPairResponce.AccessToken);
-                        context.Response.Cookies.SetRefreshTokenCookie(tokensPairResponce.RefreshToken);
-                        context.Token = tokensPairResponce.AccessToken;
+                    if (response.Result == UpdateTokensReply.Types.UpdateTokensResult.Success)
+                    {
+                        context.Response.Cookies.SetAccessTokenCookie(response.AccessToken);
+                        context.Response.Cookies.SetRefreshTokenCookie(response.RefreshToken);
+                        context.Token = response.AccessToken;
                     }
                     else
                     {

@@ -1,4 +1,4 @@
-using CarShop.ServiceDefaults.ServiceInterfaces.CarStorage;
+using CarShop.CarStorageService.Grpc;
 
 namespace CarShop.Web.Models.Catalog;
 

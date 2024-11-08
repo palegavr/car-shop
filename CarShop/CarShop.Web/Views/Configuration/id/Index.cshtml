@@ -1,0 +1,8 @@
+@model CarShop.Web.Models.Catalog.ConfigurationViewModel
+
+<div>Car ID: @Model.Car.Id</div>
+<div>Configuration ID: @Model.Configuration.Id</div>
+<div>Кондиционер: @Model.Configuration.AirConditioner</div>
+<div>Подогрев: @Model.Configuration.HeatedDriversSeat</div>
+<div>Регулировка сидения: @Model.Configuration.SeatHeightAdjustment</div>
+<div>Цвет: @(Model.Configuration.HasDifferentCarColor ? Model.Configuration.DifferentCarColor : false)</div>

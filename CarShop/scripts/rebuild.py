@@ -1,6 +1,17 @@
+import os
 import subprocess
 
 import yaml
+
+
+def cls():
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+
+def print_services(_services):
+    for _index, _service in enumerate(_services):
+        print(f'[{_index + 1}] {_service}')
+
 
 with open("../docker-compose.yml", 'r') as stream:
     try:
@@ -10,12 +21,11 @@ with open("../docker-compose.yml", 'r') as stream:
 
     services = []
     for index, service in enumerate(doc["services"]):
-        print(f'[{index + 1}] {service}')
         services.append(service)
 
-    print()
-
     while True:
+        print_services(services)
+        print()
         print('Чтобы выйти, введите "exit".')
         service_index = input('Введите номер сервиса, который нужно пересобрать: ')
         if service_index == 'exit':
@@ -30,6 +40,4 @@ with open("../docker-compose.yml", 'r') as stream:
             continue
 
         subprocess.call(['docker-compose', 'up', '--build', '-d', services[service_index - 1]])
-        break
-
-
+        cls()
