@@ -1,6 +1,14 @@
 @model CarShop.Web.Models.Catalog.ConfigureViewModel
 
 <div>Car ID: @Model.Car.Id</div>
+@foreach (var option in Model.Car.AdditionalCarOptions)
+{
+    <div>
+        <p>@option.Type</p>
+        <p>@option.Price</p>
+        <p>@option.IsRequired</p>
+    </div>
+}
 @if (Model.AddedCarConfiguration is not null)
 {
     <div>/configuration/@Model.AddedCarConfiguration.Id</div>

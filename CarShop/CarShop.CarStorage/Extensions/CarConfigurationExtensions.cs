@@ -5,7 +5,7 @@ namespace CarShop.CarStorage.Extensions;
 
 public static class CarConfigurationExtensions
 {
-    public static CarShop.CarStorageService.Grpc.CarConfiguration 
+    public static CarShop.CarStorageService.Grpc.CarConfiguration
         ToGrpcMessage(this CarConfiguration carConfiguration)
     {
         var carConfigurationMessage = new CarStorageService.Grpc.CarConfiguration()
@@ -20,6 +20,7 @@ public static class CarConfigurationExtensions
         {
             carConfigurationMessage.DifferentCarColor = carConfiguration.DifferentCarColor;
         }
+
         return carConfigurationMessage;
     }
 
@@ -28,7 +29,9 @@ public static class CarConfigurationExtensions
     {
         return new()
         {
-            Id = Guid.Parse(carConfiguration.Id),
+            Id = !string.IsNullOrWhiteSpace(carConfiguration.Id)
+                ? Guid.Parse(carConfiguration.Id)
+                : Guid.Empty,
             CarId = carConfiguration.CarId,
             AirConditioner = carConfiguration.AirConditioner,
             HeatedDriversSeat = carConfiguration.HeatedDriversSeat,
@@ -43,9 +46,10 @@ public static class CarConfigurationExtensions
         this CarConfiguration carConfiguration,
         IEnumerable<AdditionalCarOption> additionalCarOptions)
     {
-        var availableTypesSet = new HashSet<AdditionalCarOptionType>(additionalCarOptions.Select(option => option.Type));
+        var availableTypesSet =
+            new HashSet<AdditionalCarOptionType>(additionalCarOptions.Select(option => option.Type));
 
-        var requiredOptions = new[]
+        var optionTuples = new[]
         {
             (carConfiguration.AirConditioner, AdditionalCarOptionType.AirConditioner),
             (carConfiguration.HeatedDriversSeat, AdditionalCarOptionType.HeatedDriversSeat),
@@ -53,7 +57,20 @@ public static class CarConfigurationExtensions
             (carConfiguration.DifferentCarColor is not null, AdditionalCarOptionType.DifferentCarColor)
         };
 
-        return requiredOptions
-            .All(option => !option.Item1 || availableTypesSet.Contains(option.Item2));
+        bool result = true;
+        
+        foreach (var optionTuple in optionTuples)
+        {
+            if ((optionTuple.Item1 &&
+                 !availableTypesSet.Contains(optionTuple.Item2)) ||
+                (!optionTuple.Item1 &&
+                 additionalCarOptions
+                     .SingleOrDefault(option => option.Type == optionTuple.Item2)?.IsRequired == true))
+            {
+                result = false;
+            }
+        }
+
+        return result;
     }
 }

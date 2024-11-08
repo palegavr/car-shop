@@ -173,18 +173,19 @@ namespace CarShop.Web.Controllers
                 AirConditioner = Request.Form.ContainsKey("air_conditioner"),
                 HeatedDriversSeat = Request.Form.ContainsKey("heated_drivers_seat"),
                 SeatHeightAdjustment = Request.Form.ContainsKey("seat_height_adjustment"),
-                DifferentCarColor =
-                    Request.Form.TryGetValue("different_car_color", out var differentCarColor)
-                        ? differentCarColor.First()!.ToLowerInvariant()
-                        : null,
             };
+
+            if (Request.Form.TryGetValue("different_car_color", out var differentCarColor))
+            {
+                carConfiguration.DifferentCarColor = differentCarColor.First()!.ToLowerInvariant();
+            }
 
             // Если не пришел ни один параметр
             if ((!carConfiguration.AirConditioner &&
                 !carConfiguration.HeatedDriversSeat &&
                 !carConfiguration.SeatHeightAdjustment &&
-                carConfiguration.DifferentCarColor is null) || // или в поле цвета пришел не цвет
-                (carConfiguration.DifferentCarColor is not null && 
+                !carConfiguration.HasDifferentCarColor) || 
+                (carConfiguration.HasDifferentCarColor && // или в поле цвета пришел не цвет
                  !IsValidRgbHexColor(carConfiguration.DifferentCarColor)))
             {
                 return BadRequest();
@@ -194,6 +195,12 @@ namespace CarShop.Web.Controllers
             {
                 CarConfiguration = carConfiguration
             });
+
+            if (addCarConfigurationReply.Result == AddCarConfigurationReply.Types.AddCarConfigurationResult
+                    .CarConfigurationHaveUnavailableOptions)
+            {
+                return BadRequest();
+            }
             
             if (addCarConfigurationReply.Result != AddCarConfigurationReply.Types.AddCarConfigurationResult.Success)
             {
