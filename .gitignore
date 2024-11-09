@@ -399,7 +399,6 @@ FodyWeavers.xsd
 
 # Другое
 /CarShop/data/
-/CarShop/CarShop.Web/wwwroot/images/
-!/CarShop/CarShop.Web/wwwroot/images/route/home/
+/CarShop/CarShop.Web/wwwroot/images/route/catalog/*
 /CarShop/.idea/
 /CarShop/scripts/venv/
