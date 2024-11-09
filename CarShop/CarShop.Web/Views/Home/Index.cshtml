@@ -1,5 +1,44 @@
-﻿@{
+﻿
+    @section HeadContent{
+        <link rel="stylesheet" href="~/css/layout.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    }
+    <header>
+        <nav>
+            <img src="~/images/route/home/DNUcarlogo.png" class="logo" alt="Car Shop Logo">
+            <div class="menu-toggle">
+                <i class="fa fa-bars"></i> 
+            </div>
+            <div class="menu">
+                <a href="#">Главная</a>
+                <a href="#">О нас</a>
+                <a href="/catalog">Каталог</a>
+                <a href="#">Помощь</a>
+            </div>
+        </nav>
+    </header>
 
-}
-
-<div>Главная страница</div>
+    <div class="hero">
+        <div class="text">
+            <h4>Ищете идеальный автомобиль?</h4>
+            <h1>У нас — только проверенные машины<br> с прозрачной историей <br>и выгодными условиями покупки.</h1>
+            <p> Узнайте, как легко и быстро стать владельцем авто мечты!</p>
+            <a href="#" class="btn">ПЕРЕЙТИ К КАТАЛОГУ</a>
+        </div>
+        <div class="avatar">
+            <img src="~/images/route/home/coupe-1374450_1280-removebg-preview.png" alt="Car Image">
+        </div>
+    </div>
+    
+    <footer>
+        <div class="social-bar">
+            <a href="#"><i class="fa-brands fa-telegram"></i></a>
+            <a href="#"><i class="fa-brands fa-instagram"></i></a>
+            <a href="#"><i class="fa-brands fa-twitter"></i></a>
+        </div>
+    </footer>
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.menu').classList.toggle('active');
+        });
+    </script>
