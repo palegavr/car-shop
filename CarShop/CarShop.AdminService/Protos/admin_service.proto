@@ -7,6 +7,10 @@ package car_shop.admin_service.admin_service;
 service AdminService {
   rpc CreateAccount(CreateAccountRequest)
       returns (CreateAccountReply);
+  rpc GetAccount(GetAccountRequest)
+      returns (GetAccountReply);
+  rpc UpdateAccount(UpdateAccountRequest)
+      returns (UpdateAccountReply);
   rpc Login(LoginRequest)
       returns (LoginReply);
   rpc UpdateTokens(UpdateTokensRequest)
@@ -17,6 +21,46 @@ service AdminService {
       returns (UnbanAccountReply);
 }
 
+message GetAccountRequest {
+  int64 account_id = 1;
+}
+
+message GetAccountReply {
+  GetAccountResult result = 1;
+  optional AdminAccount account = 2;
+  
+  enum GetAccountResult {
+    UNDEFINED = 0;
+    ACCOUNT_NOT_FOUND = 1;
+    SUCCESS = 2;
+  }
+}
+
+// + UpdateAccount
+message UpdateAccountRequest {
+  int64 id = 1;
+  optional string email = 2;
+  optional string password = 3;
+  repeated string roles = 4;
+  optional bool update_roles = 5;
+  optional int32 priority = 6;
+  optional bool banned = 7;
+}
+
+message UpdateAccountReply {
+  UpdateAccountResult result = 1;
+  AdminAccount account = 2;
+  
+  enum UpdateAccountResult {
+    UNDEFINED = 0;
+    BAD_REQUEST = 1;
+    ACCOUNT_NOT_FOUND = 2;
+    EMAIL_IS_BUSY = 3;
+    SUCCESS = 4;
+  }
+}
+// - UpdateAccount
+
 // + UnbanAccount
 message UnbanAccountRequest {
   int64 account_id = 1;
@@ -24,7 +68,7 @@ message UnbanAccountRequest {
 
 message UnbanAccountReply {
   UnbanAccountResult result = 1;
-  
+
   enum UnbanAccountResult {
     UNDEFINED = 0;
     ACCOUNT_NOT_FOUND = 1;
@@ -41,7 +85,7 @@ message BanAccountRequest {
 
 message BanAccountReply {
   BanAccountResult result = 1;
-  
+
   enum BanAccountResult {
     UNDEFINED = 0;
     ACCOUNT_NOT_FOUND = 1;
@@ -60,7 +104,7 @@ message UpdateTokensReply {
   UpdateTokensResult result = 1;
   optional string access_token = 2;
   optional string refresh_token = 3;
-  
+
   enum UpdateTokensResult {
     UNDEFINED = 0;
     BAD_REQUEST = 1;
@@ -80,7 +124,7 @@ message LoginReply {
   LoginResult result = 1;
   optional string access_token = 2;
   optional string refresh_token = 3;
-  
+
   enum LoginResult {
     UNDEFINED = 0;
     BAD_REQUEST = 1;
@@ -94,14 +138,13 @@ message LoginReply {
 
 // + CreateAccount
 message CreateAccountRequest {
-  string email = 1;
-  string password = 2;
-  int32 priority = 3;
+  AdminAccount account = 1;
 }
 
 message CreateAccountReply {
   CreateAccountResult result = 1;
-  
+  optional AdminAccount account = 2;
+
   enum CreateAccountResult {
     UNDEFINED = 0;
     BAD_REQUEST = 1;
@@ -111,3 +154,11 @@ message CreateAccountReply {
 }
 // - CreateAccount
 
+message AdminAccount {
+  int64 id = 1;
+  string email = 2;
+  string password = 3;
+  repeated string roles = 4;
+  int32 priority = 5;
+  bool banned = 6;
+}

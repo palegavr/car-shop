@@ -1,21 +1,25 @@
 using System.Net.Mime;
 using System.Security.Claims;
+using CarShop.AdminService.Grpc;
 using CarShop.ApiGateway.Models;
 using CarShop.CarStorageService.Grpc;
 using CarShop.FileService.Grpc;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
+using CarShop.ServiceDefaults.Services;
 using CarShop.ServiceDefaults.Utils;
 using Google.Protobuf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace CarShop.ApiGateway.Controllers;
+namespace CarShop.ApiGateway.Controllers.Admin;
 
 [Authorize]
 [Route("api/[controller]")]
 public class AdminController(
     FileService.Grpc.FileService.FileServiceClient _fileServiceClient,
-    CarStorageService.Grpc.CarStorageService.CarStorageServiceClient _carStorageClient) : ControllerBase
+    CarStorageService.Grpc.CarStorageService.CarStorageServiceClient _carStorageClient,
+    AdminService.Grpc.AdminService.AdminServiceClient _adminServiceClient,
+    PasswordGenerator _passwordGenerator) : ControllerBase
 {
     [HttpPost]
     [Route("uploadimage")]
@@ -170,12 +174,73 @@ public class AdminController(
         {
             CarId = id
         });
-        
+
         if (deleteCarReply.Result == DeleteCarReply.Types.DeleteCarResult.CarNotFound)
         {
             return NotFound();
         }
-        
+
         return Ok();
+    }
+
+    [Authorize]
+    [HttpPost]
+    [Route("account/{id:long?}")]
+    public async Task<IActionResult> AccountActionAsync(
+        [FromRoute] long? id,
+        [FromBody] AccountActionPayload payload)
+    {
+        long adminId = Utils.GetAdminIdFromClaimsPrincipal(User) ?? throw new ArgumentNullException();
+        int performingAdminPriority = Utils.GetPriorityFromClaimsPrincipal(User) ?? throw new ArgumentNullException();
+        id ??= 0;
+        
+        if (!ModelState.IsValid ||
+            (id <= 0 && payload.ActionType != AccountAction.Create))
+        {
+            return BadRequest(ModelState.Values.Select(entry => entry.Errors));
+        }
+        
+        var getAccountReply = payload.ActionType != AccountAction.Create
+            ? await _adminServiceClient.GetAccountAsync(new()
+            {
+                AccountId = id.Value
+            })
+            : null;
+
+        if (getAccountReply?.Result == GetAccountReply.Types.GetAccountResult.AccountNotFound)
+        {
+            return NotFound();
+        }
+        
+        if (!payload.ActionIsAllowed(
+                roles: User.Claims
+                    .Where(claim => claim.Type == ClaimTypes.Role)
+                    .Select(claim => claim.Value)
+                    .ToArray(),
+                performingAdminId: adminId,
+                adminId: id.Value,
+                performingAdminPriority: performingAdminPriority,
+                adminPriority: getAccountReply?.Account.Priority ?? default
+            ))
+        {
+            return Forbid();
+        }
+        
+        var accountActionHandler = new AccountActionHandler(id.Value, _passwordGenerator, _adminServiceClient);
+
+        return payload.ActionType switch
+        {
+            AccountAction.Create => await accountActionHandler.Create(payload.Data!.Email!),
+            AccountAction.ChangePassword => await accountActionHandler.ChangePassword(
+                payload.Data!.Password!,
+                payload.Data!.OldPassword!,
+                performingAdminId: adminId),
+            AccountAction.Ban => await accountActionHandler.Ban(),
+            AccountAction.Unban => await accountActionHandler.Unban(),
+            AccountAction.GiveRole => await accountActionHandler.GiveRoles([payload.Data!.Role!]),
+            AccountAction.TakeRole => await accountActionHandler.TakeRoles([payload.Data!.Role!]),
+            AccountAction.SetPriority => await accountActionHandler.SetPriority(payload.Data!.Priority!.Value),
+            _ => throw new ArgumentOutOfRangeException()
+        };
     }
 }

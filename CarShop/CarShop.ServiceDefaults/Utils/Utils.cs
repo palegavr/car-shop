@@ -12,6 +12,12 @@ public static class Utils
             out long adminId) ? adminId : null;
     }
 
+    public static int? GetPriorityFromClaimsPrincipal(ClaimsPrincipal claimsPrincipal)
+    {
+        return int.TryParse(claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "priority")?.Value ?? "NotNumber",
+            out int priority) ? priority : null;
+    }
+
     public static bool IsEmail(string email)
     {
         try

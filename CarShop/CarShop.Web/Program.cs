@@ -1,5 +1,6 @@
 using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
+using CarShop.ServiceDefaults.Services;
 using CarShop.Web.ModelBuilders;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
@@ -11,6 +12,8 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.AddServiceDefaults();
+
+        builder.Services.AddSingleton<PasswordGenerator>();
 
         builder.Services.AddControllersWithViews(options =>
         {

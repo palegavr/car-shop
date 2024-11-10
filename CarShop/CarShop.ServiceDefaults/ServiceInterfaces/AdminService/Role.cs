@@ -34,6 +34,11 @@ public static class Role
             }
 
             public const string Unban = "admin.account.unban";
+
+            public static class Priority
+            {
+                public const string Set = "admin.account.priority.set";
+            }
         }
     }
     
@@ -48,6 +53,7 @@ public static class Role
         Admin.Account.Ban.Other,
         Admin.Account.Role.Give,
         Admin.Account.Role.Take,
-        Admin.Account.Unban
+        Admin.Account.Unban,
+        Admin.Account.Priority.Set
     ];
 }

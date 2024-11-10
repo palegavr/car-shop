@@ -1,5 +1,6 @@
 using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
+using CarShop.ServiceDefaults.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace CarShop.ApiGateway;
@@ -17,6 +18,9 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
         builder.Services.AddControllers();
+
+        builder.Services.AddSingleton<PasswordGenerator>();
+        
         builder.Services.AddGrpcClient<FileService.Grpc.FileService.FileServiceClient>(options =>
         {
             options.Address = new Uri(ServiceAddresses.FileServiceUrl);
