@@ -1,18 +1,20 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="~/@(nameof(CarShop)).@(nameof(CarShop.Web)).styles.css" />
-    <link rel="stylesheet" href="~/bootstrap/dist/css/bootstrap.min.css" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="stylesheet" href="~/css/layout.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="~/bootstrap/dist/css/bootstrap.min.css"/>
     <title>@ViewData["Title"]</title>
     @await RenderSectionAsync("HeadContent", required: false)
 </head>
 <body>
-@if (ViewData["NotRenderHeader"] is not true)
+@if (ViewData["RenderTransparentHeader"] is not true)
 {
     <header>
-        <nav class="navbar navbar-expand-sm bg-body-tertiary">
+        <nav class="navbar navbar-expand-sm bg-body-tertiary" style="margin: 0; width: 100%">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">Car Shop</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -39,8 +41,49 @@
         </nav>
     </header>
 }
+else
+{
+    <header>
+        <nav>
+            <img src="~/images/route/home/DNUcarlogo.png" class="logo" alt="Car Shop Logo">
+            <div class="menu-toggle">
+                <i class="fa fa-bars"></i>
+            </div>
+            <div class="menu">
+                <a href="/">Главная</a>
+                <a href="/about">О нас</a>
+                <a href="/catalog">Каталог</a>
+                <a href="/help">Помощь</a>
+            </div>
+        </nav>
+    </header>
 
-@RenderBody()
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.menu').classList.toggle('active');
+        });
+    </script>
+}
+<div style="@(ViewData["RenderTransparentHeader"] is not true ? "margin-top: 70px" : "") ">
+    @RenderBody()
+</div>
+
+@if (ViewData["RenderTransparentHeader"] is true)
+{
+    <footer>
+        <div class="social-bar">
+            <a href="#">
+                <i class="fa-brands fa-telegram"></i>
+            </a>
+            <a href="#">
+                <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a href="#">
+                <i class="fa-brands fa-twitter"></i>
+            </a>
+        </div>
+    </footer>
+}
 
 <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 <script src="~/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
