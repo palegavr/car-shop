@@ -1,0 +1,121 @@
+
+
+@if (Model.Car.AdditionalCarOptions.Count > 0)
+{
+    <form method="post"  style="font-size: 8mm;">
+        <div class="container p-3 my-3 border border-1 rounded rounded-3 shadow position-absolute top-50 start-50 translate-middle" style="max-width: 700px;">
+            @foreach (var option in Model.Car.AdditionalCarOptions)
+            {
+                @if (option.Type == AdditionalCarOption.Types.Type.AirConditioner)
+                {
+                    @if (option.IsRequired)
+                    {
+                        <input type="checkbox" class="form-check-input option-checkbox" id="topliv1" name="air_conditioner" style="pointer-events: none; opacity: .3;" checked="checked" data-price="@option.Price" />
+
+                        <label class="form-check-label" for="topliv1" style="pointer-events: none; opacity: .3;">Кондиционер </label>
+                        <label class="form-check-label"> @option.Price грн</label>
+                    }
+                    else
+                    {
+                        <input type="checkbox" class="form-check-input option-checkbox" id="topliv1" name="air_conditioner" data-price="@option.Price" />
+
+                        <label class="form-check-label" for="topliv1">Кондиционер </label>
+                        <label class="form-check-label"> @option.Price грн</label>
+                    }
+                }
+
+                @if (option.Type == AdditionalCarOption.Types.Type.HeatedDriversSeat)
+                {
+                    @if (option.IsRequired)
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input option-checkbox" id="topliv2" name="heated_drivers_seat" style="pointer-events: none; opacity: .3;" checked="checked" data-price="@option.Price"/>
+
+                            <label class="form-check-label" for="topliv2" style="pointer-events: none; opacity: .3;">Подогрев сидения водителя </label>
+                            <label class="form-check-label"> @option.Price грн</label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input option-checkbox" id="topliv2" name="heated_drivers_seat" data-price="@option.Price"/>
+
+                            <label class="form-check-label" for="topliv2">Подогрев сидения водителя </label>
+                            <label class="form-check-label"> @option.Price грн</label>
+                        </div>
+                    }
+                }
+
+                @if (option.Type == AdditionalCarOption.Types.Type.SeatHeightAdjustment)
+                {
+                    @if (option.IsRequired)
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input option-checkbox" id="topliv3" name="seat_height_adjustment" style="pointer-events: none; opacity: .3;" checked="checked" data-price="@option.Price"/>
+
+                            <label class="form-check-label" for="topliv3" style="pointer-events: none; opacity: .3;">Регулировка сидения водителя по высоте </label>
+                            <label class="form-check-label"> @option.Price грн</label>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input option-checkbox" id="topliv3" name="seat_height_adjustment" data-price="@option.Price" />
+
+                            <label class="form-check-label" for="topliv3">Регулировка сидения водителя по высоте </label>
+                            <label class="form-check-label"> @option.Price грн</label>
+                        </div>
+                    }
+                }
+
+                @if (option.Type == AdditionalCarOption.Types.Type.DifferentCarColor)
+                {
+                    @if (option.IsRequired)
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input collapsed option-checkbox" id="topliv4" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" style="pointer-events: none; opacity: .3;" checked="checked" data-price="@option.Price"/>
+
+                            <label class="form-check-label" for="topliv4" style="pointer-events: none; opacity: .3;">Другой цвет авто </label>
+                            <label class="form-check-label"> @option.Price грн</label>
+                        </div>
+                        <div id="collapseOne" class="accordion-collapse collapse show " data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <input type="color" class="form-control form-control-color" id="exampleColorInput" name="different_car_color" value="#563d7c" title="Выбери свой цвет">
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input collapsed option-checkbox" id="topliv4" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne" data-price="@option.Price"/>
+
+                            <label class="form-check-label" for="topliv4">Другой цвет авто </label>
+                            <label class="form-check-label"> @option.Price грн</label>
+                        </div>
+                        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <input type="color" class="form-control form-control-color" id="exampleColorInput" value="#563d7c" title="Выбери свой цвет">
+                            </div>
+                        </div>
+                    }
+                }
+            }
+            <div>
+                <label id="pricefull">Цена: 0 грн</label>
+            </div>
+            <input class="btn btn-success w-100" type="submit" value="Сохранить конфигурацию"/>
+        </div>
+    </form>
+}
+else
+{
+    <div>Корече тут нетуничого</div>
+}
+<div class="">
+    @if (Model.AddedCarConfiguration is not null)
+    {
+        <a href="/configuration/@Model.AddedCarConfiguration.Id" class="alert alert-primary">/configuration/@Model.AddedCarConfiguration.Id</a>
+    }
+</div>
+
+
