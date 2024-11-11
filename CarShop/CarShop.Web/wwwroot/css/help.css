@@ -1,0 +1,72 @@
+
+body {
+    padding-bottom: 80px;
+}
+section{
+    min-height: 100vh;
+    width: 80%;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.titlehelp{
+    font-size: 20px;
+    margin: 75px 0px;
+    color: white;
+}
+.helpquestion{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.helpquestion h3{
+    font-size: 20px;
+    color: white;
+    transition: color 0.3s ease;
+}
+
+
+.helpquestion:hover h3 {
+    color: red;
+}
+
+.helpquestion svg path {
+    transition: stroke 0.3s ease;
+}
+
+.helpquestion:hover svg path {
+    stroke: red;
+}
+
+.helpp{
+    max-width: 700px;
+    margin-top: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #fff;
+    cursor: pointer;
+}
+.helpanswer{
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 1.4s ease;
+}
+.helpanswer p{
+    padding-top: 15px;
+    line-height: 25px;
+    font-size: 23px;
+    color: white;
+}
+em{
+    color: red;
+}
+.helpp.active .helpanswer {
+    max-height: 300px;
+}
+.helpp.active svg {
+   transform: rotate(180deg);
+}
+svg{
+    transition: transform 0.5s ease-in;
+}

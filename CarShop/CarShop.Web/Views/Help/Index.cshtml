@@ -1,1 +1,108 @@
-<div>help</div>
+@{
+    ViewData["RenderTransparentHeader"] = true;
+}
+@section HeadContent {
+    <link rel="stylesheet" href="/css/help.css"/>
+}
+<section>
+        <h2 class="titlehelp"></h2>
+        <div class="helpp">
+            <div class="helpquestion">
+                <h3>Какие документы необходимы для покупки автомобиля?</h3>
+                <svg width="15" heigh="10" viewBox="0 0 42 45">
+                    <path d="M3 3L21 21L39 3" stroke="white" stroke-width="7" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="helpanswer">
+                <p>Чтобы купить автомобиль, вам понадобятся паспорт, ИНН, в некоторых случаях,
+                дополнительные документы для оформления кредита или лизинга. Мы поможем подготовить все необходимое!</p>
+            </div>
+        </div>
+
+        <div class="helpp">
+            <div class="helpquestion">
+                <h3>Как я могу проверить историю автомобиля перед покупкой?</h3>
+                <svg width="15" heigh="10" viewBox="0 0 42 45">
+                    <path d="M3 3L21 21L39 3" stroke="white" stroke-width="7" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="helpanswer">
+                <p>Мы предоставляем полную информацию об истории каждого автомобиля.
+                При необходимости вы также можете запросить независимую проверку.
+                Для получения данных о конкретном авто напишите нам на почту: <em>dnucarsales@gmail.com</em>.</p>
+            </div>
+        </div>
+
+        <div class="helpp">
+            <div class="helpquestion">
+                <h3>Предоставляете ли вы гарантию на автомобили?</h3>
+                <svg width="15" heigh="10" viewBox="0 0 42 45">
+                    <path d="M3 3L21 21L39 3" stroke="white" stroke-width="7" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="helpanswer">
+                <p>Да, большинство наших автомобилей имеют гарантию.
+                Подробности зависят от модели автомобиля, мы всегда готовы обсудить условия гарантии при выборе авто по номеру телефона: <em>+380665556667</em>.</p>
+            </div>
+        </div>
+
+        <div class="helpp">
+            <div class="helpquestion">
+                <h3>Другие вопросы</h3>
+                <svg width="15" heigh="10" viewBox="0 0 42 45">
+                    <path d="M3 3L21 21L39 3" stroke="white" stroke-width="7" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="helpanswer">
+                <p>Если у вас возникли другие вопросы, вы можете написать нам на почту: <em>dnucarsales@gmail.com</em> или обратиться через наши соцсети, ссылки на которые указаны ниже.</p>
+            </div>
+        </div>
+    </section>
+    <script>
+    window.addEventListener('scroll', function() {
+    const logo = document.querySelector('.logo');
+    if (window.scrollY > 50) { 
+        logo.style.opacity = '0'; 
+    } else {
+        logo.style.opacity = '1';
+    }
+    });
+    window.addEventListener('scroll', function() {
+    const menu = document.querySelector('.menu');
+    if (window.scrollY > 50) { 
+      menu.style.opacity = '0'; 
+    } else {
+      menu.style.opacity = '1';
+    }
+    });
+    const helpItems = document.querySelectorAll(".helpp");
+
+
+    function checkScroll() {
+ 
+    if (isMobile()) {
+        document.body.style.overflowY = "scroll"; 
+        return;
+    }
+
+    const activeItems = document.querySelectorAll(".helpp.active");
+
+    if (activeItems.length >= 2) {
+        document.body.style.overflowY = "scroll"; 
+    } else {
+        document.body.style.overflowY = "hidden"; 
+    }
+    }
+
+    function isMobile() {
+    return window.innerWidth <= 768; 
+    }
+
+    helpItems.forEach((item) => {
+    item.addEventListener("click", () => {
+        item.classList.toggle("active"); 
+        checkScroll(); 
+    });
+    });
+    checkScroll();
+    </script>
