@@ -9,6 +9,8 @@
     @await RenderSectionAsync("HeadContent", required: false)
 </head>
 <body>
+@if (ViewData["NotRenderHeader"] is not true)
+{
     <header>
         <nav class="navbar navbar-expand-sm bg-body-tertiary">
             <div class="container-fluid">
@@ -24,10 +26,11 @@
                         <li class="nav-item">
                             @if (User.HasClaim(claim => claim.Type == "id"))
                             {
-                                <a asp-controller="admin" asp-action="addcar"  class="btn btn-primary">
+                                <a asp-controller="admin" asp-action="addcar" class="btn btn-primary">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
                                         <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/>
-                                    </svg> Добавить товар</a>
+                                    </svg> Добавить товар
+                                </a>
                             }
                         </li>
                     </ul>
@@ -35,11 +38,12 @@
             </div>
         </nav>
     </header>
+}
 
-    @RenderBody()
+@RenderBody()
 
-    @await RenderSectionAsync("Scripts", required: false)
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    <script src="~/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+<script src="~/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

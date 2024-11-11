@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using CarShop.AdminService.Database.Entities;
+using CarShop.AdminService.Extensions;
 using CarShop.AdminService.Repositories;
 using CarShop.AdminService.Services;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
@@ -14,37 +15,43 @@ public class AdminServiceImpl(
     RefreshSessionsRepository _refreshSessionsRepository,
     TokensPairGenerator _tokensPairGenerator) : AdminService.AdminServiceBase
 {
-    public override async Task<CreateAccountReply> CreateAccount(CreateAccountRequest request, ServerCallContext context)
+    public override async Task<CreateAccountReply> CreateAccount(CreateAccountRequest request,
+        ServerCallContext context)
     {
-        // Корректные ли данные пришли
-        if (string.IsNullOrWhiteSpace(request.Email) ||
-            !Utils.IsEmail(request.Email) ||
-            string.IsNullOrWhiteSpace(request.Password) ||
-            request.Priority < Constants.HighestAdminPriority ||
-            request.Priority > Constants.LowestAdminPriority)
-        {
-            return new CreateAccountReply
-            {
-                Result = CreateAccountReply.Types.CreateAccountResult.BadRequest
-            };
-        }
-        
-        Admin? admin = await _adminsRepository.GetByEmailAsync(request.Email);
-        if (admin is not null) // Пользователь с такой почтой уже есть
+        if (await _adminsRepository.GetByEmailAsync(request.Account.Email)
+            is not null) // Пользователь с такой почтой уже есть
         {
             return new CreateAccountReply
             {
                 Result = CreateAccountReply.Types.CreateAccountResult.UserWithThisEmailAlreadyExists
             };
         }
-        
-        await _adminsRepository.CreateAccountAsync(
-            request.Email,
-            Argon2.Hash(request.Password),
-            request.Priority);
+
+        Admin admin;
+
+        try
+        {
+            admin = new Admin
+            {
+                Email = request.Account.Email,
+                Password = request.Account.Password,
+                Priority = request.Account.Priority,
+                Roles = request.Account.Roles.ToArray(),
+                Banned = request.Account.Banned
+            };
+            await _adminsRepository.CreateAccountAsync(admin);
+        }
+        catch (ValidationException)
+        {
+            return new CreateAccountReply
+            {
+                Result = CreateAccountReply.Types.CreateAccountResult.BadRequest
+            };
+        }
 
         return new CreateAccountReply
         {
+            Account = admin.ToGrpcMessage(),
             Result = CreateAccountReply.Types.CreateAccountResult.Success
         };
     }
@@ -61,7 +68,7 @@ public class AdminServiceImpl(
                 Result = LoginReply.Types.LoginResult.BadRequest
             };
         }
-        
+
         Admin? admin = await _adminsRepository.GetByEmailAsync(request.Email);
         if (admin is null) // Аккаунта с таким email нет
         {
@@ -86,10 +93,10 @@ public class AdminServiceImpl(
                 Result = LoginReply.Types.LoginResult.IncorrectPassword
             };
         }
-        
+
         var tokensPair = _tokensPairGenerator
-            .GenerateTokensPair(admin.Id, admin.Email, admin.Roles, out DateTime refreshTokenExpires);
-        
+            .GenerateTokensPair(admin.Id, admin.Email, admin.Roles, admin.Priority, out DateTime refreshTokenExpires);
+
         await _refreshSessionsRepository.CreateSessionAsync(new RefreshSession
         {
             AdminId = admin.Id,
@@ -116,7 +123,7 @@ public class AdminServiceImpl(
                 Result = UpdateTokensReply.Types.UpdateTokensResult.BadRequest
             };
         }
-        
+
         RefreshSession? refreshSession = await _refreshSessionsRepository
             .GetByRefreshTokenAsync(request.RefreshToken);
 
@@ -136,15 +143,15 @@ public class AdminServiceImpl(
                 Result = UpdateTokensReply.Types.UpdateTokensResult.SessionNotFound
             };
         }
-        
+
         Admin admin = (await _adminsRepository.GetByIdAsync(refreshSession.AdminId))!;
         var tokensPair = _tokensPairGenerator
-            .GenerateTokensPair(admin.Id, admin.Email, admin.Roles, out DateTime refreshTokenExpires);
-        
+            .GenerateTokensPair(admin.Id, admin.Email, admin.Roles, admin.Priority, out DateTime refreshTokenExpires);
+
         refreshSession.RefreshToken = tokensPair.RefreshToken;
         refreshSession.ExpiresIn = refreshTokenExpires;
         await _refreshSessionsRepository.UpdateSessionAsync(refreshSession);
-        
+
         return new UpdateTokensReply
         {
             Result = UpdateTokensReply.Types.UpdateTokensResult.Success,
@@ -207,6 +214,105 @@ public class AdminServiceImpl(
         return new UnbanAccountReply
         {
             Result = UnbanAccountReply.Types.UnbanAccountResult.Success
+        };
+    }
+
+    public override async Task<UpdateAccountReply> UpdateAccount(UpdateAccountRequest request,
+        ServerCallContext context)
+    {
+        Admin? admin = await _adminsRepository.GetByIdAsync(request.Id);
+        if (admin is null)
+        {
+            return new UpdateAccountReply
+            {
+                Result = UpdateAccountReply.Types.UpdateAccountResult.AccountNotFound
+            };
+        }
+
+        if (request.HasEmail)
+        {
+            admin.Email = request.Email;
+        }
+
+        if (request.HasPassword)
+        {
+            admin.Password = request.Password;
+            try
+            {
+                Validator.ValidateObject(admin, new(admin), true);
+            }
+            catch (ValidationException)
+            {
+                return new UpdateAccountReply
+                {
+                    Result = UpdateAccountReply.Types.UpdateAccountResult.BadRequest
+                };
+            }
+
+            admin.Password = Argon2.Hash(admin.Password);
+        }
+
+        if (request.HasPriority)
+        {
+            admin.Priority = request.Priority;
+        }
+
+        if (request.HasBanned)
+        {
+            admin.Banned = request.Banned;
+        }
+
+        if (request.Roles.Any() || request is { HasUpdateRoles: true, UpdateRoles: true })
+        {
+            admin.Roles = request.Roles.ToArray();
+        }
+
+        try
+        {
+            await _adminsRepository.UpdateAccountAsync(admin);
+        }
+        catch (ValidationException)
+        {
+            return new UpdateAccountReply
+            {
+                Result = UpdateAccountReply.Types.UpdateAccountResult.BadRequest
+            };
+        }
+        catch (ArgumentException e)
+        {
+            if (e.ParamName == nameof(admin.Email))
+            {
+                return new UpdateAccountReply
+                {
+                    Result = UpdateAccountReply.Types.UpdateAccountResult.EmailIsBusy
+                };
+            }
+
+            throw;
+        }
+
+        return new UpdateAccountReply
+        {
+            Account = admin.ToGrpcMessage(),
+            Result = UpdateAccountReply.Types.UpdateAccountResult.Success,
+        };
+    }
+
+    public override async Task<GetAccountReply> GetAccount(GetAccountRequest request, ServerCallContext context)
+    {
+        Admin? admin = await _adminsRepository.GetByIdAsync(request.AccountId);
+        if (admin is null)
+        {
+            return new GetAccountReply
+            {
+                Result = GetAccountReply.Types.GetAccountResult.AccountNotFound
+            };
+        }
+
+        return new GetAccountReply
+        {
+            Account = admin.ToGrpcMessage(),
+            Result = GetAccountReply.Types.GetAccountResult.Success
         };
     }
 }

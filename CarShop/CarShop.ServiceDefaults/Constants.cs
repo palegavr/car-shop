@@ -1,6 +1,6 @@
-namespace CarShop.AdminService;
+namespace CarShop.ServiceDefaults;
 
-public static class Constants
+public class Constants
 {
     public static readonly string[] DefaultAdminRoles = [
         "admin.account.change-password.own",

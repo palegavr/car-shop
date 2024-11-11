@@ -1,0 +1,62 @@
+@{
+    ViewData["NotRenderHeader"] = true;
+}
+@section HeadContent {
+    <link rel="stylesheet" href="/css/about.css"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+}
+
+    <header>
+        <nav>
+            <img src="/images/route/home/DNUcarlogo.png" class="logo" alt="Car Shop Logo">
+            <div class="menu-toggle">
+                <i class="fa fa-bars"></i> 
+            </div>
+            <div class="menu">
+                <a href="#">Главная</a>
+                <a href="#">О нас</a>
+                <a href="#">Каталог</a>
+                <a href="#">Помощь</a>
+            </div>
+        </nav>
+    </header>
+
+    <section>
+
+        <div class="box"><h1>О нас</h1>
+            <p>Мы – команда профессионалов, которые заботятся о том, чтобы ваш выбор автомобиля был простым, безопасным и выгодным.<br>
+            Наша компания специализируется на продаже проверенных автомобилей с полной историей и прозрачными условиями покупки.<br>
+            Мы тщательно отбираем каждый автомобиль, чтобы предложить вам только лучшее.</p>
+            <p>Почему выбирают нас? Мы обеспечиваем:<br>
+                Полную прозрачность: каждый автомобиль имеет подтверждённую историю и проходит все необходимые технические проверки.<br>
+                Индивидуальный подход: помогаем найти автомобиль, который идеально соответствует вашим требованиям и бюджету.<br>
+                Гибкие условия покупки и поддержку на всех этапах выбора и оформления.<br></p>
+                <h1>Свяжитесь с нами:</h1>
+                <p>📞 +380665556667<br>
+                📞 +380674455667</p>
+        </div>
+
+        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2647.215915762499!2d35.03792568648978!3d48.43319565648827!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x40dbe34ab395ba83%3A0x44a6262ae0025165!2z0JTQndCj!5e0!3m2!1sru!2sua!4v1731173766246!5m2!1sru!2sua" width="500" height="400" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    </section>
+
+    <div class="social-bar">
+        <a href="#"><i class="fa-brands fa-telegram"></i></a>
+        <a href="#"><i class="fa-brands fa-instagram"></i></a>
+        <a href="#"><i class="fa-brands fa-twitter"></i></a>
+    </div>
+    
+    <script>
+        document.querySelector('.menu-toggle').addEventListener('click', function() {
+            document.querySelector('.menu').classList.toggle('active');
+        });
+        window.addEventListener('scroll', function() {
+    const logo = document.querySelector('.logo');
+    if (window.scrollY > 50) { 
+        logo.style.opacity = '0'; 
+    } else {
+        logo.style.opacity = '1';
+    }
+});
+
+    </script>

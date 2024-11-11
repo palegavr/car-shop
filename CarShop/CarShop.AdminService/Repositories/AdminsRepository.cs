@@ -1,6 +1,10 @@
-﻿using CarShop.AdminService.Database;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Security.Cryptography.X509Certificates;
+using CarShop.AdminService.Database;
 using CarShop.AdminService.Database.Entities;
+using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
+using Isopoh.Cryptography.Argon2;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarShop.AdminService.Repositories
@@ -33,15 +37,13 @@ namespace CarShop.AdminService.Repositories
             return admin;
         }
 
-        public async Task CreateAccountAsync(string email, string password, int priority, string[]? roles = null)
+        public async Task CreateAccountAsync(Admin admin)
         {
-            _db.Admins.Add(new Admin
-            {
-                Email = email,
-                Password = password,
-                Roles = PrepareRoles(roles ?? Constants.DefaultAdminRoles),
-                Priority = priority
-            });
+            ArgumentOutOfRangeException.ThrowIfNotEqual(admin.Id, default, nameof(admin.Id));
+            admin.Roles = PrepareRoles(admin.Roles);
+            Validator.ValidateObject(admin, new(admin), true);
+            admin.Password = Argon2.Hash(admin.Password);
+            _db.Admins.Add(admin);
             await _db.SaveChangesAsync();
         }
 
@@ -53,6 +55,14 @@ namespace CarShop.AdminService.Repositories
 
         public async Task UpdateAccountAsync(Admin admin)
         {
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(admin.Id, nameof(admin.Id));
+            Validator.ValidateObject(admin, new(admin), true);
+            Admin? otherAdmin = await GetByEmailAsync(admin.Email);
+            if (otherAdmin is not null && admin.Id != otherAdmin.Id)
+            {
+                throw new ArgumentException("Email is busy.", nameof(admin.Email));
+            }
+
             _db.Admins.Update(admin);
             await _db.SaveChangesAsync();
             _db.Entry(admin).State = EntityState.Detached;
@@ -63,10 +73,6 @@ namespace CarShop.AdminService.Repositories
             if (roles.Contains(Constants.AllRolesSymbol))
             {
                 roles = Role.AllExistingRoles;
-            }
-            else if (roles.All(role => Role.AllExistingRoles.Contains(role)))
-            {
-                roles = [Constants.AllRolesSymbol];
             }
 
             return roles;
