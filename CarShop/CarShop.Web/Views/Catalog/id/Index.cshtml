@@ -5,11 +5,12 @@
 	Car car = Model;
 	bool renderDeleteButton = User.IsInRole(Role.Admin.Car.Delete);
 	bool renderEditButton = User.IsInRole(Role.Admin.Car.Edit);
+	ViewData["RenderTransparentHeader"] = true;
 }
 
 @if (renderDeleteButton || renderEditButton)
 {
-	<div class="mb-2 py-2 text-center bg-body-secondary">
+	<div class="py-2 text-center">
 		@if (renderEditButton)
 		{
 			<a asp-controller="admin" asp-action="editcar" asp-route-id="@car.Id" class="btn btn-success">
@@ -52,7 +53,7 @@
 
 @if (car.BigImageUrls.Count > 0)
 {
-	<div id="carouselExampleIndicators" class="carousel slide" style="background-color: darkgrey;">
+	<div id="carouselExampleIndicators" class="carousel slide" style="">
 		<div class="carousel-indicators">
 			@for (int i = 0; i < car.BigImageUrls.Count; i++)
 			{
@@ -86,48 +87,51 @@
 	</div>
 }
 
-<table class="table table-striped" style="font-size: 6mm;">
+<table class="table table-secondary" style="font-size: 6mm;">
 	<tbody>
-		<tr>
-			<td>Марка</td>
-			<td>@car.Brand</td>
-		</tr>
-		<tr>
-			<td>Модель</td>
-			<td>@car.Model</td>
-		</tr>
+	<tr>
+		<td>Марка</td>
+		<td>@car.Brand</td>
+	</tr>
+	<tr>
+		<td>Модель</td>
+		<td>@car.Model</td>
+	</tr>
 
+	<tr>
+		<td>Цвет</td>
+		<td>@car.Color</td>
+	</tr>
+	@if (car.FuelType != Car.Types.FuelType.Electric)
+	{
 		<tr>
-			<td>Цвет</td>
-			<td>@car.Color</td>
+			<td>Объём двигателя</td>
+			<td>@car.EngineCapacity л</td>
 		</tr>
-		@if (car.FuelType != Car.Types.FuelType.Electric)
-		{
-			<tr>
-				<td>Объём двигателя</td>
-				<td>@car.EngineCapacity л</td>
-			</tr>
-		}
-		<tr>
-			<td>Вид корпуса</td>
-			<td>@car.CorpusType.ToDisplayString()</td>
-		</tr>
-		<tr>
-			<td>Вид топлива</td>
-			<td>@car.FuelType.ToDisplayString()</td>
-		</tr>
-		<tr>
-			<td>Количество единиц товара на складе</td>
-			<td>@car.Count</td>
-		</tr>
-		<tr>
-			<td>Цена за стандартную комплектацию</td>
-			<td style="background-color: rgb(141, 248, 141);">@car.PriceForStandartConfiguration грн</td>
-		</tr>
+	}
+	<tr>
+		<td>Вид корпуса</td>
+		<td>@car.CorpusType.ToDisplayString()</td>
+	</tr>
+	<tr>
+		<td>Вид топлива</td>
+		<td>@car.FuelType.ToDisplayString()</td>
+	</tr>
+	<tr>
+		<td>Количество единиц товара на складе</td>
+		<td>@car.Count</td>
+	</tr>
+	<tr>
+		<td>Цена за стандартную комплектацию</td>
+		<td style="background-color: rgb(141, 248, 141);">@car.PriceForStandartConfiguration грн</td>
+	</tr>
 	</tbody>
 </table>
-<a asp-controller="Catalog" asp-action="Configure" asp-route-id="@car.Id" 
-   style="height: 50px; font-size: 6mm;" class="btn btn-outline-primary w-100 mb-2">Конфигурировать</a>
+@if (car.AdditionalCarOptions.Any())
+{
+	<a asp-controller="Catalog" asp-action="Configure" asp-route-id="@car.Id" 
+	   style="height: 50px; font-size: 6mm;" class="btn btn-outline-light w-100 mb-2">Конфигурировать</a>
+}
 
 @section Scripts
 {

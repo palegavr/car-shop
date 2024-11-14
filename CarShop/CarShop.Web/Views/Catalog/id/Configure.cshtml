@@ -1,7 +1,9 @@
 @using CarShop.CarStorageService.Grpc
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model CarShop.Web.Models.Catalog.ConfigureViewModel
-
+@{
+    ViewData["RenderTransparentHeader"] = true;
+}
 
 @if (Model.Car.AdditionalCarOptions.Count > 0)
 {

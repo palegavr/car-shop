@@ -18,6 +18,7 @@ header {
     left: 0;
     right: 0;
     z-index: 1000; 
+    backdrop-filter: blur(4px);
 }
 
 header nav {
@@ -46,6 +47,11 @@ nav .menu a {
     font-weight: 700;
     position: relative;
     text-decoration: none;
+    text-shadow:
+        -1px -1px 0 black,
+        1px -1px 0 black, 
+        -1px 1px 0 black,
+        1px 1px 0 black; 
 }
 
 nav .menu a::after {
@@ -76,6 +82,7 @@ nav .menu a:hover::after {
     background-color: #333;
     padding: 7px 0;
     text-align: center;
+    z-index: 2000;
 }
 
 .social-bar a {
@@ -175,7 +182,7 @@ header nav .menu {
     top: 60px;
     left: 0;
     padding: 10px 0px; 
-    gap: 15px; 
+    gap: 15px;
 }
 
 header nav .menu a {
@@ -185,6 +192,7 @@ header nav .menu a {
 
 header nav .menu.active {
     display: flex;
+    background: rgba(0, 0, 0, 0.5);
 }
 
 header nav .logo {

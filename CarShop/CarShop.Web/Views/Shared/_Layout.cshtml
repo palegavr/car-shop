@@ -64,7 +64,7 @@ else
         });
     </script>
 }
-<div style="@(ViewData["RenderTransparentHeader"] is not true ? "margin-top: 70px" : "") ">
+<div style="@(ViewData["RenderTransparentHeader"] is true ? "margin-top: 70px; margin-bottom: 80px" : "") ">
     @RenderBody()
 </div>
 
