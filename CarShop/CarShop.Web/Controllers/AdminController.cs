@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Net;
 using System.Net.Mime;
+using System.Security.Claims;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using CarShop.AdminService.Grpc;
@@ -245,6 +246,45 @@ namespace CarShop.Web.Controllers
 					})
 					: processDataInDbJsonEncoded,
 				CarId = id
+			});
+		}
+
+		[Authorize]
+		[HttpGet]
+		[Route("account/{id:long}")]
+		public async Task<IActionResult> AccountAsync([FromRoute] long id)
+		{
+			var getAccountReply = await _adminServiceClient.GetAccountAsync(new()
+			{
+				AccountId = id
+			});
+
+			if (getAccountReply.Result == GetAccountReply.Types.GetAccountResult.AccountNotFound)
+			{
+				return NotFound();
+			}
+			
+			string html = await System.IO.File.ReadAllTextAsync("wwwroot/admin/account/id.html");
+			return View(new AccountViewModel
+			{
+				BodyHtmlContent = ExtractTagContent(html, "body"),
+				HeadHtmlContent = ExtractTagContent(html, "head"),
+				Administrator = new()
+				{
+					Id = getAccountReply.Account.Id,
+					Priority = getAccountReply.Account.Priority,
+					Roles = getAccountReply.Account.Roles.ToList(),
+					Banned = getAccountReply.Account.Banned
+				},
+				PerformingAdministrator = new()
+				{
+					Id = Utils.GetAdminIdFromClaimsPrincipal(User) ?? throw new Exception(),
+					Priority = Utils.GetPriorityFromClaimsPrincipal(User) ?? throw new Exception(),
+					Roles = User.Claims
+						.Where(claim => claim.Type == ClaimTypes.Role)
+						.Select(claim => claim.Value)
+						.ToList(),
+				}
 			});
 		}
 		

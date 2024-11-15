@@ -1,7 +1,9 @@
 ﻿@using CarShop.CarStorageService.Grpc
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model CarShop.Web.Models.Catalog.CatalogViewModel
-
+@{
+    ViewData["RenderTransparentHeader"] = true;
+}
 <div class="text-center">
     <!-- /* кнопка яка відкриває шторку зліва*/ -->
     <button class="btn btn-success" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" aria-controls="offcanvasExample" onclick="check()">
@@ -56,8 +58,15 @@
         @foreach (Car car in Model.Cars)
         {
             <div class="col">
-                <div class="card mb-3">
-                    <img src="@car.ImageUrl" style="height: 300px;" class="img-fluid rounded" alt="...">
+                <div class="card mb-3 bg-secondary-subtle">
+                    @if (string.IsNullOrWhiteSpace(car.ImageUrl))
+                    {
+                        <div style="height: 300px; line-height: 300px">Картинка отсутствует.</div>
+                    }
+                    else
+                    {
+                        <img src="@car.ImageUrl" style="height: 300px; object-fit: contain" class="rounded" alt="...">
+                    }
                     <div class="card-body">
                         <h5 class="card-title">@car.Brand @car.Model</h5>
                         <p class="card-text">Цена: <b class="text-success">@car.PriceForStandartConfiguration</b> грн.</p>
