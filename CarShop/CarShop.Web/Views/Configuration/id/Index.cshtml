@@ -1,8 +1,110 @@
+@using CarShop.CarStorageService.Grpc
 @model CarShop.Web.Models.Catalog.ConfigurationViewModel
+
+@{
+double totalPrice = 0; // Змінна для зберігання загальної суми
+double totalCost = 0;
+}
+
 
 <div>Car ID: @Model.Car.Id</div>
 <div>Configuration ID: @Model.Configuration.Id</div>
-<div>Кондиционер: @Model.Configuration.AirConditioner</div>
-<div>Подогрев: @Model.Configuration.HeatedDriversSeat</div>
-<div>Регулировка сидения: @Model.Configuration.SeatHeightAdjustment</div>
-<div>Цвет: @(Model.Configuration.HasDifferentCarColor ? Model.Configuration.DifferentCarColor : false)</div>
+<table class="table table-striped" style="font-size: 6mm;">
+    <tbody>
+    <tr>
+        <td colspan="2" style="text-align: center; font-weight: bold;">Дані про автомобіль</td>
+    </tr>
+    <tr>
+        <td>Марка</td>
+        <td>@Model.Car.Brand</td>
+    </tr>
+    <tr>
+        <td>Модель</td>
+        <td>@Model.Car.Model</td>
+    </tr>
+
+    <tr>
+        <td>Колір</td>
+        <td>@Model.Car.Color</td>
+    </tr>
+    @if (Model.Car.FuelType != Car.Types.FuelType.Electric)
+    {
+        <tr>
+            <td>Об'єм двигуна</td>
+            <td>@Model.Car.EngineCapacity л</td>
+        </tr>
+    }
+    <tr>
+        <td>Вид корпусу</td>
+        <td>@Model.Car.CorpusType.ToDisplayString()</td>
+    </tr>
+    <tr>
+        <td>Вид палива</td>
+        <td>@Model.Car.FuelType.ToDisplayString()</td>
+    </tr>
+    <tr>
+        <td>Кількість одиниць товару складі</td>
+        <td>@Model.Car.Count</td>
+    </tr>
+    <tr>
+        <td colspan="2" style="text-align: center; font-weight: bold;">Додаткова комплектація</td>
+    </tr>
+    @foreach (var option in Model.Car.AdditionalCarOptions)
+    {
+        @if (@Model.Configuration.AirConditioner == true && option.Type == AdditionalCarOption.Types.Type.AirConditioner)
+        {
+            <tr>
+                <td>Кондиціонер</td>
+                <td>@option.Price грн</td>
+                @{ totalPrice += option.Price; }
+            </tr>
+        }
+
+        @if (Model.Configuration.HeatedDriversSeat == true && option.Type == AdditionalCarOption.Types.Type.HeatedDriversSeat)
+        {
+            <tr>
+                <td>Підігрів сидіння</td>
+                <td>@option.Price грн</td>
+                @{ totalPrice += option.Price; }
+            </tr>
+        }
+
+        @if (Model.Configuration.SeatHeightAdjustment == true && option.Type == AdditionalCarOption.Types.Type.SeatHeightAdjustment)
+        {
+            <tr>
+                <td>Регулювання сидіння</td>
+                <td>@option.Price грн</td>
+                @{ totalPrice += option.Price; }
+            </tr>
+        }
+
+        @if (Model.Configuration.HasDifferentCarColor && option.Type == AdditionalCarOption.Types.Type.DifferentCarColor)
+        {
+            <tr>
+                <td>Колір</td>
+                <td>@(Model.Configuration.HasDifferentCarColor ? Model.Configuration.DifferentCarColor : false) @option.Price грн</td>
+                @{ totalPrice += option.Price; }
+            </tr>
+        }
+
+    }
+    <tr>
+        <td colspan="2" style="text-align: center; font-weight: bold;">Ціна</td>
+    </tr>
+    <tr>
+        <td>Ціна за стандартну комплектацію</td>
+        <td style="background-color: rgb(141, 248, 141);">@Model.Car.PriceForStandartConfiguration грн</td>
+    </tr>
+    <tr>
+        <td>Ціна за додаткову комплектацію</td>
+        <td style="background-color: rgb(141, 248, 141);"> @totalPrice грн</td>
+    </tr>
+    <tr>
+        @{
+            totalCost = (@totalPrice + @Model.Car.PriceForStandartConfiguration) * 1.2;
+        }
+        <td>Ціна за все з податком</td>
+        <td style="background-color: rgb(141, 248, 141);"> @($"{totalCost:F2} грн") </td>
+    </tr>
+    </tbody>
+</table>
