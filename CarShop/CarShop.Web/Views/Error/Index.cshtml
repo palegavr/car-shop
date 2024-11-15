@@ -1,5 +1,12 @@
-﻿@{
-	ViewData["Title"] = "Непредвиденная ошибка";
+﻿@using Microsoft.AspNetCore.Diagnostics
+@{
+	ViewData["Title"] = "Непередбачена помилка";
+	var statusCodeReExecuteFeature = Context.Features.Get<IStatusCodeReExecuteFeature>();
 }
-
-<div>Непредвиденная ошибка</div>
+<div style="color: white">
+	<div>Непередбачена помилка</div>
+	@if (statusCodeReExecuteFeature is not null)
+	{
+		<div>Код: @statusCodeReExecuteFeature.OriginalStatusCode</div>
+	}
+</div>
