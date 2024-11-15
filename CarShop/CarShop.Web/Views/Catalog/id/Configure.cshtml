@@ -7,7 +7,7 @@
 
 @if (Model.Car.AdditionalCarOptions.Count > 0)
 {
-    <form method="post" style="font-size: 8mm;">
+    <form method="post" oninput="pris()" style="font-size: 8mm;">
         <div class="container p-3 my-3 border border-1 rounded rounded-3 shadow position-absolute top-50 start-50 translate-middle bg-secondary-subtle" style="max-width: 700px;">
             @foreach (var option in Model.Car.AdditionalCarOptions)
             {
@@ -133,7 +133,31 @@ else
 {
 
 
-<script>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            pris();  // Викликаємо функцію для перевірки вибраних чекбоксів при завантаженні
+        });
+
+        // Функція для підрахунку ціни
+        function pris() {
+            let piras = 0;
+
+            // Отримуємо всі чекбокси на сторінці
+            const checkboxes = document.querySelectorAll('.option-checkbox');
+
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    // Якщо чекбокс вибраний, додаємо ціну
+                    let price = parseInt(checkbox.getAttribute('data-price')) || 0;
+                    piras += price;
+                }
+            });
+
+            // Вивести ціну в елемент з ID "pricefull"
+            document.getElementById("pricefull").textContent = "Цена: " + piras + " грн";
+        }
+        
     // Отримуємо елементи чекбокса і вибору кольору
     const colorCheckbox = document.getElementById('topliv4');
     const colorInput = document.getElementById('exampleColorInput');
@@ -171,21 +195,7 @@ else
         }
     });
 
-    function updatePrice() {
-        let totalPrice = 0;
-        document.querySelectorAll('.option-checkbox').forEach(function(checkbox) {
-            if (checkbox.checked) {
-                totalPrice += parseFloat(checkbox.getAttribute('data-price')) || 0;
-            }
-        });
-        document.getElementById('pricefull').innerText = 'Цена: ' + totalPrice + ' грн';
-    }
+   
 
-    document.querySelectorAll('.option-checkbox').forEach(function(checkbox) {
-        checkbox.addEventListener('change', updatePrice);
-    });
-
-    // Initial calculation for pre-checked options
-    updatePrice();
-</script>
+    </script>
 }
