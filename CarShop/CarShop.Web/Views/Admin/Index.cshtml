@@ -1,0 +1,14 @@
+@model CarShop.Web.Models.Admin.AdminViewModel
+
+@section HeadContent
+{
+    @Html.Raw(Model.HeadHtmlContent)
+}
+<script>
+    window.carShopData = {
+        admins: @Json.Serialize(Model.AdminAccounts),
+        performingAdmin: @Json.Serialize(Model.PerformingAdmin),
+        adminEmail: @Json.Serialize(Model.AdminEmail)
+    };
+</script>
+@Html.Raw(Model.BodyHtmlContent)

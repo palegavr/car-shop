@@ -1,46 +1,42 @@
 'use client'
-
-import '@fontsource/roboto/300.css';
-import '@fontsource/roboto/400.css';
-import '@fontsource/roboto/500.css';
-import '@fontsource/roboto/700.css';
+import React, {useEffect, useRef, useState} from "react";
+import {
+    banAsync,
+    changePasswordAsync,
+    ChangePasswordResult,
+    ExistingRoles,
+    giveRoleAsync,
+    Role,
+    setPriorityAsync,
+    SetPriorityResult,
+    takeRoleAsync,
+    unbanAsync
+} from "@/clients/backendСlient";
 import {
     Box,
     Button,
     Checkbox,
     CircularProgress,
     Container,
-    FormControlLabel, IconButton, InputAdornment, Paper,
+    FormControlLabel,
     Stack,
     TextField,
     Typography
 } from "@mui/material";
-import React, {useEffect, useRef, useState} from "react";
-import {
-    banAsync,
-    changePasswordAsync,
-    ChangePasswordResult, ExistingRoles,
-    giveRoleAsync,
-    Role,
-    setPriorityAsync, SetPriorityResult,
-    takeRoleAsync,
-    unbanAsync
-} from "@/clients/backendСlient";
-import {LoadingButton} from "@mui/lab";
-import {delay} from "@/utilities/delay";
 import {toast, ToastContainer} from "react-toastify";
-import 'react-toastify/dist/ReactToastify.css';
+import {LoadingButton} from "@mui/lab";
 
 const defaultToastTime = 2000;
 
-type Admin = {
+export type Admin = {
     id: number,
+    email: string,
     priority: number,
     banned: boolean,
     roles: Role[],
 }
 
-type PerformingAdmin = {
+export type PerformingAdmin = {
     id: number,
     priority: number,
     roles: Role[],
@@ -51,37 +47,11 @@ type Props = {
     performingAdmin: PerformingAdmin,
 }
 
-let performingAdmin: PerformingAdmin = {
-    id: 0,
-    roles: [],
-    priority: 0
-}
 
-let admin: Admin = {
-    id: 0,
-    roles: [],
-    banned: false,
-    priority: 0
-}
-
-export default function Page() {
+export default function AdminAccountEditor({admin, performingAdmin}: Props) {
     const [priority, setPriority] = useState<number>(admin.priority);
     const [banned, setBanned] = useState<boolean>(admin.banned);
     const [roles, setRoles] = useState<string[]>(admin.roles);
-    const [pageLoaded, setPageLoaded] = useState<boolean>();
-
-    useEffect(() => {
-        try {
-            admin = (window as any).carShopData.admin;
-            performingAdmin = (window as any).carShopData.performingAdmin;
-            setPriority(admin.priority);
-            setRoles(admin.roles);
-            setBanned(admin.banned)
-            setPageLoaded(true);
-        } catch {
-            setPageLoaded(false);
-        }
-    }, []);
 
     async function handleChangePriority(newPriority: number): Promise<SetPriorityResult> {
         const result = await setPriorityAsync(admin.id, newPriority);
@@ -124,56 +94,15 @@ export default function Page() {
         return await changePasswordAsync(admin.id, newPassword, oldPassword);
     }
 
-    if (pageLoaded === undefined) {
-        return (
-            <Paper sx={{
-                backgroundColor: 'lightyellow',
-                padding: 1,
-                textAlign: 'center',
-                marginTop: '50vh',
-                marginLeft: '50%',
-                transform: 'translate(-50%)',
-                display: 'inline-block'
-            }}>
-                Загрузка...
-            </Paper>
-        )
-    }
-
-    if (!pageLoaded) {
-        return (
-            <Paper sx={{
-                backgroundColor: '#faa',
-                padding: 1,
-                textAlign: 'center',
-                marginTop: '50vh',
-                marginLeft: '50%',
-                transform: 'translate(-50%)',
-                display: 'inline-block'
-            }}>
-                Ошибка
-            </Paper>
-        )
-    }
-
     return (
         <>
-            <Container maxWidth={'sm'} sx={{
-                backgroundColor: '#fff',
-                marginTop: 2,
-                marginBottom: 2,
-                paddingTop: 2,
-                paddingBottom: 2,
-                borderRadius: 2
-            }}>
-                <Stack spacing={2}>
-                    <PriorityChanger/>
-                    <BanChanger/>
-                    <RolesManager/>
-                    <PasswordChanger/>
-                </Stack>
-            </Container>
-            <ToastContainer/>
+
+            <Stack spacing={2}>
+                <PriorityChanger/>
+                <BanChanger/>
+                <RolesManager/>
+                <PasswordChanger/>
+            </Stack>
         </>
     )
 
@@ -435,4 +364,3 @@ export default function Page() {
         )
     }
 }
-

@@ -16,11 +16,4 @@ public class AccountViewModel
         [JsonPropertyName("banned")] public bool Banned { get; set; }
         [JsonPropertyName("roles")] public List<string> Roles { get; set; }
     }
-    
-    public class PerformingAdmin
-    {
-        [JsonPropertyName("id")] public long Id { get; set; }
-        [JsonPropertyName("priority")] public int Priority { get; set; }
-        [JsonPropertyName("roles")] public List<string> Roles { get; set; }
-    }
 }

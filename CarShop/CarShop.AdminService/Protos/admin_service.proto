@@ -9,6 +9,8 @@ service AdminService {
       returns (CreateAccountReply);
   rpc GetAccount(GetAccountRequest)
       returns (GetAccountReply);
+  rpc GetAccounts(GetAccountsRequest)
+      returns (GetAccountsReply);
   rpc UpdateAccount(UpdateAccountRequest)
       returns (UpdateAccountReply);
   rpc Login(LoginRequest)
@@ -21,6 +23,33 @@ service AdminService {
       returns (UnbanAccountReply);
 }
 
+// + GetAccounts
+message GetAccountsRequest {
+  optional SortType sort_type = 1;
+  optional SortBy sort_by = 2;
+  optional int32 min_priority = 3;
+  optional int32 max_priority = 4;
+  repeated string have_roles = 5;
+  optional bool banned = 6;
+  
+  enum SortType {
+    UNDEFINED = 0;
+    ASC = 1;
+    DESC = 2;
+  }
+  enum SortBy {
+    _UNDEFINED = 0;
+    PRIORITY = 1;
+    BANNED = 2;
+  }
+}
+// - GetAccounts
+
+message GetAccountsReply {
+  repeated AdminAccount accounts = 1;
+}
+
+// + GetAccount
 message GetAccountRequest {
   int64 account_id = 1;
 }
@@ -35,6 +64,7 @@ message GetAccountReply {
     SUCCESS = 2;
   }
 }
+// - GetAccount
 
 // + UpdateAccount
 message UpdateAccountRequest {

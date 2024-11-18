@@ -315,4 +315,20 @@ public class AdminServiceImpl(
             Result = GetAccountReply.Types.GetAccountResult.Success
         };
     }
+
+    public override async Task<GetAccountsReply> GetAccounts(GetAccountsRequest request, ServerCallContext context)
+    {
+        var admins = await _adminsRepository.GetMany(
+            sortType: request.HasSortType ? request.SortType : GetAccountsRequest.Types.SortType.Asc,
+            sortBy: request.HasSortBy ? request.SortBy : null,
+            minPriority: request.HasMinPriority ? request.MinPriority : null,
+            maxPriority: request.HasMaxPriority ? request.MaxPriority : null,
+            haveRoles: request.HaveRoles.Count > 0 ? request.HaveRoles.ToArray() : null,
+            banned: request.HasBanned ? request.Banned : null);
+
+        return new GetAccountsReply
+        {
+            Accounts = { admins.Select(admin => admin.ToGrpcMessage()) }
+        };
+    }
 }

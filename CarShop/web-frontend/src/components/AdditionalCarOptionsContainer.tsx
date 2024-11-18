@@ -7,6 +7,7 @@ import {backgroundImageStyle} from "@/utilities/backgroundImageStyle";
 type Props = {
     additionalCarOptions: AdditionalCarOption[],
     markAsEditedTypes?: AdditionalCarOptionType[],
+    showResetButton?: boolean
     onChange?: (optionsWithEnabled: AdditionalCarOptionWithEnabled[]) => Promise<void>,
     onReset?: (optionType: AdditionalCarOptionType) => Promise<void>
 }
@@ -20,6 +21,7 @@ export default function AdditionalCarOptionsContainer({
                                                           additionalCarOptions,
                                                           onChange,
                                                           markAsEditedTypes = [],
+                                                          showResetButton = true,
                                                           onReset
                                                       }: Props) {
     const [opened, setOpened] = useState<boolean>(false);
@@ -97,9 +99,11 @@ export default function AdditionalCarOptionsContainer({
                                                        handleChangeOptionEnabled(optionType, event.currentTarget.checked)}/>
                                             <label
                                                 className="form-check-label">{additionalCarOptionTypeToString(optionType)}</label>
-                                            <span className="ms-2">
-                                                <ResetChangesButton onClick={() => handleReset(optionType)}/>
-                                            </span>
+                                            {showResetButton && (
+                                                <span className="ms-2">
+                                                    <ResetChangesButton onClick={() => handleReset(optionType)}/>
+                                                </span>
+                                            )}
                                         </div>
                                         {optionWithEnabled.enabled && (
                                             <AdditionalCarOptionInput

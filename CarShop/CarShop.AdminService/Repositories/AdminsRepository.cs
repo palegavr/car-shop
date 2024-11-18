@@ -2,6 +2,7 @@
 using System.Security.Cryptography.X509Certificates;
 using CarShop.AdminService.Database;
 using CarShop.AdminService.Database.Entities;
+using CarShop.AdminService.Grpc;
 using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using Isopoh.Cryptography.Argon2;
@@ -35,6 +36,56 @@ namespace CarShop.AdminService.Repositories
             }
 
             return admin;
+        }
+
+        public async Task<Admin[]> GetMany(
+            GetAccountsRequest.Types.SortType sortType = GetAccountsRequest.Types.SortType.Asc,
+            GetAccountsRequest.Types.SortBy? sortBy = null,
+            int? minPriority = null,
+            int? maxPriority = null,
+            string[]? haveRoles = null,
+            bool? banned = null)
+        {
+            var query = _db.Admins.AsNoTracking();
+
+            if (minPriority is not null)
+            {
+                query = query.Where(admin => admin.Priority >= minPriority);
+            }
+            
+            if (maxPriority is not null)
+            {
+                query = query.Where(admin => admin.Priority <= maxPriority);
+            }
+
+            if (haveRoles is not null)
+            {
+                query = query.Where(admin => admin.Roles.Any(haveRoles.Contains));
+            }
+
+            if (banned is not null)
+            {
+                query = query.Where(admin => admin.Banned == banned);
+            }
+            
+            query = sortBy switch
+            {
+                GetAccountsRequest.Types.SortBy.Priority => sortType == GetAccountsRequest.Types.SortType.Asc
+                    ? query.OrderBy(admin => admin.Priority)
+                    : query.OrderByDescending(admin => admin.Priority),
+                GetAccountsRequest.Types.SortBy.Banned => sortType == GetAccountsRequest.Types.SortType.Asc
+                    ? query.OrderBy(admin => admin.Banned)
+                    : query.OrderByDescending(admin => admin.Banned),
+                _ => query
+            };
+            
+            return (await query.ToArrayAsync())
+                .Select(admin =>
+                {
+                    admin.Roles = PrepareRoles(admin.Roles);
+                    return admin;
+                })
+                .ToArray();
         }
 
         public async Task CreateAccountAsync(Admin admin)

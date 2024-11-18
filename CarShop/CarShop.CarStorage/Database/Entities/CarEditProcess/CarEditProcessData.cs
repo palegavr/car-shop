@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CarShop.CarStorage.Database.Entities.Car;
+using CarShop.ServiceDefaults.Attributes.Validation;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace CarShop.CarStorage.Database.Entities.CarEditProcess;
@@ -33,10 +34,12 @@ public class CarEditProcessData
 
     [JsonPropertyName("corpus_type")]
     [Required]
+    [EnumValidation(typeof(CorpusType))]
     public CorpusType CorpusType { get; set; }
 
     [JsonPropertyName("fuel_type")]
     [Required]
+    [EnumValidation(typeof(FuelType))]
     public FuelType FuelType { get; set; }
 
     [JsonPropertyName("count")]

@@ -38,6 +38,69 @@ export const ExistingRoles = [
 ] as const;
 export type Role = typeof ExistingRoles[number];
 
+export type Admin = {
+    id: number,
+    email: string,
+    roles: Role[],
+    priority: number,
+    banned: boolean
+}
+
+type GetAdminsResult = {
+    success: boolean,
+    admins: Admin[],
+}
+export async function getAdminsAsync(): Promise<GetAdminsResult> {
+    try {
+        const response = await fetch(`/api/admin/admins`, {
+            method: 'GET',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        });
+
+        return {
+            success: response.ok,
+            admins: await response.json()
+        }
+    } catch (error) {
+        return {
+            success: false,
+            admins: [],
+        }
+    }
+}
+
+type AddCarResult = {
+    success: boolean,
+    badRequest: boolean,
+    carId?: number,
+}
+export async function addCarAsync(carData: ProcessData): Promise<AddCarResult> {
+    try {
+        const response = await fetch(`/api/admin/car`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: encodeProcessDataToJson(carData)
+        });
+
+        return {
+            success: response.ok,
+            badRequest: response.status === 400,
+            carId: (await response.json()).id
+        }
+    } catch (error) {
+        return {
+            success: false,
+            badRequest: false,
+        }
+    }
+}
+
 type UploadImageResult = {
     success: boolean,
     publicImageUrls?: string[]
@@ -251,6 +314,41 @@ export async function changePasswordAsync(accountId: number, newPassword: string
     } catch (error) {
         return {
             success: false
+        }
+    }
+}
+
+export type CreateAccountResult = {
+    success: boolean,
+    password?: string,
+    emailAlreadyExists: boolean
+}
+export async function createAccountAsync(email: string): Promise<CreateAccountResult> {
+    try {
+        const payload: AccountActionPayload = {
+            action: AccountAction.Create,
+            data: {
+                email: email
+            }
+        };
+        const response = await fetch(`/api/admin/account`, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        return {
+            success: response.ok,
+            password: response.ok ? (await response.json()).password : undefined,
+            emailAlreadyExists: response.status === 409
+        }
+    } catch (error) {
+        return {
+            success: false,
+            emailAlreadyExists: false
         }
     }
 }

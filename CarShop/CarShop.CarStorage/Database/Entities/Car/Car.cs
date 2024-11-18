@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using CarShop.CarStorage.ValidationAttributes;
+using CarShop.ServiceDefaults.Attributes.Validation;
 
 namespace CarShop.CarStorage.Database.Entities.Car
 {
@@ -22,8 +23,8 @@ namespace CarShop.CarStorage.Database.Entities.Car
         [EngineCapacityFuelType]
         public double EngineCapacity { get; set; }
 
-        [Required] public CorpusType CorpusType { get; set; }
-        [Required] public FuelType FuelType { get; set; }
+        [Required] [EnumValidation(typeof(CorpusType))] public CorpusType CorpusType { get; set; }
+        [Required] [EnumValidation(typeof(FuelType))] public FuelType FuelType { get; set; }
         [Required] [Range(0, int.MaxValue)] public int Count { get; set; }
         public string ImageUrl { get; set; }
         [Required] public string[] BigImageURLs { get; set; } = [];

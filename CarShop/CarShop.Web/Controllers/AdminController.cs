@@ -27,109 +27,39 @@ namespace CarShop.Web.Controllers
 	{
 		public static readonly string[] ALLOWED_IMAGES_EXTENTIONS = ["jpg", "jpeg", "png"];
 
-		public IActionResult Index()
-		{
-			return RedirectToAction("AddCar");
-		}
-
 		[Authorize]
 		[HttpGet]
-		[Route("addcar")]
-		public async Task<IActionResult> AddCarAsync()
+		public async Task<IActionResult> IndexAsync([FromQuery] string? email)
 		{
-			return View();
-		}
+			var getAccountsReply = await _adminServiceClient.GetAccountsAsync(new());
+			string html = await System.IO.File.ReadAllTextAsync("wwwroot/admin.html");
 
-		[Authorize]
-		[HttpPost]
-		[Route("addcar")]
-		[Consumes(MediaTypeNames.Multipart.FormData)]
-		public async Task<IActionResult> AddCarAsync([FromForm] AddCarFormModel addCarFormModel)
-		{
-			if (!ModelState.IsValid)
+			return View(new AdminViewModel
 			{
-				return BadRequest();
-			}
-			
-			// Загружаем картинку для /catalog, если была отправлена пользователем
-			string imageUrl = string.Empty;
-			if (addCarFormModel.Image is not null && addCarFormModel.Image.Length > 0)
-			{
-				var saveCatalogImageReply = await _fileServiceClient.SaveCatalogImageAsync(new()
+				BodyHtmlContent = ExtractTagContent(html, "body"),
+				HeadHtmlContent = ExtractTagContent(html, "head"),
+				PerformingAdmin = new PerformingAdmin()
 				{
-					ImageBytes = await ByteString.FromStreamAsync(addCarFormModel.Image.OpenReadStream()),
-					FileExtention = Path.GetExtension(addCarFormModel.Image.FileName)
-				});
-
-				if (saveCatalogImageReply.Result == SaveCatalogImageResult.Success)
-				{
-					imageUrl = saveCatalogImageReply.PublicPath;
-				}
-			}
-
-			// Загружаем картинки для /catalog/{id}, если были отправлены пользователем
-			List<string> bigImageUrls = new();
-			if (addCarFormModel.BigImages is not null)
-			{
-				foreach (var bigImage in addCarFormModel.BigImages)
-				{
-					if (bigImage.Length > 0)
-					{
-						var saveCatalogImageReply = await _fileServiceClient.SaveCatalogImageAsync(new()
-						{
-							ImageBytes = await ByteString.FromStreamAsync(bigImage.OpenReadStream()),
-							FileExtention = Path.GetExtension(bigImage.FileName)
-						});
-
-						if (saveCatalogImageReply.Result == SaveCatalogImageResult.Success)
-						{
-							bigImageUrls.Add(saveCatalogImageReply.PublicPath);
-						}
-					}
-				}
-			}
-
-			var addCarReply = await _carStorageClient.AddCarAsync(new AddCarRequest
-			{
-				Car = new Car
-				{
-					Brand = addCarFormModel.Brand,
-					Model = addCarFormModel.Model,
-					PriceForStandartConfiguration = addCarFormModel.Price,
-					Color = addCarFormModel.Color,
-					EngineCapacity = addCarFormModel.EngineCapacity,
-					CorpusType = addCarFormModel.CorpusType,
-					FuelType = addCarFormModel.FuelType,
-					Count = addCarFormModel.Count,
-					ImageUrl = imageUrl,
-					BigImageUrls = { bigImageUrls },
-					AdditionalCarOptions =
-					{
-						addCarFormModel.AdditionalCarOptions
-							.Select(optionPayload => new AdditionalCarOption
-							{
-								Type = optionPayload.Type,
-								IsRequired = optionPayload.IsRequired,
-								Price = optionPayload.Price
-							})
-					},
-				}
+					Id = Utils.GetAdminIdFromClaimsPrincipal(User) ?? throw new Exception(),
+					Priority = Utils.GetPriorityFromClaimsPrincipal(User) ?? throw new Exception(),
+					Roles = User.Claims
+						.Where(claim => claim.Type == ClaimTypes.Role)
+						.Select(claim => claim.Value)
+						.ToList(),
+				},
+				AdminAccounts = getAccountsReply.Accounts.ToArray(),
+				AdminEmail = email
 			});
-
-			if (addCarReply.Result == AddCarReply.Types.AddCarResult.BadRequest)
-			{
-				return BadRequest();
-			}
-			
-			var car = addCarReply.Car;
-
-			return Redirect($"/catalog/{car.Id}");
 		}
 
 		[HttpGet]
 		[Route("login")]
 		public async Task<IActionResult> LoginAsync()
 		{
+			if (Utils.GetAdminIdFromClaimsPrincipal(User) is not null)
+			{
+				return RedirectToAction("Index");
+			}
 			return View(new LoginViewModel());
 		}
 		
@@ -246,45 +176,6 @@ namespace CarShop.Web.Controllers
 					})
 					: processDataInDbJsonEncoded,
 				CarId = id
-			});
-		}
-
-		[Authorize]
-		[HttpGet]
-		[Route("account/{id:long}")]
-		public async Task<IActionResult> AccountAsync([FromRoute] long id)
-		{
-			var getAccountReply = await _adminServiceClient.GetAccountAsync(new()
-			{
-				AccountId = id
-			});
-
-			if (getAccountReply.Result == GetAccountReply.Types.GetAccountResult.AccountNotFound)
-			{
-				return NotFound();
-			}
-			
-			string html = await System.IO.File.ReadAllTextAsync("wwwroot/admin/account/id.html");
-			return View(new AccountViewModel
-			{
-				BodyHtmlContent = ExtractTagContent(html, "body"),
-				HeadHtmlContent = ExtractTagContent(html, "head"),
-				Administrator = new()
-				{
-					Id = getAccountReply.Account.Id,
-					Priority = getAccountReply.Account.Priority,
-					Roles = getAccountReply.Account.Roles.ToList(),
-					Banned = getAccountReply.Account.Banned
-				},
-				PerformingAdministrator = new()
-				{
-					Id = Utils.GetAdminIdFromClaimsPrincipal(User) ?? throw new Exception(),
-					Priority = Utils.GetPriorityFromClaimsPrincipal(User) ?? throw new Exception(),
-					Roles = User.Claims
-						.Where(claim => claim.Type == ClaimTypes.Role)
-						.Select(claim => claim.Value)
-						.ToList(),
-				}
 			});
 		}
 		

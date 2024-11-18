@@ -16,7 +16,7 @@ export default function RootLayout({
             <meta name="viewport" content="initial-scale=1, width=device-width"/>
             <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
         </head>
-        <body>
+        <body style={{background: '#fff'}}>
         <div>
             {children}
         </div>
