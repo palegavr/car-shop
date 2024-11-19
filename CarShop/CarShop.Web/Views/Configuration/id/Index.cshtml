@@ -46,6 +46,7 @@ double totalCost = 0;
         <td>Кількість одиниць товару складі</td>
         <td>@Model.Car.Count</td>
     </tr>
+    @if(Model.Configuration.AirConditioner||Model.Configuration.HeatedDriversSeat||Model.Configuration.SeatHeightAdjustment||Model.Configuration.HasDifferentCarColor){
     <tr>
         <td colspan="2" style="text-align: center; font-weight: bold;">Додаткова комплектація</td>
     </tr>
@@ -89,6 +90,7 @@ double totalCost = 0;
             </tr>
         }
 
+    }
     }
     <tr>
         <td colspan="2" style="text-align: center; font-weight: bold;">Ціна</td>
