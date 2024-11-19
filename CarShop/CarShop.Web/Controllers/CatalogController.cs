@@ -180,17 +180,6 @@ namespace CarShop.Web.Controllers
                 carConfiguration.DifferentCarColor = differentCarColor.First()!.ToLowerInvariant();
             }
 
-            // Если не пришел ни один параметр
-            if ((!carConfiguration.AirConditioner &&
-                !carConfiguration.HeatedDriversSeat &&
-                !carConfiguration.SeatHeightAdjustment &&
-                !carConfiguration.HasDifferentCarColor) || 
-                (carConfiguration.HasDifferentCarColor && // или в поле цвета пришел не цвет
-                 !IsValidRgbHexColor(carConfiguration.DifferentCarColor)))
-            {
-                return BadRequest();
-            }
-
             var addCarConfigurationReply = await _carStorageClient.AddCarConfigurationAsync(new()
             {
                 CarConfiguration = carConfiguration
