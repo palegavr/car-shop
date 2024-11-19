@@ -1,4 +1,4 @@
-import {Autocomplete, TextField} from "@mui/material";
+import {Autocomplete, Container, TextField} from "@mui/material";
 import AdminAccountEditor, {PerformingAdmin} from "@/components/AdminAccountEditor";
 import {useEffect, useState} from "react";
 import {Admin} from "@/clients/backendСlient";
@@ -38,23 +38,26 @@ export default function EditAdminPart({admins, performingAdmin, defaultEmail}: P
 
     return (
         <>
-            <Autocomplete
-                disablePortal
-                defaultValue={currentAccount?.email}
-                options={admins.map(admin => admin.email)}
-                sx={{
-                    marginBottom: 2
-                }}
-                onChange={(event, value, reason) => handleSearch(value)}
-                renderInput={(params) =>
-                    <TextField {...params}
-                               label="Email администратора"/>}
-            />
-            {currentAccount !== undefined && (
-                <AdminAccountEditor
-                    admin={currentAccount}
-                    performingAdmin={performingAdmin}/>
-            )}
+            <Container
+                maxWidth={'sm'}>
+                <Autocomplete
+                    disablePortal
+                    defaultValue={currentAccount?.email}
+                    options={admins.map(admin => admin.email)}
+                    sx={{
+                        marginBottom: 2
+                    }}
+                    onChange={(event, value, reason) => handleSearch(value)}
+                    renderInput={(params) =>
+                        <TextField {...params}
+                                   label="Email администратора"/>}
+                />
+                {currentAccount !== undefined && (
+                    <AdminAccountEditor
+                        admin={currentAccount}
+                        performingAdmin={performingAdmin}/>
+                )}
+            </Container>
         </>
     )
 }
