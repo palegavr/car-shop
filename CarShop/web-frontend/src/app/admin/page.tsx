@@ -21,7 +21,7 @@ type PageInMainPart = 'create account' | 'edit admin' | 'add car'
 (window as any).carShopData.admins = [];
 (window as any).carShopData.performingAdmin = {
     id: 1,
-    roles: ['admin.account.create'],
+    roles: ['admin.account.create', 'admin.car.add'],
     priority: 1000,
 };*/
 

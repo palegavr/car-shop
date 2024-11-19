@@ -82,7 +82,9 @@ double totalCost = 0;
         {
             <tr>
                 <td>Колір</td>
-                <td>@(Model.Configuration.HasDifferentCarColor ? Model.Configuration.DifferentCarColor : false) @option.Price грн</td>
+                <td>
+                    <input type="color" disabled="disabled" class="form-control form-control-color" value="@(Model.Configuration.HasDifferentCarColor ? Model.Configuration.DifferentCarColor : false)"> @option.Price грн
+                </td>
                 @{ totalPrice += option.Price; }
             </tr>
         }

@@ -1,4 +1,14 @@
-import {Autocomplete, Button, FormControlLabel, FormGroup, Stack, Switch, TextField, Typography} from "@mui/material";
+import {
+    Autocomplete,
+    Button,
+    Container,
+    FormControlLabel,
+    FormGroup,
+    Stack,
+    Switch,
+    TextField,
+    Typography
+} from "@mui/material";
 import AdditionalCarOptionsContainer from "@/components/AdditionalCarOptionsContainer";
 import {AdditionalCarOption, CorpusType, FuelType, FuelTypes, ProcessData} from "@/types/types";
 import {useRef, useState} from "react";
@@ -108,124 +118,127 @@ export default function AddCarPart() {
 
     return (
         <>
-            <Stack
-                spacing={2}
-                paddingBottom={2}>
-                <Typography
-                    variant={'h5'}
-                    align={'center'}>
-                    Добавление товара</Typography>
+            <Container
+                maxWidth={'sm'}>
+                <Stack
+                    spacing={2}
+                    paddingBottom={2}>
+                    <Typography
+                        variant={'h5'}
+                        align={'center'}>
+                        Добавление товара</Typography>
 
-                <TextField variant={'standard'} label={'Марка'}
-                           inputRef={brandInputRef}
-                           error={brandInputErrorMessage !== undefined}
-                           helperText={brandInputErrorMessage}
-                           onChange={event => {
-                               validateBrand();
-                           }}/>
-                <TextField variant={'standard'} label={'Модель'}
-                           inputRef={modelInputRef}
-                           error={modelInputErrorMessage !== undefined}
-                           helperText={modelInputErrorMessage}
-                           onChange={event => {
-                               validateModel();
-                           }}/>
-                <TextField variant={'standard'} label={'Цена за стандартную комплектацию (грн)'}
-                           inputRef={priceInputRef}
-                           error={priceInputErrorMessage !== undefined}
-                           helperText={priceInputErrorMessage}
-                           onChange={event => {
-                               validatePrice();
-                           }}/>
-                <TextField variant={'standard'} label={'Цвет'}
-                           inputRef={colorInputRef}
-                           error={colorInputErrorMessage !== undefined}
-                           helperText={colorInputErrorMessage}
-                           onChange={event => {
-                               validateColor();
-                           }}/>
-                <Autocomplete
-                    disablePortal
-                    options={Object.values(corpusTypeDisplayName)}
-                    renderInput={(params) => (
-                        <TextField {...params} label="Вид корпуса"
-                                   inputRef={corpusTypeInputRef}
-                                   error={corpusTypeInputErrorMessage !== undefined}
-                                   helperText={corpusTypeInputErrorMessage}/>
-                    )}
-                    onChange={async event => {
-                        await delay(100);
-                        validateCorpusType();
-                    }}
-                />
+                    <TextField variant={'standard'} label={'Марка'}
+                               inputRef={brandInputRef}
+                               error={brandInputErrorMessage !== undefined}
+                               helperText={brandInputErrorMessage}
+                               onChange={event => {
+                                   validateBrand();
+                               }}/>
+                    <TextField variant={'standard'} label={'Модель'}
+                               inputRef={modelInputRef}
+                               error={modelInputErrorMessage !== undefined}
+                               helperText={modelInputErrorMessage}
+                               onChange={event => {
+                                   validateModel();
+                               }}/>
+                    <TextField variant={'standard'} label={'Цена за стандартную комплектацию (грн)'}
+                               inputRef={priceInputRef}
+                               error={priceInputErrorMessage !== undefined}
+                               helperText={priceInputErrorMessage}
+                               onChange={event => {
+                                   validatePrice();
+                               }}/>
+                    <TextField variant={'standard'} label={'Цвет'}
+                               inputRef={colorInputRef}
+                               error={colorInputErrorMessage !== undefined}
+                               helperText={colorInputErrorMessage}
+                               onChange={event => {
+                                   validateColor();
+                               }}/>
+                    <Autocomplete
+                        disablePortal
+                        options={Object.values(corpusTypeDisplayName)}
+                        renderInput={(params) => (
+                            <TextField {...params} label="Вид корпуса"
+                                       inputRef={corpusTypeInputRef}
+                                       error={corpusTypeInputErrorMessage !== undefined}
+                                       helperText={corpusTypeInputErrorMessage}/>
+                        )}
+                        onChange={async event => {
+                            await delay(100);
+                            validateCorpusType();
+                        }}
+                    />
 
-                <FormGroup
-                    onChange={event => {
-                        setFuelTypeState(getFuelType());
-                        validateFuelType();
-                    }}>
+                    <FormGroup
+                        onChange={event => {
+                            setFuelTypeState(getFuelType());
+                            validateFuelType();
+                        }}>
+                        <Typography>
+                            Вид топлива
+                        </Typography>
+                        <FormControlLabel control={<Switch inputRef={petrolInputRef}/>} label="Бензин"/>
+                        <FormControlLabel control={<Switch inputRef={dieselInputRef}/>} label="Дизель"/>
+                        <FormControlLabel control={<Switch inputRef={gasInputRef}/>} label="Газ"/>
+                        <FormControlLabel control={<Switch inputRef={electricInputRef}/>} label="Электрика"/>
+                        {fuelTypeInputErrorMessage !== undefined && (
+                            <Typography color={'error'}>{fuelTypeInputErrorMessage}</Typography>
+                        )}
+                    </FormGroup>
+
+                    <TextField variant={'standard'} label={'Объём двигателя (литры)'}
+                               inputRef={engineCapacityInputRef}
+                               sx={{
+                                   display: (fuelTypeState > 0 && fuelTypeState !== FuelType.Electric) ? undefined : 'none',
+                               }}
+                               error={engineCapacityInputErrorMessage !== undefined}
+                               helperText={engineCapacityInputErrorMessage}
+                               onChange={event => {
+                                   validateEngineCapacity();
+                               }}/>
+
+                    <TextField variant={'standard'} label={'Количество единиц товара на складе'}
+                               inputRef={countInputRef}
+                               error={countInputErrorMessage !== undefined}
+                               helperText={countInputErrorMessage}
+                               onChange={event => {
+                                   validateCount();
+                               }}/>
+
                     <Typography>
-                        Вид топлива
+                        Картинка для <Typography fontWeight={'bold'} component={'span'}>/catalog</Typography>
                     </Typography>
-                    <FormControlLabel control={<Switch inputRef={petrolInputRef}/>} label="Бензин"/>
-                    <FormControlLabel control={<Switch inputRef={dieselInputRef}/>} label="Дизель"/>
-                    <FormControlLabel control={<Switch inputRef={gasInputRef}/>} label="Газ"/>
-                    <FormControlLabel control={<Switch inputRef={electricInputRef}/>} label="Электрика"/>
-                    {fuelTypeInputErrorMessage !== undefined && (
-                        <Typography color={'error'}>{fuelTypeInputErrorMessage}</Typography>
-                    )}
-                </FormGroup>
+                    <ImageUploader variant={'single'}
+                                   allowedImageExtensions={['png', 'jpg', 'jpeg']}
+                                   defaultImageUrls={[]}
+                                   onChange={imageUrls => setImageUrl(imageUrls.length > 0 ? imageUrls[0] : undefined)}/>
 
-                <TextField variant={'standard'} label={'Объём двигателя (литры)'}
-                           inputRef={engineCapacityInputRef}
-                           sx={{
-                               display: (fuelTypeState > 0 && fuelTypeState !== FuelType.Electric) ? undefined : 'none',
-                           }}
-                           error={engineCapacityInputErrorMessage !== undefined}
-                           helperText={engineCapacityInputErrorMessage}
-                           onChange={event => {
-                               validateEngineCapacity();
-                           }}/>
+                    <Typography>
+                        Картинки для <Typography fontWeight={'bold'} component={'span'}>/catalog/{'{id}'}</Typography>
+                    </Typography>
+                    <ImageUploader variant={'multiple'}
+                                   allowedImageExtensions={['png', 'jpg', 'jpeg']}
+                                   defaultImageUrls={[]}
+                                   onChange={imageUrls => setBigImageUrls(imageUrls)}/>
 
-                <TextField variant={'standard'} label={'Количество единиц товара на складе'}
-                           inputRef={countInputRef}
-                           error={countInputErrorMessage !== undefined}
-                           helperText={countInputErrorMessage}
-                           onChange={event => {
-                               validateCount();
-                           }}/>
+                    <AdditionalCarOptionsContainer
+                        additionalCarOptions={additionalCarOptions}
+                        showResetButton={false}
+                        onChange={async optionsWithEnabled => {
+                            const options = optionsWithEnabled.filter(e => e.enabled)
+                                .map(optionWithEnabled => optionWithEnabled.additionalCarOption);
+                            setAdditionalCarOptions(options);
+                        }}/>
 
-                <Typography>
-                    Картинка для <Typography fontWeight={'bold'} component={'span'}>/catalog</Typography>
-                </Typography>
-                <ImageUploader variant={'single'}
-                               allowedImageExtensions={['png', 'jpg', 'jpeg']}
-                               defaultImageUrls={[]}
-                               onChange={imageUrls => setImageUrl(imageUrls.length > 0 ? imageUrls[0] : undefined)}/>
-
-                <Typography>
-                    Картинки для <Typography fontWeight={'bold'} component={'span'}>/catalog/{'{id}'}</Typography>
-                </Typography>
-                <ImageUploader variant={'multiple'}
-                               allowedImageExtensions={['png', 'jpg', 'jpeg']}
-                               defaultImageUrls={[]}
-                               onChange={imageUrls => setBigImageUrls(imageUrls)}/>
-
-                <AdditionalCarOptionsContainer
-                    additionalCarOptions={additionalCarOptions}
-                    showResetButton={false}
-                    onChange={async optionsWithEnabled => {
-                        const options = optionsWithEnabled.filter(e => e.enabled)
-                            .map(optionWithEnabled => optionWithEnabled.additionalCarOption);
-                        setAdditionalCarOptions(options);
-                    }}/>
-
-                <Button
-                    variant={'contained'}
-                    onClick={handleAddCar}>
-                    Добавить товар
-                </Button>
-            </Stack>
+                    <Button
+                        variant={'contained'}
+                        onClick={handleAddCar}>
+                        Добавить товар
+                    </Button>
+                </Stack>
+            </Container>
         </>
     )
 
