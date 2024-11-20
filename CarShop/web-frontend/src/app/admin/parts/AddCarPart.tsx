@@ -95,11 +95,7 @@ export default function AddCarPart() {
         if (validateAll()) {
             const result = await addCarAsync(payload);
             if (result.success) {
-                toast.success('Товар добавлен.', {
-                    position: 'bottom-right',
-                    autoClose: defaultAutoCloseTime,
-                    onClose: props => window.location.href = `/catalog/${result.carId}`
-                });
+                window.location.href = `/catalog/${result.carId}`;
             } else {
                 toast.error('Ошибка.', {
                     position: 'bottom-right',
