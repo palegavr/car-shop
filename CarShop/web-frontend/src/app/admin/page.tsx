@@ -58,14 +58,18 @@ export default function Page() {
     return (
         <>
             <TabContext value={tabsValue}>
-                <Container>
-                    <TabList onChange={(event, value) => {
-                        handleChangePageInMainPart(value);
-                    }}
-                             variant={'scrollable'}
+                <Container
+                    sx={{
+                        width: 'fit-content'
+                    }}>
+                    <TabList
+                        onChange={(event, value) => {
+                            handleChangePageInMainPart(value);
+                        }}
+                        variant={'scrollable'}
                         scrollButtons={'auto'}>
                         <Tab label="Добавить товар" value="add car"
-                            disabled={!performingAdmin!.roles.includes('admin.car.add')}/>
+                             disabled={!performingAdmin!.roles.includes('admin.car.add')}/>
                         <Tab label="Управление аккаунтом администратора" value="edit admin"/>
                         <Tab label="Создать аккаунт" value="create account"
                              disabled={!performingAdmin!.roles.includes('admin.account.create')}/>

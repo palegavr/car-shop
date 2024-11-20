@@ -84,12 +84,32 @@ export default function ProfilePart({id, email, priority, roles}: Props) {
                     </Stack>
                     <PasswordChanger/>
                     <BanButton/>
+                    <LogoutButton/>
                 </Stack>
             </Container>
         </>
     )
 
+    function LogoutButton() {
+        const [loggingOut, setLoggingOut] = useState<boolean>(false);
 
+        async function handleClick() {
+            setLoggingOut(true);
+            await logoutAsync();
+            window.location.href = '/';
+        }
+
+        return (
+            <>
+                <Button
+                    variant={'outlined'}
+                    disabled={loggingOut}
+                    onClick={handleClick}>
+                    Выход
+                </Button>
+            </>
+        )
+    }
 
     function BanButton() {
         const [banning, setBanning] = useState<boolean>(false);
