@@ -46,6 +46,27 @@ export type Admin = {
     banned: boolean
 }
 
+type LogoutResult = {
+    success: boolean,
+}
+export async function logoutAsync(): Promise<LogoutResult> {
+    try {
+        const response = await fetch(`/api/admin/logout`, {
+            method: 'GET',
+            credentials: 'same-origin',
+        });
+
+        return {
+            success: response.ok
+        }
+    } catch (error) {
+        return {
+            success: false
+        }
+    }
+}
+
+
 type GetAdminsResult = {
     success: boolean,
     admins: Admin[],

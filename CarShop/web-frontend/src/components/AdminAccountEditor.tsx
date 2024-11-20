@@ -12,18 +12,8 @@ import {
     takeRoleAsync,
     unbanAsync
 } from "@/clients/backendСlient";
-import {
-    Box,
-    Button,
-    Checkbox,
-    CircularProgress,
-    Container,
-    FormControlLabel,
-    Stack,
-    TextField,
-    Typography
-} from "@mui/material";
-import {toast, ToastContainer} from "react-toastify";
+import {Box, Button, Checkbox, CircularProgress, FormControlLabel, Stack, TextField, Typography} from "@mui/material";
+import {toast} from "react-toastify";
 import {LoadingButton} from "@mui/lab";
 
 const defaultToastTime = 2000;
@@ -38,6 +28,7 @@ export type Admin = {
 
 export type PerformingAdmin = {
     id: number,
+    email: string,
     priority: number,
     roles: Role[],
 }

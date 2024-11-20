@@ -17,6 +17,11 @@ public static class Utils
         return int.TryParse(claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == "priority")?.Value ?? "NotNumber",
             out int priority) ? priority : null;
     }
+    
+    public static string? GetEmailFromClaimsPrincipal(ClaimsPrincipal claimsPrincipal)
+    {
+        return claimsPrincipal.Claims.FirstOrDefault(claim => claim.Type == ClaimTypes.Email)?.Value;
+    }
 
     public static bool IsEmail(string email)
     {

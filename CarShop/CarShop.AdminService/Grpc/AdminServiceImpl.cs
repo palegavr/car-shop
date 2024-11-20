@@ -331,4 +331,23 @@ public class AdminServiceImpl(
             Accounts = { admins.Select(admin => admin.ToGrpcMessage()) }
         };
     }
+
+    public override async Task<LogoutReply> Logout(LogoutRequest request, ServerCallContext context)
+    {
+        RefreshSession? refreshSession = await _refreshSessionsRepository.GetByRefreshTokenAsync(request.RefreshToken);
+        if (refreshSession is null)
+        {
+            return new LogoutReply
+            {
+                Result = LogoutReply.Types.LogoutResult.SessionNotFound
+            };
+        }
+
+        await _refreshSessionsRepository.DeleteSessionAsync(refreshSession.Id);
+
+        return new LogoutReply
+        {
+            Result = LogoutReply.Types.LogoutResult.Success
+        };
+    }
 }

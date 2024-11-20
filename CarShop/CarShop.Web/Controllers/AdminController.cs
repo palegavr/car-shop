@@ -40,8 +40,9 @@ namespace CarShop.Web.Controllers
 				HeadHtmlContent = ExtractTagContent(html, "head"),
 				PerformingAdmin = new PerformingAdmin()
 				{
-					Id = Utils.GetAdminIdFromClaimsPrincipal(User) ?? throw new Exception(),
-					Priority = Utils.GetPriorityFromClaimsPrincipal(User) ?? throw new Exception(),
+					Id = Utils.GetAdminIdFromClaimsPrincipal(User) ?? throw new Exception("Can not extract id from JWT token"),
+					Email = Utils.GetEmailFromClaimsPrincipal(User) ?? throw new Exception("Can not extract email from JWT token"),
+					Priority = Utils.GetPriorityFromClaimsPrincipal(User) ?? throw new Exception("Can not extract priority from JWT token"),
 					Roles = User.Claims
 						.Where(claim => claim.Type == ClaimTypes.Role)
 						.Select(claim => claim.Value)

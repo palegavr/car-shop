@@ -4,6 +4,7 @@ using CarShop.AdminService.Grpc;
 using CarShop.ApiGateway.Models;
 using CarShop.CarStorageService.Grpc;
 using CarShop.FileService.Grpc;
+using CarShop.ServiceDefaults;
 using CarShop.ServiceDefaults.ServiceInterfaces.AdminService;
 using CarShop.ServiceDefaults.Services;
 using CarShop.ServiceDefaults.Utils;
@@ -330,5 +331,26 @@ public class AdminController(
             AccountAction.SetPriority => await accountActionHandler.SetPriority(payload.Data!.Priority!.Value),
             _ => throw new ArgumentOutOfRangeException()
         };
+    }
+
+    [Authorize]
+    [HttpGet]
+    [Route("logout")]
+    public async Task<IActionResult> LogoutAsync()
+    {
+        var logoutReply = await _adminServiceClient.LogoutAsync(new()
+        {
+            RefreshToken = Request.Cookies["refresh_token"]
+        });
+        
+        Response.Cookies.DeleteAccessTokenCookie();
+        Response.Cookies.DeleteRefreshTokenCookie();
+
+        if (logoutReply.Result == LogoutReply.Types.LogoutResult.SessionNotFound)
+        {
+            return Unauthorized();
+        }
+
+        return Ok();
     }
 }

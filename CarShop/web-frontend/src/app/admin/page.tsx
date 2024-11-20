@@ -15,13 +15,15 @@ import CreateAccountPart from "@/app/admin/parts/CreateAccountPart";
 import {ToastContainer} from "react-toastify";
 import {PerformingAdmin} from "@/components/AdminAccountEditor";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
+import ProfilePart from "@/app/admin/parts/ProfilePart";
 
-type PageInMainPart = 'create account' | 'edit admin' | 'add car'
+type PageInMainPart = 'create account' | 'edit admin' | 'add car' | 'profile';
 /*(window as any).carShopData = {};
 (window as any).carShopData.admins = [];
 (window as any).carShopData.performingAdmin = {
     id: 1,
-    roles: ['admin.account.create', 'admin.car.add'],
+    email: 'ggg@123.com',
+    roles: ['admin.account.create', 'admin.car.add', 'admin.account.ban.own', 'admin.account.change-password.own'],
     priority: 1000,
 };*/
 
@@ -30,7 +32,7 @@ export default function Page() {
     const [performingAdmin, setPerformingAdmin] = useState<PerformingAdmin>()
     const [adminEmail, setAdminEmail] = useState<string | null>(null);
     const [loaded, setLoaded] = useState<boolean>(false);
-    const [tabsValue, setTabsValue] = useState<PageInMainPart>('edit admin');
+    const [tabsValue, setTabsValue] = useState<PageInMainPart>('profile');
 
     useEffect(() => {
         setAdminsList((window as any).carShopData.admins);
@@ -56,9 +58,7 @@ export default function Page() {
     return (
         <>
             <TabContext value={tabsValue}>
-                <Container style={{
-                    width: 'fit-content'
-                }}>
+                <Container>
                     <TabList onChange={(event, value) => {
                         handleChangePageInMainPart(value);
                     }}
@@ -69,6 +69,7 @@ export default function Page() {
                         <Tab label="Управление аккаунтом администратора" value="edit admin"/>
                         <Tab label="Создать аккаунт" value="create account"
                              disabled={!performingAdmin!.roles.includes('admin.account.create')}/>
+                        <Tab label={'Профиль'} value={'profile'}/>
                     </TabList>
                 </Container>
                 <TabPanel value="add car">
@@ -81,6 +82,7 @@ export default function Page() {
                             admins={adminsList}
                             performingAdmin={performingAdmin ?? {
                                 id: 0,
+                                email: '',
                                 roles: [],
                                 priority: 2000000000,
                             }}/>
@@ -88,6 +90,13 @@ export default function Page() {
                 </TabPanel>
                 <TabPanel value="create account">
                     <CreateAccountPart/>
+                </TabPanel>
+                <TabPanel value="profile">
+                    <ProfilePart
+                        id={performingAdmin!.id}
+                        roles={performingAdmin!.roles}
+                        priority={performingAdmin!.priority}
+                        email={performingAdmin!.email}/>
                 </TabPanel>
             </TabContext>
             <ToastContainer/>

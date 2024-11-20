@@ -15,12 +15,28 @@ service AdminService {
       returns (UpdateAccountReply);
   rpc Login(LoginRequest)
       returns (LoginReply);
+  rpc Logout(LogoutRequest)
+      returns (LogoutReply);
   rpc UpdateTokens(UpdateTokensRequest)
       returns (UpdateTokensReply);
   rpc BanAccount(BanAccountRequest)
       returns (BanAccountReply);
   rpc UnbanAccount(UnbanAccountRequest)
       returns (UnbanAccountReply);
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message LogoutReply {
+  LogoutResult result = 1;
+  
+  enum LogoutResult {
+    UNDEFINED = 0;
+    SESSION_NOT_FOUND = 1;
+    SUCCESS = 2;
+  }
 }
 
 // + GetAccounts
@@ -31,7 +47,7 @@ message GetAccountsRequest {
   optional int32 max_priority = 4;
   repeated string have_roles = 5;
   optional bool banned = 6;
-  
+
   enum SortType {
     UNDEFINED = 0;
     ASC = 1;
@@ -57,7 +73,7 @@ message GetAccountRequest {
 message GetAccountReply {
   GetAccountResult result = 1;
   optional AdminAccount account = 2;
-  
+
   enum GetAccountResult {
     UNDEFINED = 0;
     ACCOUNT_NOT_FOUND = 1;
@@ -80,7 +96,7 @@ message UpdateAccountRequest {
 message UpdateAccountReply {
   UpdateAccountResult result = 1;
   AdminAccount account = 2;
-  
+
   enum UpdateAccountResult {
     UNDEFINED = 0;
     BAD_REQUEST = 1;
