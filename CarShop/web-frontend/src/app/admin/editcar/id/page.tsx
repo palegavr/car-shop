@@ -95,10 +95,7 @@ export default function Page() {
         const applyResult = await applyChangesAsync(carId);
         if (applyResult.success) {
             setProcessDataInDb(processData);
-            toast.success('Изменения сохранены!', {
-                position: 'bottom-right',
-                autoClose: defaultToastTime
-            });
+            window.location.href = `/catalog/${carId}`;
         } else {
             toast.error('Не удалось сохранить изменения.', {
                 position: 'bottom-right',
@@ -156,7 +153,12 @@ export default function Page() {
     // @ts-ignore
     return (
         <>
-            <div className={'text-center mb-1'}>
+            <h2 className={'text-center mb-4 bg-secondary-subtle shadow'}
+                style={{
+                    borderRadius: '0 0 10px 10px',
+                }}>Редактирование товара №{carId}</h2>
+
+            <div className={'text-center my-2'}>
                 <h5>Картинка для /catalog</h5>
                 <ImageChanger
                     imageUrl={processData.imageUrl !== '' ? processData.imageUrl : undefined}
@@ -301,6 +303,9 @@ export default function Page() {
             </div>
             <div className={'mb-2'}>
                 <SaveChangesButton onClick={handleSaveChangesButton}/>
+                <div className={'mt-1'}>
+                    <GoBackButton onClick={() => window.location.href = `/catalog/${carId}`}/>
+                </div>
             </div>
             <ToastContainer/>
         </>
@@ -332,4 +337,8 @@ export default function Page() {
 
 function SaveChangesButton({onClick}: { onClick?: MouseEventHandler<HTMLButtonElement> }) {
     return (<button className={'btn btn-lg btn-outline-success w-100'} onClick={onClick}>Сохранить изменения</button>)
+}
+
+function GoBackButton({onClick}: { onClick?: MouseEventHandler<HTMLButtonElement> }) {
+    return (<button className={'btn btn-lg btn-outline-danger w-100'} onClick={onClick}>Назад</button>)
 }

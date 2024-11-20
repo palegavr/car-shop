@@ -137,9 +137,13 @@ export default function Editable(
                     <>
                         {(type === 'string' || type === 'number') && ( // Тип: строка
                             <input type="text" ref={inputRef} onInput={handleChangeInputValue}
-
+                                   onBlur={handleBlurInput}
                                    onKeyDown={(event) => {
-                                       if (event.key === 'Enter') handleApplyChanges()
+                                       if (event.key === 'Enter') {
+                                           handleApplyChanges()
+                                       } else if (event.key === 'Escape') {
+                                           handleCancelChangesButton()
+                                       }
                                    }}
                                    className={'form-control me-2'}/>
                         )}
@@ -167,9 +171,9 @@ export default function Editable(
                             </div>
                         )}
 
-                        <div className="me-1">
-                            <CancelChangesButton onClick={handleCancelChangesButton}/>
-                        </div>
+                        {/*<div className="me-1">*/}
+                        {/*    <CancelChangesButton onClick={handleCancelChangesButton}/>*/}
+                        {/*</div>*/}
                         <ApplyChangesButton onClick={handleApplyChanges} enabled={applyChangesButtonEnabled}
                                             loading={waitingAcceptChange}/>
                     </>
