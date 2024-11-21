@@ -3,14 +3,21 @@ import {
     Container,
     Dialog, DialogActions,
     DialogContent, DialogContentText,
-    DialogTitle,
+    DialogTitle, FormHelperText,
     Paper,
     Stack,
     TextField,
     Tooltip,
     Typography
 } from "@mui/material";
-import {banAsync, changePasswordAsync, ChangePasswordResult, logoutAsync, Role} from "@/clients/backendСlient";
+import {
+    banAsync,
+    changePasswordAsync,
+    ChangePasswordResult,
+    logoutAsync,
+    Role,
+    RoleDisplayName
+} from "@/clients/backendСlient";
 import React, {useRef, useState} from "react";
 import {toast} from "react-toastify";
 import {LoadingButton} from "@mui/lab";
@@ -66,7 +73,7 @@ export default function ProfilePart({id, email, priority, roles}: Props) {
                     <Typography
                         align={'center'}
                         variant={'h6'}>
-                        Роли
+                        Права
                     </Typography>
                     <Stack
                         spacing={1}
@@ -77,7 +84,13 @@ export default function ProfilePart({id, email, priority, roles}: Props) {
                             <>
                                 <Typography
                                     textAlign={'center'}>
-                                    {role}
+                                    {RoleDisplayName[role]}
+                                    <FormHelperText
+                                        sx={{
+                                            textAlign: 'center',
+                                        }}>
+                                        {role}
+                                    </FormHelperText>
                                 </Typography>
                             </>
                         ))}

@@ -6,13 +6,23 @@ import {
     ChangePasswordResult,
     ExistingRoles,
     giveRoleAsync,
-    Role,
+    Role, RoleDisplayName,
     setPriorityAsync,
     SetPriorityResult,
     takeRoleAsync,
     unbanAsync
 } from "@/clients/backendСlient";
-import {Box, Button, Checkbox, CircularProgress, FormControlLabel, Stack, TextField, Typography} from "@mui/material";
+import {
+    Box,
+    Button,
+    Checkbox,
+    CircularProgress,
+    FormControlLabel,
+    FormHelperText,
+    Stack,
+    TextField,
+    Typography
+} from "@mui/material";
 import {toast} from "react-toastify";
 import {LoadingButton} from "@mui/lab";
 
@@ -226,7 +236,7 @@ export default function AdminAccountEditor({admin, performingAdmin}: Props) {
                 <Typography
                     align={'center'}
                     variant={'h6'}>
-                    Роли
+                    Права
                 </Typography>
                 <Stack spacing={1} border={'1px solid grey'} padding={2} borderRadius={'5px'}>
                     {ExistingRoles.map(role => (
@@ -252,7 +262,16 @@ export default function AdminAccountEditor({admin, performingAdmin}: Props) {
                                 onChange={async (event, checked) => await handleRoleChange(role, checked)}/>
                         </Box>
                     }
-                    label={role}
+                    label={(
+                        <>
+                            <Typography>
+                                {RoleDisplayName[role]}
+                                <FormHelperText>
+                                    {role}
+                                </FormHelperText>
+                            </Typography>
+                        </>
+                    )}
                     labelPlacement={'start'}
                     sx={{
                         '& .MuiFormControlLabel-label': {

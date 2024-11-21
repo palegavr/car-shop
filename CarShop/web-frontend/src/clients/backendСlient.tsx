@@ -38,6 +38,21 @@ export const ExistingRoles = [
 ] as const;
 export type Role = typeof ExistingRoles[number];
 
+export const RoleDisplayName: Record<Role, string> = {
+    'admin.car.add': 'Добавление автомобиля',
+    'admin.car.edit': 'Редактирование автомобиля',
+    'admin.car.delete': 'Удаление автомобиля',
+    'admin.account.create': 'Создание учетной записи',
+    'admin.account.change-password.own': 'Смена пароля своей учетной записи',
+    'admin.account.change-password.other': 'Смена пароля другой учетной записи',
+    'admin.account.ban.own': 'Блокировка своей учетной записи',
+    'admin.account.ban.other': 'Блокировка другой учетной записи',
+    'admin.account.unban': 'Разблокировка учетной записи',
+    'admin.account.role.give': 'Выдача роли',
+    'admin.account.role.take': 'Снятие роли',
+    'admin.account.priority.set': 'Установка приоритета',
+};
+
 export type Admin = {
     id: number,
     email: string,

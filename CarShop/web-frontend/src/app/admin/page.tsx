@@ -19,7 +19,13 @@ import ProfilePart from "@/app/admin/parts/ProfilePart";
 
 type PageInMainPart = 'create account' | 'edit admin' | 'add car' | 'profile';
 /*(window as any).carShopData = {};
-(window as any).carShopData.admins = [];
+(window as any).carShopData.admins = [{
+    id: 5,
+    email: 'abc@ggg.com',
+    priority: 20000,
+    banned: false,
+    roles: ['admin.account.create', 'admin.car.add', 'admin.account.ban.own', 'admin.account.change-password.own'],
+}];
 (window as any).carShopData.performingAdmin = {
     id: 1,
     email: 'ggg@123.com',
