@@ -26,12 +26,14 @@ namespace CarShop.AdminService.Database
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            string host = "db";
-            int port = 5432;
-            string database = "adminsdb";
-            string username = "postgres";
-            string password = "123";
-            optionsBuilder.UseNpgsql($"Host={host};Port={port};Database={database};Username={username};Password={password}");
+            var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new InvalidOperationException("Connection string is not set.");
+            }
+
+            optionsBuilder.UseNpgsql(connectionString);
         }
     }
 }

@@ -6,33 +6,62 @@ services:
     build:
       context: .
       dockerfile: CarShop.Web/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_HTTP_PORTS=${ASPNETCORE_HTTP_PORTS}
+    volumes:
+      - ./CarShop.Web/wwwroot/images/route:/app/wwwroot/images/route
 
   carshop.carstorage:
     image: ${DOCKER_REGISTRY-}carshopcarstorage
     build:
       context: .
       dockerfile: CarShop.CarStorage/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_HTTP_PORTS=${ASPNETCORE_HTTP_PORTS}
+      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
       
   carshop.fileservice:
     image: ${DOCKER_REGISTRY-}carshop.fileservice
     build:
       context: .
       dockerfile: CarShop.FileService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_HTTP_PORTS=${ASPNETCORE_HTTP_PORTS}
+    volumes:
+      - ./CarShop.Web/wwwroot:/app/wwwroot
 
   carshop.adminservice:
     image: ${DOCKER_REGISTRY-}carshopadminservice
     build:
       context: .
       dockerfile: CarShop.AdminService/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_HTTP_PORTS=${ASPNETCORE_HTTP_PORTS}
+      - ConnectionStrings__DefaultConnection=${ConnectionStrings__DefaultConnection}
 
   carshop.apigateway:
     image: ${DOCKER_REGISTRY-}carshop.apigateway
     build:
       context: .
       dockerfile: CarShop.ApiGateway/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_HTTP_PORTS=${ASPNETCORE_HTTP_PORTS}
 
   db:
     image: postgres:17
+    environment:
+      - POSTGRES_PASSWORD=123
+      - PGDATA=/var/lib/postgresql/data
+      - PGPORT=5432
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
 
   nginx:
     image: nginx:latest
