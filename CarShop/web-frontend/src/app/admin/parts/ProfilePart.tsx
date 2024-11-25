@@ -21,6 +21,7 @@ import {
 import React, {useRef, useState} from "react";
 import {toast} from "react-toastify";
 import {LoadingButton} from "@mui/lab";
+import LogoutButton from "@/components/LogoutButton";
 
 type Props = {
     id: number,
@@ -103,27 +104,6 @@ export default function ProfilePart({id, email, priority, roles}: Props) {
         </>
     )
 
-    function LogoutButton() {
-        const [loggingOut, setLoggingOut] = useState<boolean>(false);
-
-        async function handleClick() {
-            setLoggingOut(true);
-            await logoutAsync();
-            window.location.href = '/';
-        }
-
-        return (
-            <>
-                <Button
-                    variant={'outlined'}
-                    disabled={loggingOut}
-                    onClick={handleClick}>
-                    Выход
-                </Button>
-            </>
-        )
-    }
-
     function BanButton() {
         const [banning, setBanning] = useState<boolean>(false);
         const [banned, setBanned] = useState<boolean>(false)
@@ -162,7 +142,7 @@ export default function ProfilePart({id, email, priority, roles}: Props) {
                          }}>
                     <div>
                         <Button
-                            variant={'contained'}
+                            variant={'outlined'}
                             color={'error'}
                             fullWidth
                             disabled={banning || banned || !canBan}
