@@ -6,7 +6,41 @@ double totalPrice = 0; // Змінна для зберігання загаль�
 double totalCost = 0;
 }
 
+@if (Model.Car.BigImageUrls.Count > 0)
+{
+    <div id="carouselExampleIndicators" class="carousel slide" style="">
+        <div class="carousel-indicators">
+            @for (int i = 0; i < Model.Car.BigImageUrls.Count; i++)
+            {
+                @if (i == 0)
+                {
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="@i" class="active" aria-current="true" aria-label="Slide @(i + 1)"></button>
+                }
+                else
+                {
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="@i" aria-label="Slide @(i + 1)"></button>
+                }
+            }
 
+        </div>
+        <div class="carousel-inner">
+            @foreach (string imgUrl in Model.Car.BigImageUrls)
+            {
+                <div class="carousel-item @(imgUrl == Model.Car.BigImageUrls[0] ? "active" : "")">
+                    <img src="@imgUrl" style="max-height: 400px; max-width: 1000px;" class="d-block  mx-auto">
+                </div>
+            }
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+    </div>
+}
 
 <table class="table table-striped" style="font-size: 6mm;">
     <tbody>
