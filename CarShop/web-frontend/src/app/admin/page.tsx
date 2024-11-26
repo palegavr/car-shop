@@ -16,6 +16,7 @@ import {ToastContainer} from "react-toastify";
 import {PerformingAdmin} from "@/components/AdminAccountEditor";
 import {TabContext, TabList, TabPanel} from "@mui/lab";
 import ProfilePart from "@/app/admin/parts/ProfilePart";
+import Header from "@/app/Header";
 
 type PageInMainPart = 'create account' | 'edit admin' | 'add car' | 'profile';
 /*(window as any).carShopData = {};
@@ -33,6 +34,8 @@ type PageInMainPart = 'create account' | 'edit admin' | 'add car' | 'profile';
     priority: 1000,
 };*/
 
+const PageTitle: string = 'Админка';
+
 export default function Page() {
     const [adminsList, setAdminsList] = useState<Admin[]>([]);
     const [performingAdmin, setPerformingAdmin] = useState<PerformingAdmin>()
@@ -41,6 +44,7 @@ export default function Page() {
     const [tabsValue, setTabsValue] = useState<PageInMainPart>('profile');
 
     useEffect(() => {
+        window.document.title = PageTitle;
         setAdminsList((window as any).carShopData.admins);
         setPerformingAdmin((window as any).carShopData.performingAdmin);
         setAdminEmail((window as any).carShopData.adminEmail);
@@ -63,6 +67,7 @@ export default function Page() {
 
     return (
         <>
+            <Header/>
             <TabContext value={tabsValue}>
                 <Container
                     sx={{
