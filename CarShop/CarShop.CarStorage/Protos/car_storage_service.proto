@@ -156,7 +156,8 @@ message GetCarsRequest {
   optional string brand = 3;
   optional double minimum_engine_capacity = 4;
   optional double maximum_engine_capacity = 5;
-  optional Car.FuelType fuel_type = 6;
+  //optional Car.FuelType fuel_type = 6;
+  optional int32 fuel_type = 6;
   optional Car.CorpusType corpus_type = 7;
   optional double minimum_price = 8;
   optional double maximum_price = 9;

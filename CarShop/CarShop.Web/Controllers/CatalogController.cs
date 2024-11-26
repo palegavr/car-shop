@@ -24,13 +24,14 @@ namespace CarShop.Web.Controllers
             double? minimumEngineCapacity,
             [FromQuery(Name = "maximum_engine_capacity")]
             double? maximumEngineCapacity,
-            [FromQuery(Name = "fuel_type")] Car.Types.FuelType? fuelType,
+            [FromQuery(Name = "fuel_type")] int? fuelType,
             [FromQuery(Name = "corpus_type")] Car.Types.CorpusType? corpusType,
             [FromQuery(Name = "minimum_price")] double? minimumPrice,
             [FromQuery(Name = "maximum_price")] double? maximumPrice,
             [FromQuery(Name = "page")] int page = 1,
             [FromQuery(Name = "sort_by")] GetCarsRequest.Types.SortBy sortBy = GetCarsRequest.Types.SortBy.Brand,
-            [FromQuery(Name = "sort_type")] GetCarsRequest.Types.SortType sortType = GetCarsRequest.Types.SortType.Ascending)
+            [FromQuery(Name = "sort_type")] GetCarsRequest.Types.SortType sortType =
+                GetCarsRequest.Types.SortType.Ascending)
         {
             if (id is not null)
             {
@@ -46,6 +47,13 @@ namespace CarShop.Web.Controllers
                 sortBy = GetCarsRequest.Types.SortBy.Brand;
             if (!Enum.IsDefined(sortType))
                 sortType = GetCarsRequest.Types.SortType.Ascending;
+            if (fuelType is not null && Enumerable.Range(1, Enum.GetValues(typeof(Car.Types.FuelType))
+                        .Cast<Car.Types.FuelType>()
+                        .Sum(fuel => (int)fuel))
+                    .All(i => i != fuelType))
+            {
+                fuelType = null;
+            }
 
             var getCarsRequest = new GetCarsRequest
             {
@@ -57,26 +65,32 @@ namespace CarShop.Web.Controllers
             {
                 getCarsRequest.Brand = brand;
             }
+
             if (minimumEngineCapacity is not null)
             {
                 getCarsRequest.MinimumEngineCapacity = minimumEngineCapacity.Value;
             }
+
             if (maximumEngineCapacity is not null)
             {
                 getCarsRequest.MaximumEngineCapacity = maximumEngineCapacity.Value;
             }
+
             if (fuelType is not null)
             {
-                getCarsRequest.FuelType = fuelType.Value;
+                getCarsRequest.FuelType = (int)fuelType.Value;
             }
+
             if (corpusType is not null)
             {
                 getCarsRequest.CorpusType = corpusType.Value;
             }
+
             if (minimumPrice is not null)
             {
                 getCarsRequest.MinimumPrice = minimumPrice.Value;
             }
+
             if (maximumPrice is not null)
             {
                 getCarsRequest.MaximumPrice = maximumPrice.Value;
@@ -120,7 +134,7 @@ namespace CarShop.Web.Controllers
             {
                 CarId = id
             });
-            
+
             if (getCarReply.Result == GetCarReply.Types.GetCarResult.CarNotFound)
             {
                 return NotFound();
@@ -137,7 +151,7 @@ namespace CarShop.Web.Controllers
             {
                 CarId = id
             });
-            
+
             if (getCarReply.Result == GetCarReply.Types.GetCarResult.CarNotFound)
             {
                 return NotFound();
@@ -164,14 +178,14 @@ namespace CarShop.Web.Controllers
             {
                 CarId = id
             });
-            
+
             if (getCarReply.Result == GetCarReply.Types.GetCarResult.CarNotFound)
             {
                 return NotFound();
             }
 
             var car = getCarReply.Car;
-            
+
             if (car.Count <= 0)
             {
                 return Conflict();
@@ -204,12 +218,12 @@ namespace CarShop.Web.Controllers
             {
                 return BadRequest();
             }
-            
+
             if (addCarConfigurationReply.Result != AddCarConfigurationReply.Types.AddCarConfigurationResult.Success)
             {
                 return Problem();
             }
-            
+
             ConfigureViewModel viewModel = new()
             {
                 Car = car,
@@ -217,7 +231,7 @@ namespace CarShop.Web.Controllers
             };
             return View("~/Views/Catalog/id/Configure.cshtml", viewModel);
         }
-        
+
         private static bool IsValidRgbHexColor(string color)
         {
             string pattern = "^#([0-9a-fA-F]{6})$";

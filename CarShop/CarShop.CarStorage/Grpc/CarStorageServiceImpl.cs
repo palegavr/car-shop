@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using CarShop.CarStorage.Database.Entities.Car;
 using CarShop.CarStorage.Extensions;
 using CarShop.CarStorage.Repositories;
 using CarShop.CarStorage.Repositories.CarsRepository;
@@ -117,7 +118,7 @@ public class CarStorageServiceImpl(
         {
             Brand = request.HasBrand ? request.Brand : null,
             CorpusType = request.HasCorpusType ? request.CorpusType.FromGrpcMessage() : null,
-            FuelType = request.HasFuelType ? request.FuelType.FromGrpcMessage() : null,
+            FuelType = request.HasFuelType ? (FuelType)request.FuelType : null,
             MaximumPrice = request.HasMaximumPrice ? request.MaximumPrice : null,
             MinimumPrice = request.HasMinimumPrice ? request.MinimumPrice : null,
             MinimumEngineCapacity = request.HasMinimumEngineCapacity ? request.MinimumEngineCapacity : null,
