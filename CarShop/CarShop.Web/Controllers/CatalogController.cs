@@ -143,6 +143,11 @@ namespace CarShop.Web.Controllers
                 return NotFound();
             }
 
+            if (getCarReply.Car.Count <= 0)
+            {
+                return RedirectToAction("Index", new { id });
+            }
+
             ConfigureViewModel viewModel = new()
             {
                 Car = getCarReply.Car
@@ -166,6 +171,11 @@ namespace CarShop.Web.Controllers
             }
 
             var car = getCarReply.Car;
+            
+            if (car.Count <= 0)
+            {
+                return Conflict();
+            }
 
             CarConfiguration carConfiguration = new()
             {
@@ -178,6 +188,10 @@ namespace CarShop.Web.Controllers
             if (Request.Form.TryGetValue("different_car_color", out var differentCarColor))
             {
                 carConfiguration.DifferentCarColor = differentCarColor.First()!.ToLowerInvariant();
+                if (!IsValidRgbHexColor(carConfiguration.DifferentCarColor))
+                {
+                    return BadRequest();
+                }
             }
 
             var addCarConfigurationReply = await _carStorageClient.AddCarConfigurationAsync(new()

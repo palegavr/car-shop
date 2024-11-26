@@ -130,18 +130,39 @@ double totalCost = 0;
     </tr>
     <tr>
         <td>Ціна за стандартну комплектацію</td>
-        <td style="background-color: rgb(141, 248, 141);">@Model.Car.PriceForStandartConfiguration грн</td>
+        @if (Model.Car.Count > 0)
+        {
+            <td style="background-color: rgb(141, 248, 141);">@Model.Car.PriceForStandartConfiguration грн</td>
+        }
+        else
+        {
+            <td class="text-bg-secondary">По предзаказу</td>
+        }
     </tr>
     <tr>
         <td>Ціна за додаткову комплектацію</td>
-        <td style="background-color: rgb(141, 248, 141);"> @totalPrice грн</td>
+        @if (Model.Car.Count > 0)
+        {
+            <td style="background-color: rgb(141, 248, 141);"> @totalPrice грн</td>
+        } 
+        else
+        {
+            <td class="text-bg-secondary">По предзаказу</td>
+        }
     </tr>
     <tr>
         @{
             totalCost = (@totalPrice + @Model.Car.PriceForStandartConfiguration) * 1.2;
         }
         <td>Ціна за все з податком</td>
-        <td style="background-color: rgb(141, 248, 141);"> @($"{totalCost:F2} грн") </td>
+        @if (Model.Car.Count > 0)
+        {
+            <td style="background-color: rgb(141, 248, 141);"> @($"{totalCost:F2} грн") </td>
+        }
+        else
+        {
+            <td class="text-bg-secondary">По предзаказу</td>
+        }
     </tr>
     </tbody>
 </table>

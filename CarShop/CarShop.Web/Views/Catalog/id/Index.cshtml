@@ -123,14 +123,23 @@
 	</tr>
 	<tr>
 		<td>Цена за стандартную комплектацию</td>
-		<td style="background-color: rgb(141, 248, 141);">@car.PriceForStandartConfiguration грн</td>
+		@if (car.Count > 0)
+		{
+			<td style="background-color: rgb(141, 248, 141);">@car.PriceForStandartConfiguration грн</td>
+		}
+		else
+		{
+			<td class="text-bg-secondary">По предзаказу</td>
+		}
 	</tr>
 	</tbody>
 </table>
-@if (car.AdditionalCarOptions.Any())
+@if (car.AdditionalCarOptions.Any() && car.Count > 0)
 {
-	<a asp-controller="Catalog" asp-action="Configure" asp-route-id="@car.Id" 
-	   style="height: 50px; font-size: 6mm;" class="btn btn-outline-light w-100 mb-2">Конфигурировать</a>
+	<div class="w-100 text-center">
+		<a asp-controller="Catalog" asp-action="Configure" asp-route-id="@car.Id" 
+		   style="height: 50px; font-size: 6mm;" class="btn btn-outline-light mb-2">Конфигурировать</a>
+	</div>
 }
 
 @section Scripts
