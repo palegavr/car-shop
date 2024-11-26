@@ -28,6 +28,7 @@ header nav {
     align-items: center;
     height: 60px;
     margin-left: 40px;
+    overflow: hidden;
 }
 
 header nav .logo {
