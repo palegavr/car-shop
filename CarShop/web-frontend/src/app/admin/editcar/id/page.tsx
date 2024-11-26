@@ -33,6 +33,19 @@ export default function Page() {
     const [processDataInDb, setProcessDataInDb] = useState<ProcessData>(null!);
     const [currentProcessData, setCurrentProcessData] = useState<ProcessData>(null!);
     const [processData, setProcessData] = useState<ProcessData>(null!);
+    const [editingStatus, setEditingStatus] = useState<Record<keyof ProcessData, boolean>>({
+        additionalCarOptions: false,
+        bigImageUrls: false,
+        brand: false,
+        color: false,
+        corpusType: false,
+        count: false,
+        engineCapacity: false,
+        fuelType: false,
+        imageUrl: false,
+        model: false,
+        price: false,
+    });
     const [carId, setCarId] = useState(null!);
     const pushingChangesRef = useRef<boolean>(false);
     const processDataRef = useRef<ProcessData>(processData);
@@ -56,6 +69,10 @@ export default function Page() {
             setDataFromBackendLoaded(false);
         }
     }, [])
+
+    function handleEditingChanged(progressDataPropName: keyof ProcessData, newValue: boolean) {
+        setEditingStatus({...editingStatus, [progressDataPropName]: newValue});
+    }
 
     async function handleChangeSomething(progressDataPropName: keyof ProcessData, newValue: any)
         : Promise<HandleChangeSomethingResult> {
@@ -163,7 +180,7 @@ export default function Page() {
                 <ImageChanger
                     imageUrl={processData.imageUrl !== '' ? processData.imageUrl : undefined}
                     edited={processData.imageUrl !== processDataInDb.imageUrl}
-                    onReset={async() => {
+                    onReset={async () => {
                         await handleReset({progressDataPropName: 'imageUrl'})
                     }}
                     onChange={async imageUrl => {
@@ -203,6 +220,7 @@ export default function Page() {
                     <td className={processData.brand !== processDataInDb.brand ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.brand} type={'string'}
                                   edited={processData.brand !== processDataInDb.brand}
+                                  onEditingChanged={editing => handleEditingChanged('brand', editing)}
                                   onReset={() => handleEditableReset('brand')}
                                   onChange={newValue => handleEditableChange('brand', newValue)}/></td>
                 </tr>
@@ -211,6 +229,7 @@ export default function Page() {
                     <td className={processData.model !== processDataInDb.model ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.model} type={'string'}
                                   edited={processData.model !== processDataInDb.model}
+                                  onEditingChanged={editing => handleEditingChanged('model', editing)}
                                   onReset={() => handleEditableReset('model')}
                                   onChange={newValue => handleEditableChange('model', newValue)}/></td>
                 </tr>
@@ -219,6 +238,7 @@ export default function Page() {
                     <td className={processData.color !== processDataInDb.color ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.color} type={'string'}
                                   edited={processData.color !== processDataInDb.color}
+                                  onEditingChanged={editing => handleEditingChanged('color', editing)}
                                   onReset={() => handleEditableReset('color')}
                                   onChange={newValue => handleEditableChange('color', newValue)}/></td>
                 </tr>
@@ -236,6 +256,7 @@ export default function Page() {
                                 displayIfNotEditFormat={'{0} л'}
                                 type={'number'}
                                 edited={processData.engineCapacity !== processDataInDb.engineCapacity}
+                                onEditingChanged={editing => handleEditingChanged('engineCapacity', editing)}
                                 onReset={() => handleEditableReset('engineCapacity')}
                                 onChange={newValue => handleEditableChange('engineCapacity', newValue)}/></td>
                     </tr>
@@ -245,6 +266,7 @@ export default function Page() {
                     <td className={processData.corpusType !== processDataInDb.corpusType ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.corpusType} type={'CorpusType'}
                                   edited={processData.corpusType !== processDataInDb.corpusType}
+                                  onEditingChanged={editing => handleEditingChanged('corpusType', editing)}
                                   onReset={() => handleEditableReset('corpusType')}
                                   onChange={newValue => handleEditableChange('corpusType', newValue)}/></td>
                 </tr>
@@ -253,6 +275,7 @@ export default function Page() {
                     <td className={processData.fuelType !== processDataInDb.fuelType ? EDITED_CLASS : ''}>
                         <Editable initialValue={processData.fuelType} type={'FuelTypes'}
                                   edited={processData.fuelType !== processDataInDb.fuelType}
+                                  onEditingChanged={editing => handleEditingChanged('fuelType', editing)}
                                   onReset={() => handleEditableReset('fuelType')}
                                   onChange={newValue => handleEditableChange('fuelType', newValue)}/></td>
                 </tr>
@@ -266,6 +289,7 @@ export default function Page() {
                                 minNumberValue: 0
                             }}
                             edited={processData.count !== processDataInDb.count}
+                            onEditingChanged={editing => handleEditingChanged('count', editing)}
                             onReset={() => handleEditableReset('count')}
                             onChange={newValue => handleEditableChange('count', newValue)}/></td>
                 </tr>
@@ -282,6 +306,7 @@ export default function Page() {
                             }}
                             displayIfNotEditFormat={'{0} грн'}
                             edited={processData.price !== processDataInDb.price}
+                            onEditingChanged={editing => handleEditingChanged('price', editing)}
                             onReset={() => handleEditableReset('price')}
                             onChange={newValue => handleEditableChange('price', newValue)}/></td>
                 </tr>
@@ -301,10 +326,15 @@ export default function Page() {
                         return;
                     }}/>
             </div>
-            <div className={'mb-2'}>
-                <SaveChangesButton onClick={handleSaveChangesButton}/>
-                <div className={'mt-1'}>
-                    <GoBackButton onClick={() => window.location.href = `/catalog/${carId}`}/>
+            <div className={'mb-2 mx-2'}>
+                <div className={'row row-cols-1 row-cols-sm-2'}>
+                    <div className="col">
+                        <GoBackButton onClick={() => window.location.href = `/catalog/${carId}`}/>
+                    </div>
+                    <div className="col mt-1 mt-sm-0">
+                        <SaveChangesButton
+                            onClick={handleSaveChangesButton}/>
+                    </div>
                 </div>
             </div>
             <ToastContainer/>
@@ -333,11 +363,16 @@ export default function Page() {
                 }
             )
     }
+
+    function SaveChangesButton({onClick}: { onClick?: MouseEventHandler<HTMLButtonElement> }) {
+        return (
+            <button className={'btn btn-lg btn-success w-100'}
+                    disabled={Object.values(editingStatus).includes(true)}
+                    onClick={onClick}>Сохранить изменения</button>
+        )
+    }
 }
 
-function SaveChangesButton({onClick}: { onClick?: MouseEventHandler<HTMLButtonElement> }) {
-    return (<button className={'btn btn-lg btn-outline-success w-100'} onClick={onClick}>Сохранить изменения</button>)
-}
 
 function GoBackButton({onClick}: { onClick?: MouseEventHandler<HTMLButtonElement> }) {
     return (<button className={'btn btn-lg btn-outline-danger w-100'} onClick={onClick}>Назад</button>)

@@ -15,7 +15,8 @@ type Props = {
     numberValidationOptions?: NumberValidatorOptions,
     // События
     onChange?: (newValue: EditableSupportedTypes) => Promise<EditableSupportedTypes | undefined>,
-    onReset?: () => Promise<EditableSupportedTypes | undefined>
+    onReset?: () => Promise<EditableSupportedTypes | undefined>,
+    onEditingChanged?(editing: boolean): void
 }
 
 type EditableType = 'string' | 'number' | 'FuelTypes' | 'CorpusType';
@@ -23,7 +24,8 @@ export type EditableSupportedTypes = string | number | FuelTypes | CorpusType;
 
 export default function Editable(
     {
-        displayIfNotEditFormat = '{0}', initialValue, type, numberValidationOptions, onChange, edited = false, onReset
+        displayIfNotEditFormat = '{0}', initialValue, type, numberValidationOptions,
+        onChange, edited = false, onReset, onEditingChanged = () => {}
     }: Props
 ) {
     const inputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +39,7 @@ export default function Editable(
     const [waitingAcceptChange, setWaitingAcceptChange] = useState<boolean>(false);
 
     function handleStartEdit() {
-        setEditing(true);
+        handleSetEditing(true);
         setTimeout(() => {
             inputRef.current?.focus();
             selectRef.current?.focus();
@@ -52,11 +54,18 @@ export default function Editable(
         }, 0);
     }
 
+    function handleSetEditing(newEditing: boolean) {
+        if (editing !== newEditing) {
+            setEditing(newEditing);
+            onEditingChanged(newEditing);
+        }
+    }
+
     function handleCancelChangesButton() {
         if (type === 'FuelTypes')
             setFuelTypeCheckboxesState(currentValue as FuelTypes);
 
-        setEditing(false);
+        handleSetEditing(false);
     }
 
     async function handleApplyChanges() {
@@ -71,13 +80,13 @@ export default function Editable(
                 const result = await onChange(valueFromInput);
                 if (result !== undefined) {
                     setCurrentValue(result);
-                    setEditing(false);
+                    handleSetEditing(false);
                 }
                 setWaitingAcceptChange(false);
                 setApplyChangesButtonEnabled(true);
             } else {
                 setCurrentValue(valueFromInput);
-                setEditing(false);
+                handleSetEditing(false);
             }
         }
     }
