@@ -32,6 +32,8 @@ namespace CarShop.AdminService.Database
             {
                 throw new InvalidOperationException("Connection string is not set.");
             }
+            
+            connectionString = connectionString.Replace("{database_name}", "adminsdb");
 
             optionsBuilder.UseNpgsql(connectionString);
         }

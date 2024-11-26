@@ -22,11 +22,13 @@ namespace CarShop.CarStorage.Database
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
-
+            
             if (string.IsNullOrEmpty(connectionString))
             {
                 throw new InvalidOperationException("Connection string is not set.");
             }
+            
+            connectionString = connectionString.Replace("{database_name}", "carstoragedb");
 
             optionsBuilder.UseNpgsql(connectionString);
         }
