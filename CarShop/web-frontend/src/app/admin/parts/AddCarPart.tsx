@@ -112,6 +112,15 @@ export default function AddCarPart() {
         }
     }
 
+    function handleUploadEnd(file: File, success: boolean) {
+        if (!success) {
+            toast.error(`Не удалось загрузить файл ${file.name}`, {
+                position: 'bottom-right',
+                autoClose: defaultAutoCloseTime,
+            });
+        }
+    }
+
     return (
         <>
             <Container
@@ -209,6 +218,7 @@ export default function AddCarPart() {
                     <ImageUploader variant={'single'}
                                    allowedImageExtensions={['png', 'jpg', 'jpeg']}
                                    defaultImageUrls={[]}
+                                   onUploadEnd={handleUploadEnd}
                                    onChange={imageUrls => setImageUrl(imageUrls.length > 0 ? imageUrls[0] : undefined)}/>
 
                     <Typography>
@@ -217,7 +227,18 @@ export default function AddCarPart() {
                     <ImageUploader variant={'multiple'}
                                    allowedImageExtensions={['png', 'jpg', 'jpeg']}
                                    defaultImageUrls={[]}
+                                   onUploadEnd={handleUploadEnd}
                                    onChange={imageUrls => setBigImageUrls(imageUrls)}/>
+                    <Typography
+                        align={'center'}>
+                        Максимальный размер одной картинки
+                        <Typography
+                            component={'span'}
+                            color={'warning'}
+                            fontWeight={'bold'}>
+                            &nbsp;10&nbsp;МБ
+                        </Typography>
+                    </Typography>
 
                     <AdditionalCarOptionsContainer
                         additionalCarOptions={additionalCarOptions}

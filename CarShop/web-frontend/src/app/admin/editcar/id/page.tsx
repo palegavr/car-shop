@@ -12,6 +12,7 @@ import {toast, ToastContainer} from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import ImageChanger from "@/components/ImageChanger";
 import {delay} from "@/utilities/delay";
+import {Typography} from "@mui/material";
 
 
 type DataFromBackend = {
@@ -208,6 +209,17 @@ export default function Page() {
                         autoClose: defaultToastTime
                     })}/>
             </div>
+
+            <Typography
+                align={'center'}>
+                За раз можно загрузить картинок максимум на
+                <Typography
+                    component={'span'}
+                    color={'warning'}
+                    fontWeight={'bold'}>
+                    &nbsp;10&nbsp;МБ
+                </Typography>
+            </Typography>
 
             <table className="table mt-3" style={{fontSize: '6mm'}}>
                 <colgroup>
