@@ -27,6 +27,17 @@ type PageInMainPart = 'create account' | 'edit admin' | 'add car' | 'profile';
     banned: false,
     roles: ['admin.account.create', 'admin.car.add', 'admin.account.ban.own', 'admin.account.change-password.own'],
 }];
+
+for (let i = 0; i < 30; i++) {
+    (window as any).carShopData.admins.push({
+        id: 6 + i,
+        email: `abc${i}@ggg.com`,
+        priority: 20000 + (i * 100),
+        banned: i % 2 === 0,
+        roles: ['admin.account.create', 'admin.car.add', 'admin.account.ban.own', 'admin.account.change-password.own'],
+    })
+}
+
 (window as any).carShopData.performingAdmin = {
     id: 1,
     email: 'ggg@123.com',

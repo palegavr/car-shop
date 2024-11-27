@@ -3,6 +3,7 @@ import AdminAccountEditor, {PerformingAdmin} from "@/components/AdminAccountEdit
 import {useEffect, useState} from "react";
 import {Admin} from "@/clients/backendСlient";
 import {delay} from "@/utilities/delay";
+import AdminAccountsTable from "@/components/AdminAccountsTable";
 
 type Props = {
     admins: Admin[],
@@ -13,14 +14,17 @@ type Props = {
 export default function EditAdminPart({admins, performingAdmin, defaultEmail}: Props) {
     const [currentAccount, setCurrentAccount] = useState<Admin>();
     const [loaded, setLoaded] = useState<boolean>(false);
+    const [adminEmailAutocompleteValue, setAdminEmailAutocompleteValue] = useState<string>('');
 
     useEffect(() => {
         if (defaultEmail !== null && defaultEmail !== undefined) {
             const admin = admins.find(admin => admin.email === defaultEmail)
             if (admin !== undefined) {
                 setCurrentAccount(admin);
+                setAdminEmailAutocompleteValue(admin.email);
             }
         }
+
         setLoaded(true);
     }, []);
 
@@ -30,6 +34,7 @@ export default function EditAdminPart({admins, performingAdmin, defaultEmail}: P
         setCurrentAccount(value !== null
             ? admins.find(admin => admin.email === value)
             : undefined)
+        setAdminEmailAutocompleteValue(value ?? '');
     }
 
     if (!loaded) {
@@ -42,20 +47,28 @@ export default function EditAdminPart({admins, performingAdmin, defaultEmail}: P
                 maxWidth={'sm'}>
                 <Autocomplete
                     disablePortal
-                    defaultValue={currentAccount?.email}
+                    value={adminEmailAutocompleteValue}
+                    onInputChange={(event, value) => setAdminEmailAutocompleteValue(value)}
                     options={admins.map(admin => admin.email)}
                     sx={{
-                        marginBottom: 2
+                        marginBottom: 2,
                     }}
                     onChange={(event, value, reason) => handleSearch(value)}
                     renderInput={(params) =>
                         <TextField {...params}
+                                   value={adminEmailAutocompleteValue}
                                    label="Email администратора"/>}
                 />
-                {currentAccount !== undefined && (
+                {currentAccount !== undefined ? (
                     <AdminAccountEditor
                         admin={currentAccount}
                         performingAdmin={performingAdmin}/>
+                ) : (
+                    <AdminAccountsTable
+                        admins={admins}
+                        onAdminSelect={async email => {
+                            await handleSearch(email);
+                        }}/>
                 )}
             </Container>
         </>
