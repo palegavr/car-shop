@@ -326,7 +326,7 @@ export default function Page() {
                         return;
                     }}/>
             </div>
-            <div className={'mb-2 mx-2'}>
+            <div className={'mb-2 container-fluid'}>
                 <div className={'row row-cols-1 row-cols-sm-2'}>
                     <div className="col">
                         <GoBackButton onClick={() => window.location.href = `/catalog/${carId}`}/>
