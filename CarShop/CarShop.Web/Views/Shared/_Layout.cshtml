@@ -50,6 +50,12 @@
             <a href="#">
                 <i class="fa-brands fa-twitter"></i>
             </a>
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-controller="Admin" asp-action="Index">
+                    <i class="fa-solid fa-gear"></i>
+                </a>
+            }
         </div>
     </footer>
 }
