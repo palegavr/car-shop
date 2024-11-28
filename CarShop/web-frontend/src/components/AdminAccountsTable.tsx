@@ -26,7 +26,14 @@ const columns: GridColDef[] = [
     )},
     {field: 'email', headerName: 'Email', flex: 1},
     {field: 'priority', headerName: 'Приоритет', flex: 1},
-    {field: 'banned', headerName: 'Заблокирован', flex: 1},
+    {field: 'banned', headerName: 'Заблокирован', flex: 1,
+    renderCell: params => (
+        <span
+            style={{
+                color: params.row.banned ? 'red' : 'green',
+            }}
+            >{params.row.banned ? 'Да' : 'Нет'}</span>
+    )},
 ];
 
 export default function AdminAccountsTable({admins, onColumnResize, onAdminSelect = () => {}}: Props) {
