@@ -8,10 +8,11 @@ import AdminAccountsTable from "@/components/AdminAccountsTable";
 type Props = {
     admins: Admin[],
     performingAdmin: PerformingAdmin,
-    defaultEmail?: string
+    defaultEmail?: string,
+    onAdminChanged?(admin: Admin): void,
 }
 
-export default function EditAdminPart({admins, performingAdmin, defaultEmail}: Props) {
+export default function EditAdminPart({admins, performingAdmin, defaultEmail, onAdminChanged = () => {}}: Props) {
     const [currentAccount, setCurrentAccount] = useState<Admin>();
     const [loaded, setLoaded] = useState<boolean>(false);
     const [adminEmailAutocompleteValue, setAdminEmailAutocompleteValue] = useState<string>('');
@@ -61,6 +62,7 @@ export default function EditAdminPart({admins, performingAdmin, defaultEmail}: P
                 />
                 {currentAccount !== undefined ? (
                     <AdminAccountEditor
+                        onAdminChanged={onAdminChanged}
                         admin={currentAccount}
                         performingAdmin={performingAdmin}/>
                 ) : (

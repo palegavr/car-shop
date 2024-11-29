@@ -20,7 +20,7 @@ const columns: GridColDef[] = [
     renderCell: params => (
         <Button
             variant={'outlined'}
-            onClick={event => onIdButtonClick(params.row.email)}>
+            onClick={() => onIdButtonClick(params.row.email)}>
             {params.row.id}
         </Button>
     )},

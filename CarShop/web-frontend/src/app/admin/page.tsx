@@ -106,6 +106,12 @@ export default function Page() {
                         <EditAdminPart
                             defaultEmail={adminEmail ?? undefined}
                             admins={adminsList}
+                            onAdminChanged={admin => {
+                                const newAdminList = [...adminsList]
+                                    .filter(adm => adm.id !== admin.id);
+                                newAdminList.push(admin);
+                                setAdminsList(newAdminList);
+                            }}
                             performingAdmin={performingAdmin ?? {
                                 id: 0,
                                 email: '',

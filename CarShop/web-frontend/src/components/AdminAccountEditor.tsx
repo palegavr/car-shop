@@ -46,13 +46,24 @@ export type PerformingAdmin = {
 type Props = {
     admin: Admin,
     performingAdmin: PerformingAdmin,
+    onAdminChanged?(admin: Admin): void,
 }
 
 
-export default function AdminAccountEditor({admin, performingAdmin}: Props) {
+export default function AdminAccountEditor({admin, performingAdmin, onAdminChanged = () => {}}: Props) {
     const [priority, setPriority] = useState<number>(admin.priority);
     const [banned, setBanned] = useState<boolean>(admin.banned);
-    const [roles, setRoles] = useState<string[]>(admin.roles);
+    const [roles, setRoles] = useState<Role[]>(admin.roles);
+
+    useEffect(() => {
+        onAdminChanged({
+            email: admin.email,
+            banned,
+            roles,
+            priority,
+            id: admin.id,
+        });
+    }, [priority, roles, banned]);
 
     async function handleChangePriority(newPriority: number): Promise<SetPriorityResult> {
         const result = await setPriorityAsync(admin.id, newPriority);
@@ -196,7 +207,7 @@ export default function AdminAccountEditor({admin, performingAdmin}: Props) {
                 <TextField
                     variant={'standard'}
                     label={'Приоритет'}
-                    helperText={`Введите число от ${performingAdmin.priority + 1} до 2.000.000.000`}
+                    helperText={`Введите число от ${performingAdmin.priority + 1} до 2 000 000 000`}
                     error={inputState === 'error'}
                     disabled={inputState === 'loading' || !canChangePriority}
                     inputRef={inputRef}/>
