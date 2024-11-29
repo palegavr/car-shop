@@ -2,8 +2,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34928.147
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarShop.AppHost", "CarShop.AppHost\CarShop.AppHost.csproj", "{94BB6A62-0A77-4AB4-9496-B0D0301DB038}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarShop.ServiceDefaults", "CarShop.ServiceDefaults\CarShop.ServiceDefaults.csproj", "{2B998C82-B04B-43D9-A38D-3640F2C22A38}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CarShop.Web", "CarShop.Web\CarShop.Web.csproj", "{D4DF1C7A-F677-4416-8B6B-852E4F6D15EC}"
@@ -24,10 +22,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{94BB6A62-0A77-4AB4-9496-B0D0301DB038}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{94BB6A62-0A77-4AB4-9496-B0D0301DB038}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{94BB6A62-0A77-4AB4-9496-B0D0301DB038}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{94BB6A62-0A77-4AB4-9496-B0D0301DB038}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2B998C82-B04B-43D9-A38D-3640F2C22A38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2B998C82-B04B-43D9-A38D-3640F2C22A38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2B998C82-B04B-43D9-A38D-3640F2C22A38}.Release|Any CPU.ActiveCfg = Release|Any CPU
