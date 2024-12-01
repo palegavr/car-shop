@@ -155,7 +155,7 @@ double totalCost = 0;
         @{
             totalCost = (@totalPrice + @Model.Car.PriceForStandartConfiguration) * 1.2;
         }
-        <td>Ціна за все з податком</td>
+        <td>Ціна за все з податком (20%)</td>
         @if (Model.Car.Count > 0)
         {
             <td style="background-color: rgb(141, 248, 141);"> @($"{totalCost.ToDisplayString(2)} грн") </td>
