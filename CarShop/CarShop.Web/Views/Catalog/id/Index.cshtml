@@ -1,5 +1,6 @@
 ﻿@using CarShop.CarStorageService.Grpc
 @using CarShop.ServiceDefaults.ServiceInterfaces.AdminService
+@using CarShop.Web.Extensions
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @{
 	Car car = Model;
@@ -125,7 +126,7 @@
 		<td>Цена за стандартную комплектацию</td>
 		@if (car.Count > 0)
 		{
-			<td style="background-color: rgb(141, 248, 141);">@car.PriceForStandartConfiguration грн</td>
+			<td style="background-color: rgb(141, 248, 141);">@car.PriceForStandartConfiguration.ToDisplayString() грн</td>
 		}
 		else
 		{

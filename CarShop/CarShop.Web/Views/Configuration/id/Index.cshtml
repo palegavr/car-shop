@@ -1,4 +1,5 @@
 @using CarShop.CarStorageService.Grpc
+@using CarShop.Web.Extensions
 @model CarShop.Web.Models.Catalog.ConfigurationViewModel
 
 @{
@@ -89,7 +90,7 @@ double totalCost = 0;
         {
             <tr>
                 <td>Кондиціонер</td>
-                <td>@option.Price грн</td>
+                <td>@option.Price.ToDisplayString() грн</td>
                 @{ totalPrice += option.Price; }
             </tr>
         }
@@ -98,7 +99,7 @@ double totalCost = 0;
         {
             <tr>
                 <td>Підігрів сидіння</td>
-                <td>@option.Price грн</td>
+                <td>@option.Price.ToDisplayString() грн</td>
                 @{ totalPrice += option.Price; }
             </tr>
         }
@@ -107,7 +108,7 @@ double totalCost = 0;
         {
             <tr>
                 <td>Регулювання сидіння</td>
-                <td>@option.Price грн</td>
+                <td>@option.Price.ToDisplayString() грн</td>
                 @{ totalPrice += option.Price; }
             </tr>
         }
@@ -117,7 +118,7 @@ double totalCost = 0;
             <tr>
                 <td>Колір</td>
                 <td>
-                    <input type="color" disabled="disabled" class="form-control form-control-color" value="@(Model.Configuration.HasDifferentCarColor ? Model.Configuration.DifferentCarColor : false)"> @option.Price грн
+                    <input type="color" disabled="disabled" class="form-control form-control-color" value="@(Model.Configuration.HasDifferentCarColor ? Model.Configuration.DifferentCarColor : false)"> @option.Price.ToDisplayString() грн
                 </td>
                 @{ totalPrice += option.Price; }
             </tr>
@@ -132,7 +133,7 @@ double totalCost = 0;
         <td>Ціна за стандартну комплектацію</td>
         @if (Model.Car.Count > 0)
         {
-            <td style="background-color: rgb(141, 248, 141);">@Model.Car.PriceForStandartConfiguration грн</td>
+            <td style="background-color: rgb(141, 248, 141);">@Model.Car.PriceForStandartConfiguration.ToDisplayString() грн</td>
         }
         else
         {
@@ -143,7 +144,7 @@ double totalCost = 0;
         <td>Ціна за додаткову комплектацію</td>
         @if (Model.Car.Count > 0)
         {
-            <td style="background-color: rgb(141, 248, 141);"> @totalPrice грн</td>
+            <td style="background-color: rgb(141, 248, 141);"> @totalPrice.ToDisplayString() грн</td>
         } 
         else
         {
@@ -157,7 +158,7 @@ double totalCost = 0;
         <td>Ціна за все з податком</td>
         @if (Model.Car.Count > 0)
         {
-            <td style="background-color: rgb(141, 248, 141);"> @($"{totalCost:F2} грн") </td>
+            <td style="background-color: rgb(141, 248, 141);"> @($"{totalCost.ToDisplayString(2)} грн") </td>
         }
         else
         {

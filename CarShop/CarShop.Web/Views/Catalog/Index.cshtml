@@ -1,4 +1,5 @@
 ﻿@using CarShop.CarStorageService.Grpc
+@using CarShop.Web.Extensions
 @using Microsoft.AspNetCore.Mvc.TagHelpers
 @model CarShop.Web.Models.Catalog.CatalogViewModel
 @{
@@ -72,7 +73,7 @@
                         <h5 class="card-title">@car.Brand @car.Model</h5>
                         @if (car.Count > 0)
                         {   
-                            <p class="card-text">Цена: <b class="text-success">@car.PriceForStandartConfiguration</b> грн.</p>
+                            <p class="card-text">Цена: <b class="text-success">@car.PriceForStandartConfiguration.ToDisplayString()</b> грн.</p>
                         }
                         else
                         {
