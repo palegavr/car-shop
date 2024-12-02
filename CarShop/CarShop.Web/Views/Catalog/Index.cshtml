@@ -16,7 +16,7 @@
     <div class="btn-group">
         @* Критерий сортировки *@
         <div class="dropdown me-2">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-secondary dropdown-toggle" id="drop" onclick="fd()" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 @Model.GetCarsOptions.SortBy.ToDisplayString()
             </button>
             <ul class="dropdown-menu">
@@ -39,7 +39,7 @@
         </div>
         @* Тип сортировки *@
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="btn btn-secondary dropdown-toggle" id="drop1" type="button" onclick="fd1()" data-bs-toggle="dropdown" aria-expanded="false">
                 @Model.GetCarsOptions?.SortType.ToDisplayString()
             </button>
             <ul class="dropdown-menu">
@@ -203,6 +203,34 @@
 @section Scripts
 {
     <script>
+        function toggleDropdown(dropdownId, stateVariable) {
+            const dropdownElement = document.getElementById(dropdownId);
+            const dropdownInstance = bootstrap.Dropdown.getOrCreateInstance(dropdownElement);
+
+            if (stateVariable === 0) {
+                // Відкрити dropdown
+                stateVariable++;
+            } else {
+                // Закрити dropdown
+                stateVariable--;
+                dropdownInstance.hide();
+            }
+            return stateVariable;
+        }
+
+        let x = 0;
+        let g = 0;
+
+        function fd() {
+            g = 0;
+            x = toggleDropdown('drop', x);
+        }
+
+        function fd1() {
+            x = 0;
+            g = toggleDropdown('drop1', g);
+        }
+        
 		function setSortBy(sortByIndex, event) {
 			event.preventDefault();
 			const currentUrl = new URL(window.location.href);
@@ -279,5 +307,6 @@
 			с.checked = check2
 			check();
 		}
-	</script>
+	
+    </script>
 }
