@@ -16,7 +16,7 @@
     <div class="btn-group">
         @* Критерий сортировки *@
         <div class="dropdown me-2">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button id="sort_by_dropdown" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 @Model.GetCarsOptions.SortBy.ToDisplayString()
             </button>
             <ul class="dropdown-menu">
@@ -39,7 +39,7 @@
         </div>
         @* Тип сортировки *@
         <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <button id="sort_type_dropdown" class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 @Model.GetCarsOptions?.SortType.ToDisplayString()
             </button>
             <ul class="dropdown-menu">
@@ -279,5 +279,17 @@
 			с.checked = check2
 			check();
 		}
+		
+		$(document).ready(function () {
+            $('#sort_by_dropdown,#sort_type_dropdown').on('pointerup', function () {
+                if (this.classList.contains('show')) {
+                    setTimeout(function (id) {
+                        const button = $(`#${id}`)[0];
+                        const dropdownInstance = bootstrap.Dropdown.getInstance(button);
+                        dropdownInstance.hide();
+                    }, 0, this.id);
+                }
+            });
+		});
 	</script>
 }
