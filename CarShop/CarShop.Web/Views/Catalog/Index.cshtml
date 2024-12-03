@@ -112,14 +112,14 @@
     <div class="offcanvas offcanvas-start" data-bs-scroll="true" data-bs-backdrop="false" tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel" style="z-index: 3000">
         <div class="offcanvas-header">
 
-            <h1 class="offcanvas-title " id="offcanvasExampleLabel">Пошук</h1>
+            <h1 class="offcanvas-title " id="offcanvasExampleLabel">Поиск</h1>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">
 
             <div class="mb-3">
                 <label for="exampleFormControlInput1" class="form-label">Марка</label>
-                <input type="text" class="form-control" name="brand" id="e1xampleFormControlInput1" placeholder="Введіть марку авто"
+                <input type="text" class="form-control" name="brand" id="e1xampleFormControlInput1" placeholder="Введите марку авто"
                        value="@(Model.GetCarsOptions.HasBrand ? Model.GetCarsOptions.Brand : null)">
             </div>
             <div class="mb-3">
@@ -193,7 +193,7 @@
                        value="@(Model.GetCarsOptions.HasMaximumPrice ? Model.GetCarsOptions.MaximumPrice : null)">
             </div>
 
-            <input id="powyk" class="btn btn-success mb-1 w-100 disabled" type="submit" value="Пошук"/>
+            <input id="powyk" class="btn btn-success mb-1 w-100 disabled" type="submit" value="Поиск"/>
             <a type="button " href="/catalog" class="btn btn-secondary w-100">Сбросить фильтр</a>
         </div>
 
